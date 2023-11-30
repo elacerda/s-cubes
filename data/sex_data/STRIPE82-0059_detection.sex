@@ -1,0 +1,36 @@
+CATALOG_NAME	    /hdd/iDR3/STRIPE82//STRIPE82-0059/Photometry//detection/sex_STRIPE82-0059_det.catalog
+PARAMETERS_NAME     /home/felipe/PycharmProjects/calibration_pipeline_v2/calibration//files/SExsplus_v2.param
+CATALOG_TYPE        FITS_1.0                            # 'ASCII_HEAD','ASCII','FITS_1.0' or 'FITS_LDAC'
+DETECT_TYPE	        CCD	                                # 'CCD' or 'PHOTO' (*)
+DETECT_MINAREA      4                                   # minimum number of pixels above threshold
+DETECT_THRESH       1.1	                                # <sigmas> or <threshold>,<ZP> in mag.arcsec-2
+ANALYSIS_THRESH	    3.                                  # <sigmas> or <threshold>,<ZP> in mag.arcsec-2
+FILTER	            Y                                   # apply filter for detection ("Y" or "N")?
+FILTER_NAME         /hdd/external_programs/sextractor_2.25.0//config/tophat_3.0_3x3.conv
+DEBLEND_NTHRESH	    64	                                # Number of deblending sub-thresholds
+DEBLEND_MINCONT	    0.0002                              # Minimum contrast parameter for deblending
+CLEAN		        Y                                   # Clean spurious detections? (Y or N)?
+CLEAN_PARAM         1.                                  # Cleaning efficiency
+MASK_TYPE	        CORRECT                             # Blank detected objects (Y or N)?
+PHOT_APERTURES      1.81818182, 3.63636364, 5.45454545, 7.27272727, 10.90909091, 14.54545455, 18.18181818181818, 21.09090909090909, 23.999999999999996, 26.909090909090907, 29.818181818181813, 32.72727272727273, 35.63636363636363, 38.54545454545455, 41.45454545454545, 44.36363636363636, 47.272727272727266, 50.18181818181818, 53.09090909090909, 56.0, 58.909090909090914, 61.81818181818181, 64.72727272727272, 67.63636363636364, 70.54545454545453, 73.45454545454545, 76.36363636363636, 79.27272727272727, 82.18181818181819, 85.0909090909091, 88.0, 90.9090909090909	                        # MAG_APER aperture diameter(s) in pixels
+PHOT_AUTOPARAMS     3.0,1.82                            # MAG_AUTO parameters: <Kron_fact>,<min_radius>
+PHOT_PETROPARAMS    2.0,2.73
+PHOT_FLUXFRAC       0.2,0.5,0.7,0.9                     # radii containing 100*x% of the light
+SATUR_LEVEL	        1947.8720989                             # level (in ADUs) at which arises saturation
+MAG_ZEROPOINT	    20                            # magnitude zero-point
+MAG_GAMMA	        4.0                                 # gamma of emulsion (for photographic scans)
+GAIN		        406.925702555                              # detector gain in e-/ADU.
+PIXEL_SCALE	        0.55                                # size of pixel in arcsec (0=use FITS WCS info).
+SEEING_FWHM	        1.601                            # stellar FWHM in arcsec
+STARNNW_NAME	    /hdd/external_programs/sextractor_2.25.0//config/default.nnw
+BACK_SIZE           256                                 # Background mesh: <size> or <width>,<height>
+BACK_FILTERSIZE     7                                   # Background filter: <size> or <width>,<height>
+BACKPHOTO_TYPE	    LOCAL                               # can be 'GLOBAL' or 'LOCAL' (*)
+BACKPHOTO_THICK     48                                  # thickness of the background LOCAL annulus (*)
+MEMORY_OBJSTACK	    15000                               # number of objects in stack
+MEMORY_PIXSTACK     2600000                             # number of pixels in stack
+MEMORY_BUFSIZE	    4600                                # number of lines in buffer
+
+
+CHECKIMAGE_TYPE APERTURES,SEGMENTATION
+CHECKIMAGE_NAME /hdd/iDR3/STRIPE82//STRIPE82-0059/Photometry//detection/STRIPE82-0059_det_scimas.aper.fits, /hdd/iDR3/STRIPE82//STRIPE82-0059/Photometry//detection/STRIPE82-0059_det_scimas.segm.fits
