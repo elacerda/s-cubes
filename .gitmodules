@@ -1,0 +1,3 @@
+[submodule "external/sewpy"]
+	path = external/sewpy
+	url = https://github.com/megalut/sewpy
