@@ -555,7 +555,6 @@ class SCubes:
 
         # CREATE CUBE
         prim_hdu = fits.PrimaryHDU()
-        print(self.flam__byx)
         flam_hdu = fits.ImageHDU(self.flam__byx, cube_h)
         flam_hdu.header['EXTNAME'] = ('DATA', 'Name of the extension')
         flam_hdu.header['SPECZ'] = (ctrl.specz, 'Spectroscopic redshift')
