@@ -1,5 +1,5 @@
-import os
-import sys
+from os import listdir
+from os.path import join
 from setuptools import setup, find_packages
 
 def version(fn):
@@ -10,12 +10,15 @@ def version(fn):
                 v = l.split('=')[-1].strip().replace("'", '').split(' ')[-1][1:]
     return v
 
-SCRIPTS_DIRNAME = '.'
+SCRIPTS_DIRNAME = 'bin'
 VERSION_FILE = 'scubes/utilities/constants.py'
 URL = 'https://github.com/elacerda/s-cubes'
 
 all_packages = find_packages()
-scripts = ['scubes.py']
+scripts = [
+    join(SCRIPTS_DIRNAME, script_name)
+    for script_name in listdir(SCRIPTS_DIRNAME) if script_name.endswith('.py')
+]
 version = version(VERSION_FILE)
 
 requirements = [
@@ -43,10 +46,10 @@ setup(
     keywords='galaxies',
     url=URL,
     download_url=f'{URL}/archive/refs/heads/main.zip',
-    author='elacerda',
+    author='Eduardo Alberto Duarte Lacerda',
     author_email='dhubax@gmail.com',
     packages=all_packages,
-    setup_requires=['wheel'],
+    # setup_requires=['wheel'],
     install_requires=requirements,
     scripts=scripts,
 )
