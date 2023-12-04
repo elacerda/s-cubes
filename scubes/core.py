@@ -38,7 +38,7 @@ class SCubes:
         self.program_name = program_name
         self.galaxy = self._galaxy()
         self.galaxy.coords = self.galaxy.skycoord()
-        self.conn = connect_splus_cloud(username='dhubax', password=None)
+        self.conn = connect_splus_cloud(username=None, password=None)
         #self.conn = None
         self._init_spectra()
 
@@ -53,13 +53,8 @@ class SCubes:
     def _check_errors(self):
         return all([exists(_) for _ in self.wimages])
 
-    def _get_headers_list(self, images=None, ext=1, wcs=False):
+    def _get_headers_list(self, images=None, ext=1):
         images = self.images if images is None else images
-        if wcs:
-            for img in images:
-                with fits.open(img, 'update') as f:
-                    w = WCS(f[1].header)
-                    f[1].header.update(w.to_header())
         return [fits.getheader(img, ext=ext) for img in images]
 
     def _get_data_spectra(self, images=None, ext=1):
@@ -109,8 +104,14 @@ class SCubes:
         # SHORTCUTS
         self.images = [img for img in self.stamps if 'swp.' in img]
         self.wimages = [img for img in self.stamps if 'swpweight.' in img]
-        # UPDATE IMAGES HEADER - WILL ADD WCS TO THE HEADERS
-        self.headers__b = self._get_headers_list(self.images, wcs=True)
+        # UPDATE IMAGES HEADER - WILL ADD TILE INFO AND WCS TO THE HEADERS
+        for img in self.images:
+            with fits.open(img, 'update') as f:
+                w = WCS(f[1].header)
+                f[1].header['OBJECT'] = gal.name
+                f[1].header['TILE'] = ctrl.tile
+                f[1].header.update(w.to_header())
+        self.headers__b = self._get_headers_list(self.images, ext=1)
     
     def get_detection_image(self):
         gal = self.galaxy
