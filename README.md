@@ -20,20 +20,71 @@ Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository include data 
 
 ```
 > cd external/sewpy
-external/sewpy > pip install .
+external/sewpy > pip3 install .
 ```
 
 3. Install S-Cubes (go back to s-cubes directory)
 
 ```
-> pip install .
+> pip3 install .
 
 ```
 
-# Example
+Type `scubes --help` for the help:
+
+```
+usage: scubes [-h] [-r] [-c] [-f] [-b BANDS] [-l SIZE] [-a ANGSIZE] [-w WORK_DIR] 
+              [-o OUTPUT_DIR] [-x SEXTRACTOR] [-p CLASS_STAR] [-v] [--debug] 
+              [--satur_level SATUR_LEVEL] [--data_dir DATA_DIR] [--zpcorr_dir ZPCORR_DIR] 
+              [--zp_table ZP_TABLE] [--back_size BACK_SIZE] [--detect_thresh DETECT_THRESH]
+              SPLUS_TILE RA DEC GALAXY_NAME REDSHIFT
+
+┌─┐   ┌─┐┬ ┬┌┐ ┌─┐┌─┐  | Create S-PLUS galaxies data cubes, a.k.a. SCUBES. 
+└─┐───│  │ │├┴┐├┤ └─┐  | SCUBES is an organized FITS file with data, errors, 
+└─┘   └─┘└─┘└─┘└─┘└─┘  | mask and metadata about some galaxy present on any 
+---------------------- + S-PLUS observed tile. Any problem contact:
+
+                Eduardo A. D. Lacerda - dhubax@gmail.com
+
+positional arguments:
+  SPLUS_TILE                  Name of the S-PLUS tile
+  RA                          Galaxy's right ascension
+  DEC                         Galaxy's declination
+  GALAXY_NAME                 Galaxy's name
+  REDSHIFT                    Spectroscopic or photometric redshift of the galaxy
+
+options:
+  -h, --help                  show this help message and exit
+  -r, --redo                  Enable redo mode to overwrite final cubes
+  -c, --clean                 Clean intermediate files after processing
+  -f, --force                 Force overwrite of existing files
+  -b BANDS, --bands BANDS     List of S-PLUS bands
+  -l SIZE, --size SIZE        Size of the cube in pixels
+  -a ANGSIZE, --angsize ANGSIZE
+                              Galaxy's Angular size in arcsec
+  -w WORK_DIR, --work_dir WORK_DIR
+                              Working directory
+  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                              Output directory
+  -x SEXTRACTOR, --sextractor SEXTRACTOR
+                              Path to SExtractor executable
+  -p CLASS_STAR, --class_star CLASS_STAR
+                              SExtractor CLASS_STAR parameter for star/galaxy separation
+  -v, --verbose
+  --debug                     Enable debug mode
+  --satur_level SATUR_LEVEL   Saturation level for the png images. Default is 1600.0
+  --data_dir DATA_DIR         Data directory
+  --zpcorr_dir ZPCORR_DIR     Zero-point correction directory
+  --zp_table ZP_TABLE         Zero-point table
+  --back_size BACK_SIZE       Background mesh size for SExtractor. Default is 64
+  --detect_thresh DETECT_THRESH
+                              Detection threshold for SExtractor. Default is 1.1
+```
+
+# Running example
 
 TODO
 
 # License
 
-This code is distributed under the [GNU GENERAL PUBLIC LICENSE v3.0](LICENSE). Please refer to the `LICENSE` file in the repository for more details.
+This code is distributed under the [GNU GENERAL PUBLIC LICENSE v3.0](LICENSE). Please refer to the `LICENSE.txt` file in the repository for more details.
