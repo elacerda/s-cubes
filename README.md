@@ -13,7 +13,7 @@ Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository include data 
 1. Clone repository with the `sewpy` submodule:
 
 ```
-> git clone --recurse-submodules https://github.com/cameronmcnz/surface.git
+> git clone --recurse-submodules https://github.com/elacerda/s-cubes.git
 ```
 
 2. Install `sewpy` (go to external/sewpy directory):
