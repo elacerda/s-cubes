@@ -1,4 +1,4 @@
-__version__ = 'v0.1b'
+__version__ = 'v0.1.0-beta'
 
 __author__ = 'Eduardo A. D. Lacerda'
 
