@@ -33,8 +33,8 @@ class _galaxy:
         return SkyCoord(ra=self.ra, dec=self.dec, frame=frame)
     
 class SCubes:
-    def __init__(self, args, path, program_name='SCUBES'):
-        self.control = control(args, path)
+    def __init__(self, args, program_name='SCUBES'):
+        self.control = control(args, program_name=program_name)
         self.program_name = program_name
         self.galaxy = self._galaxy()
         self.galaxy.coords = self.galaxy.skycoord()
@@ -159,7 +159,7 @@ class SCubes:
 
     def get_zero_points(self):
         ctrl = self.control
-        zp_table = join(ctrl.data_dir, ctrl.zp_table)
+        zp_table = ctrl.zp_table
         print_level(f'Reading ZPs table: {zp_table}')
         zptab = grep(zp_table, ctrl.tile)
         zpt = pd.read_csv(zp_table)
@@ -255,8 +255,10 @@ class SCubes:
 
         filter_name =join(ctrl.data_dir, 'sex_data/tophat_3.0_3x3.conv')
         starnnw_name = join(ctrl.data_dir, 'sex_data/default.nnw')
-        checkimg_name = join(ctrl.output_dir, dimg.replace('detection', 'segmentation'))
-        output_name = join(ctrl.output_dir, dimg.replace('detection', 'sexcat'))
+        #checkimg_name = join(ctrl.output_dir, dimg.replace('detection', 'segmentation'))
+        #output_name = join(ctrl.output_dir, dimg.replace('detection', 'sexcat'))
+        checkimg_name = dimg.replace('detection', 'segmentation')
+        output_name = dimg.replace('detection', 'sexcat')
         # configuration for SExtractor photometry
         config = {
             'DETECT_TYPE': 'CCD',

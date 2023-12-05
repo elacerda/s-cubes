@@ -8,7 +8,7 @@ authors = [
     {name = "Eduardo Alberto Duarte Lacerda", email = "dhubax@gmail.com"},
     {name = "Fabio Herpich", email = "fabiorafaelh@gmail.com"},
 ]
-keywords="galaxies"
+keywords = ["galaxies"]
 license = {file = "LICENSE.txt"}
 description = "Make galaxy cubes (X, Y, Lambda) with S-PLUS data."
 requires-python = ">=3.10"
@@ -29,6 +29,9 @@ dependencies = [
     "splusdata",
 ]
 dynamic = ["version", "readme"]
+
+[project.scripts]
+scubes = "scubes:scubes"
 
 [project.urls]
 Homepage = "https://github.com/elacerda/s-cubes"
