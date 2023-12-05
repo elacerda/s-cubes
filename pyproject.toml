@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "s-cubes"
+authors = [
+    {name = "Eduardo Alberto Duarte Lacerda", email = "dhubax@gmail.com"},
+    {name = "Fabio Herpich", email = "fabiorafaelh@gmail.com"},
+]
+keywords="galaxies"
+license = {file = "LICENSE.txt"}
+description = "Make galaxy cubes (X, Y, Lambda) with S-PLUS data."
+requires-python = ">=3.10"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Scientific/Engineering :: Astronomy",
+]
+dependencies = [
+    "numpy",
+    "matplotlib",
+    "pandas",
+    "scipy",
+    "astropy",
+    "regions",
+    "tqdm",
+    "photutils",
+    "splusdata",
+]
+dynamic = ["version", "readme"]
+
+[project.urls]
+Homepage = "https://github.com/elacerda/s-cubes"
+
+[tool.setuptools_scm]
+
+[tool.setuptools.dynamic]
+readme = {file = "README.md", content-type = "text/markdown"}
+
