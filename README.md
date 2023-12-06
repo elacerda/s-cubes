@@ -14,6 +14,7 @@ Clone repository with the `sewpy` submodule:
 
 ```console
 git clone --recurse-submodules https://github.com/elacerda/s-cubes.git
+cd s-cubes
 ```
 
 Create and activate a virtual enviroment for the package instalation and usage:
