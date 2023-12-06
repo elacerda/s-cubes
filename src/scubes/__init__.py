@@ -15,7 +15,7 @@ from .utilities.args import create_parser
 from .core import SCubes
 
 
-def parse_arguments():
+def scubes_parse_arguments():
     parser = create_parser()
     if len(sys.argv) == 1:
         print_level(f'{__script_name__}: missing arguments', 0, 1)
@@ -39,5 +39,5 @@ def parse_arguments():
     return args
 
 def scubes():
-    scubes = SCubes(args=parse_arguments(), program_name=__script_name__)
+    scubes = SCubes(args=scubes_parse_arguments(), program_name=__script_name__)
     scubes.make(get_mask=True, det_img=True, flam_scale=None)
