@@ -37,8 +37,7 @@ class SCubes:
         self.control = control(args)
         self.galaxy = self._galaxy()
         self.galaxy.coords = self.galaxy.skycoord()
-        self.conn = connect_splus_cloud(username=None, password=None)
-        #self.conn = None
+        self.conn = None
         self._init_spectra()
 
     def _init_spectra(self):
@@ -94,6 +93,8 @@ class SCubes:
         gal = self.galaxy
         ctrl = self.control
         output_dir = ctrl.output_dir
+        if self.conn is None:
+            self.conn = connect_splus_cloud(username=ctrl.username, password=ctrl.password)
         self.stamps = download_splus_stamps(
             self.conn, gal.ra, gal.dec, ctrl.size, ctrl.tile, gal.name, 
             output_dir=output_dir, 
@@ -116,6 +117,8 @@ class SCubes:
         gal = self.galaxy
         ctrl = self.control
         output_dir = ctrl.output_dir
+        if self.conn is None:
+            self.conn = connect_splus_cloud(username=ctrl.username, password=ctrl.password)
         self.detection_image = download_splus_detection_image(
             self.conn, gal.ra, gal.dec, ctrl.size, ctrl.tile, gal.name, 
             output_dir=output_dir, 
@@ -137,6 +140,8 @@ class SCubes:
         gal = self.galaxy
         ctrl = self.control
         output_dir = ctrl.output_dir
+        if self.conn is None:
+            self.conn = connect_splus_cloud(username=ctrl.username, password=ctrl.password)
         self.lupton_rgb = download_splus_lupton_rgb(
             self.conn, gal.ra, gal.dec, ctrl.size, ctrl.tile, gal.name, 
             output_dir=output_dir, 
