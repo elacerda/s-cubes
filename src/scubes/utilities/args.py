@@ -72,13 +72,14 @@ def scubes_parse_arguments(argv):
     args = parser.parse_args(args=argv[1:])
     _sex = which(args.sextractor)
     if _sex is None:
-        print_level(f'{args.sextractor}: SExtractor exec not found', 2, args.verbose)
+        print_level(f'{args.sextractor}: SExtractor exec not found', 1, args.verbose)
         _SExtr_names = ['sex', 'source-extractor']
         for name in _SExtr_names:
             _sex = which(name)
             if _sex is None:
                 print_level(f'{name}: SExtractor exec not found', 2, args.verbose)
             else:
+                print_level(f'{name}: SExtractor found. Forcing --sextractor={_sex}', 1, args.verbose)
                 args.sextractor = _sex
                 pass
         if _sex is None:
