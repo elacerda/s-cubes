@@ -45,8 +45,8 @@ usage: scubes [-h] [-r] [-c] [-f] [-b BANDS] [-l SIZE] [-a ANGSIZE] [-w WORK_DIR
               [--zp_table ZP_TABLE] [--back_size BACK_SIZE] [--detect_thresh DETECT_THRESH]
               SPLUS_TILE RA DEC GALAXY_NAME REDSHIFT
 
-┌─┐   ┌─┐┬ ┬┌┐ ┌─┐┌─┐  | Create S-PLUS galaxies data cubes, a.k.a. SCUBES. 
-└─┐───│  │ │├┴┐├┤ └─┐  | SCUBES is an organized FITS file with data, errors, 
+┌─┐   ┌─┐┬ ┬┌┐ ┌─┐┌─┐  | Create S-PLUS galaxies data cubes, a.k.a. S-CUBES. 
+└─┐───│  │ │├┴┐├┤ └─┐  | S-CUBES is an organized FITS file with data, errors, 
 └─┘   └─┘└─┘└─┘└─┘└─┘  | mask and metadata about some galaxy present on any 
 ---------------------- + S-PLUS observed tile. Any problem contact:
 

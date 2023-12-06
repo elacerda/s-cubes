@@ -14,8 +14,8 @@ MOTD_BOT = '└─┘   └─┘└─┘└─┘└─┘└─┘ '
 MOTD_SEP = '----------------------'
 
 PROG_DESC = f'''
-{MOTD_TOP} | Create S-PLUS galaxies data cubes, a.k.a. SCUBES. 
-{MOTD_MID} | SCUBES is an organized FITS file with data, errors, 
+{MOTD_TOP} | Create S-PLUS galaxies data cubes, a.k.a. S-CUBES. 
+{MOTD_MID} | S-CUBES is an organized FITS file with data, errors, 
 {MOTD_BOT} | mask and metadata about some galaxy present on any 
 {MOTD_SEP} + S-PLUS observed tile. Any problem contact:
 
