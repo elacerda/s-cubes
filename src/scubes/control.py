@@ -1,8 +1,8 @@
 from os import makedirs
 from os.path import join
 
-from scubes.utilities.io import check_units, print_level
-from scubes.utilities.constants import WAVE_EFF
+from .utilities.io import check_units, print_level
+from .utilities.constants import WAVE_EFF
 
 class control:
     def __init__(self, args, program_name='SCUBES'):

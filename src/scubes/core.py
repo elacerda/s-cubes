@@ -15,12 +15,12 @@ from regions import PixCoord, CirclePixelRegion
 from scipy.interpolate import RectBivariateSpline
 from astropy.wcs.utils import skycoord_to_pixel as sky2pix
 
-from scubes.control import control
-from scubes.utilities.sextractor import run_sex
-from scubes.utilities.headers import get_keys, get_author, get_key
-from scubes.utilities.constants import WAVE_EFF, NAMES_CORRESPONDENT
-from scubes.utilities.io import print_level, grep
-from scubes.utilities.splusdata import connect_splus_cloud, download_splus_stamps, download_splus_detection_image, download_splus_lupton_rgb
+from .control import control
+from .utilities.sextractor import run_sex
+from .utilities.headers import get_keys, get_author, get_key
+from .utilities.constants import WAVE_EFF, NAMES_CORRESPONDENT
+from .utilities.io import print_level, grep
+from .utilities.splusdata import connect_splus_cloud, download_splus_stamps, download_splus_detection_image, download_splus_lupton_rgb
 
 @dataclass
 class _galaxy:

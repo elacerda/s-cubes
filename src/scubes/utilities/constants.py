@@ -1,5 +1,3 @@
-__version__ = 'v0.1.0-beta'
-
 __author__ = 'Eduardo A. D. Lacerda'
 
 __author_email__ = 'dhubax@gmail.com'
