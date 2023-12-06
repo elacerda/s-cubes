@@ -1,10 +1,9 @@
 import sys
-from importlib.metadata import version, PackageNotFoundError
+from importlib.metadata import version, metadata
 
-try:
-    __version__ = version('s-cubes')
-except PackageNotFoundError as e:
-    pass
+scubes_meta = metadata('s-cubes')
+__author__ = scubes_meta['Author-email']
+__version__ = version('s-cubes')
 
 def scubes():
     from .utilities.args import scubes_parse_arguments

@@ -1,6 +1,4 @@
-__author__ = 'Eduardo A. D. Lacerda'
-
-__author_email__ = 'dhubax@gmail.com'
+from .. import __author__
 
 DATA_DIR = 'data'
 ZPCORR_DIR = 'zpcorr_iDR4'
@@ -11,13 +9,14 @@ MOTD_MID = '└─┐───│  │ │├┴┐├┤ └─┐ '
 MOTD_BOT = '└─┘   └─┘└─┘└─┘└─┘└─┘ '
 MOTD_SEP = '----------------------'
 
-PROG_DESC = f'''
+SPLUS_PROG_DESC = f'''
 {MOTD_TOP} | Create S-PLUS galaxies data cubes, a.k.a. S-CUBES. 
 {MOTD_MID} | S-CUBES is an organized FITS file with data, errors, 
 {MOTD_BOT} | mask and metadata about some galaxy present on any 
 {MOTD_SEP} + S-PLUS observed tile. Any problem contact:
 
-                {__author__} - {__author_email__}
+   {__author__}
+
 '''
 
 WAVE_EFF = {

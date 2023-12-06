@@ -49,10 +49,7 @@ usage: scubes [-h] [-r] [-c] [-f] [-b BANDS] [-l SIZE] [-a ANGSIZE] [-w WORK_DIR
 └─┐───│  │ │├┴┐├┤ └─┐  | S-CUBES is an organized FITS file with data, errors, 
 └─┘   └─┘└─┘└─┘└─┘└─┘  | mask and metadata about some galaxy present on any 
 ---------------------- + S-PLUS observed tile. Any problem contact:
-
-                Eduardo A. D. Lacerda - dhubax@gmail.com
-
-                (...)
+(...)
 ```
 
 # Running example
