@@ -10,29 +10,35 @@ Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository include data 
 
 # Installation
 
-1. Clone repository with the `sewpy` submodule:
+Clone repository with the `sewpy` submodule:
 
-```
-> git clone --recurse-submodules https://github.com/elacerda/s-cubes.git
+```console
+git clone --recurse-submodules https://github.com/elacerda/s-cubes.git
 ```
 
-2. Install `sewpy` (go to external/sewpy directory):
+Create and activate a virtual enviroment for the package instalation and usage:
 
+```console
+python3 -m venv .venv
+source .venv/bin/activate
 ```
-> cd external/sewpy
+
+Install `sewpy` (go to external/sewpy directory):
+
+```console
+cd external/sewpy
 external/sewpy > pip3 install .
 ```
 
-3. Install S-Cubes (go back to s-cubes directory)
+Install S-Cubes (go back to s-cubes directory)
+
+```console
+pip3 install .
 
 ```
-> pip3 install .
+Type `scubes --help`:
 
-```
-
-Type `scubes --help` for the help:
-
-```
+```console
 usage: scubes [-h] [-r] [-c] [-f] [-b BANDS] [-l SIZE] [-a ANGSIZE] [-w WORK_DIR] 
               [-o OUTPUT_DIR] [-x SEXTRACTOR] [-p CLASS_STAR] [-v] [--debug] 
               [--satur_level SATUR_LEVEL] [--data_dir DATA_DIR] [--zpcorr_dir ZPCORR_DIR] 
