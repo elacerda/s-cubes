@@ -33,9 +33,8 @@ class _galaxy:
         return SkyCoord(ra=self.ra, dec=self.dec, frame=frame)
     
 class SCubes:
-    def __init__(self, args, program_name='SCUBES'):
-        self.control = control(args, program_name=program_name)
-        self.program_name = program_name
+    def __init__(self, args):
+        self.control = control(args)
         self.galaxy = self._galaxy()
         self.galaxy.coords = self.galaxy.skycoord()
         self.conn = connect_splus_cloud(username=None, password=None)

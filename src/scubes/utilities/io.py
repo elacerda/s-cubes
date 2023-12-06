@@ -1,11 +1,16 @@
 import re
 import pandas as pd
+from os.path import basename
 from datetime import datetime
 from astropy.coordinates import SkyCoord
 
 def print_level(msg, level=0, verbose=0):
+    import __main__ as main
+
+    __script_name__ = basename(main.__file__)
+
     if verbose >= level:
-        print(f'[{datetime.now().isoformat()}] - {msg}')
+        print(f'[{datetime.now().isoformat()}] - {__script_name__}: {msg}')
 
 def check_units(ra, dec):
     # Pattern to match: any letter (a-z, A-Z) or "°"

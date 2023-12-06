@@ -52,39 +52,7 @@ usage: scubes [-h] [-r] [-c] [-f] [-b BANDS] [-l SIZE] [-a ANGSIZE] [-w WORK_DIR
 
                 Eduardo A. D. Lacerda - dhubax@gmail.com
 
-positional arguments:
-  SPLUS_TILE                  Name of the S-PLUS tile
-  RA                          Galaxy's right ascension
-  DEC                         Galaxy's declination
-  GALAXY_NAME                 Galaxy's name
-  REDSHIFT                    Spectroscopic or photometric redshift of the galaxy
-
-options:
-  -h, --help                  show this help message and exit
-  -r, --redo                  Enable redo mode to overwrite final cubes
-  -c, --clean                 Clean intermediate files after processing
-  -f, --force                 Force overwrite of existing files
-  -b BANDS, --bands BANDS     List of S-PLUS bands
-  -l SIZE, --size SIZE        Size of the cube in pixels
-  -a ANGSIZE, --angsize ANGSIZE
-                              Galaxy's Angular size in arcsec
-  -w WORK_DIR, --work_dir WORK_DIR
-                              Working directory
-  -o OUTPUT_DIR, --output_dir OUTPUT_DIR
-                              Output directory
-  -x SEXTRACTOR, --sextractor SEXTRACTOR
-                              Path to SExtractor executable
-  -p CLASS_STAR, --class_star CLASS_STAR
-                              SExtractor CLASS_STAR parameter for star/galaxy separation
-  -v, --verbose
-  --debug                     Enable debug mode
-  --satur_level SATUR_LEVEL   Saturation level for the png images. Default is 1600.0
-  --data_dir DATA_DIR         Data directory
-  --zpcorr_dir ZPCORR_DIR     Zero-point correction directory
-  --zp_table ZP_TABLE         Zero-point table
-  --back_size BACK_SIZE       Background mesh size for SExtractor. Default is 64
-  --detect_thresh DETECT_THRESH
-                              Detection threshold for SExtractor. Default is 1.1
+                (...)
 ```
 
 # Running example

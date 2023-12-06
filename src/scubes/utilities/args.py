@@ -1,7 +1,10 @@
+import sys
 from os import getcwd
-from argparse import ArgumentParser, RawDescriptionHelpFormatter
+from shutil import which
+from argparse import ArgumentParser, RawDescriptionHelpFormatter, ArgumentDefaultsHelpFormatter
 
 from .constants import PROG_DESC, WAVE_EFF, DATA_DIR, ZPCORR_DIR, ZP_TABLE
+from .io import print_level
 
 class readFileArgumentParser(ArgumentParser):
     def __init__(self, *args, **kwargs):
@@ -15,38 +18,45 @@ class readFileArgumentParser(ArgumentParser):
                 break
             yield arg
 
-def create_parser():
+def scubes_create_parser():
     """
         Parse command line arguments for the program.
 
     Returns:
         argparse.Namespace: Parsed command line arguments.
     """
+    args_dict = {
+        'redo': ['r', dict(action='store_true', default=False, help='Enable redo mode to overwrite final cubes. Default value is %(default)s')],
+        'clean': ['c', dict(action='store_true', default=False, help='Clean intermediate files after processing. Default value is %(default)s')],
+        'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files. Default value is %(default)s')],
+        'bands': ['b', dict(default=list(WAVE_EFF.keys()), help='List of S-PLUS bands. Default value is %(default)s')],
+        'size': ['l', dict(default=500, type=int, help='Size of the cube in pixels. Default value is %(default)s')],
+        'angsize': ['a', dict(default=50, type=float, help="Galaxy's Angular size in arcsec. Default value is %(default)s")],
+        'work_dir': ['w', dict(default=getcwd(), help='Working directory. Default value is %(default)s')],
+        'output_dir': ['o', dict(default=getcwd(), help='Output directory. Default value is %(default)s')],
+        'sextractor': ['x', dict(default='sex', help='Path to SExtractor executable. Default value is %(default)s')],
+        'class_star': ['p', dict(default=0.25, type=float, help='SExtractor CLASS_STAR parameter for star/galaxy separation. Default value is %(default)s')],
+        'verbose': ['v', dict(action='count', default=0, help='Verbosity level.')],
+        'debug': ['D', dict(action='store_true', default=False, help='Enable debug mode. Default value is %(default)s')],
+        'satur_level': ['S', dict(default=1600.0, type=float, help='Saturation level for the png images. Default value is %(default)s')],
+        'data_dir': ['d', dict(default=DATA_DIR, help='Data directory. All input data should be located here. Default value is %(default)s')],
+        'zpcorr_dir': ['Z', dict(default=ZPCORR_DIR, help='Zero-point correction directory (relative to DATA_DIR). Default value is %(default)s')],
+        'zp_table': ['z', dict(default=ZP_TABLE, help='Zero-point table (relative to DATA_DIR). Default value is %(default)s')],
+        'back_size': ['B', dict(default=64, type=int, help='Background mesh size for SExtractor.. Default value is %(default)s')],
+        'detect_thresh': ['T', dict(default=1.1, type=float, help='Detection threshold for SExtractor.. Default value is %(default)s')],
+    }
+
     _formatter = lambda prog: RawDescriptionHelpFormatter(prog, max_help_position=30)
     parser = readFileArgumentParser(fromfile_prefix_chars='@', description=PROG_DESC, formatter_class=_formatter)
-    
-    parser.add_argument('-r', '--redo', action='store_true', default=False, help='Enable redo mode to overwrite final cubes')
-    parser.add_argument('-c', '--clean', action='store_true', default=False, help='Clean intermediate files after processing')
-    parser.add_argument('-f', '--force', action='store_true', default=False, help='Force overwrite of existing files')
-    
-    # parser.add_argument('-s', '--savestamps', action='store_false', default=True, help='Save stamps')
 
-    parser.add_argument('-b', '--bands', default=list(WAVE_EFF.keys()), help='List of S-PLUS bands')
-    parser.add_argument('-l', '--size', default=500, type=int, help='Size of the cube in pixels')
-    parser.add_argument('-a', '--angsize', default=50, type=float, help="Galaxy's Angular size in arcsec")
-    parser.add_argument('-w', '--work_dir', default=getcwd(), help='Working directory')
-    parser.add_argument('-o', '--output_dir', default=getcwd(), help='Output directory')
-    parser.add_argument('-x', '--sextractor', default='sex', help='Path to SExtractor executable')
-    parser.add_argument('-p', '--class_star', default=0.25, type=float, help='SExtractor CLASS_STAR parameter for star/galaxy separation')
-    parser.add_argument('-v', '--verbose', action='count', default=0)
-    # parser.add_argument('-q', '--tile_dir', default=None, help='Directory where the S-PLUS images are stored.\n' 'Default is work_dir/tile')
-    parser.add_argument('--debug', action='store_true', default=False, help='Enable debug mode')
-    parser.add_argument('--satur_level', default=1600.0, type=float, help='Saturation level for the png images. Default is 1600.0')
-    parser.add_argument('--data_dir', default=DATA_DIR, help='Data directory')
-    parser.add_argument('--zpcorr_dir', default=ZPCORR_DIR, help='Zero-point correction directory')
-    parser.add_argument('--zp_table', default=ZP_TABLE, help='Zero-point table')
-    parser.add_argument('--back_size', default=64, type=int, help='Background mesh size for SExtractor. Default is 64')
-    parser.add_argument('--detect_thresh', default=1.1, type=float, help='Detection threshold for SExtractor. Default is 1.1')
+    for k, v in args_dict.items():
+        long_option = k
+        short_option, kwargs = v
+        option_string = []
+        if short_option != '':
+            option_string.append(f'-{short_option}')
+        option_string.append(f'--{long_option}')
+        parser.add_argument(*option_string, **kwargs)
 
     # positional arguments
     parser.add_argument('tile', metavar='SPLUS_TILE', help='Name of the S-PLUS tile')
@@ -56,3 +66,22 @@ def create_parser():
     parser.add_argument('specz', type=float, metavar='REDSHIFT', help='Spectroscopic or photometric redshift of the galaxy')
     
     return parser
+
+def scubes_parse_arguments(argv):
+    parser = scubes_create_parser()
+    args = parser.parse_args(args=argv[1:])
+    _sex = which(args.sextractor)
+    if _sex is None:
+        print_level(f'{args.sextractor}: SExtractor exec not found', 2, args.verbose)
+        _SExtr_names = ['sex', 'source-extractor']
+        for name in _SExtr_names:
+            _sex = which(name)
+            if _sex is None:
+                print_level(f'{name}: SExtractor exec not found', 2, args.verbose)
+            else:
+                args.sextractor = _sex
+                pass
+        if _sex is None:
+            print_level(f'SExtractor not found')
+            sys.exit(1)
+    return args

@@ -5,11 +5,10 @@ from .utilities.io import check_units, print_level
 from .utilities.constants import WAVE_EFF
 
 class control:
-    def __init__(self, args, program_name='SCUBES'):
+    def __init__(self, args):
         for key, value in args.__dict__.items():
             print_level(f'control obj - key: {key} - value: {value}', 3, args.verbose)
             setattr(self, key, value)
-        self.program_name = program_name
         self._correct_dirpath()
         self._parse_coords()
         self.prefix_filename = f'{self.galaxy}_{self.tile}_{self.size}x{self.size}'
@@ -32,4 +31,4 @@ class control:
         try: 
             makedirs(self.output_dir)
         except FileExistsError:
-            print_level(f'{self.program_name}: {self.output_dir}: directory already exists', 2, self.verbose)
+            print_level(f'{self.output_dir}: directory already exists', 2, self.verbose)
