@@ -24,11 +24,10 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Install `sewpy` (go to external/sewpy directory):
+Install `sewpy`:
 
 ```console
-cd external/sewpy
-external/sewpy > pip3 install .
+pip3 install external/sewpy/.
 ```
 
 Install S-Cubes (go back to s-cubes directory)

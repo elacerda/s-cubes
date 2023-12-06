@@ -1,12 +1,19 @@
 import sys
 from shutil import which
 from os.path import basename, dirname, realpath
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version('s-cubes')
+except PackageNotFoundError as e:
+    pass
 
 __script_name__ = basename(sys.argv[0])
 
 from .utilities.io import print_level
 from .utilities.args import create_parser
 from .core import SCubes
+
 
 def parse_arguments():
     parser = create_parser()
