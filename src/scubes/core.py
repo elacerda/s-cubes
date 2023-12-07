@@ -18,9 +18,10 @@ from scipy.interpolate import RectBivariateSpline
 from astropy.wcs.utils import skycoord_to_pixel as sky2pix
 
 from .control import control
-from .constants import WAVE_EFF, NAMES_CORRESPONDENT, SPLUS_DEFAULT_SEXTRACTOR_CONFIG
 from .headers import get_keys, get_author, get_key
-
+from .constants import WAVE_EFF, NAMES_CORRESPONDENT, \
+    SPLUS_DEFAULT_SEXTRACTOR_CONFIG, \
+    SPLUS_DEFAULT_SEXTRACTOR_PARAMS
 from .utilities.io import print_level
 from .utilities.sextractor import run_sex
 from .utilities.splusdata import connect_splus_cloud
@@ -264,10 +265,6 @@ class SCubes:
         dimg = self.detection_image
         h = fits.getheader(dimg, ext=1)
 
-        params = ["NUMBER", "X_IMAGE", "Y_IMAGE", "KRON_RADIUS", "ELLIPTICITY",
-                  "THETA_IMAGE", "A_IMAGE", "B_IMAGE", "MAG_AUTO", "FWHM_IMAGE",
-                  "CLASS_STAR"]
-
         filter_name =join(ctrl.sexdata_dir, 'tophat_3.0_3x3.conv')
         starnnw_name = join(ctrl.sexdata_dir, 'default.nnw')
         checkimg_name = dimg.replace('detection', 'segmentation')
@@ -290,7 +287,7 @@ class SCubes:
             sex_path=ctrl.sextractor, 
             detection_fits=dimg, 
             input_config=config, 
-            output_params=params, 
+            output_params=SPLUS_DEFAULT_SEXTRACTOR_PARAMS, 
             work_dir=ctrl.output_dir, 
             output_file=output_name, 
             verbose=ctrl.verbose
