@@ -1,6 +1,8 @@
 import sys
 import numpy as np
 import pandas as pd
+from PIL import Image
+from tqdm import tqdm
 import astropy.units as u
 from astropy.io import fits
 from astropy.wcs import WCS
@@ -21,7 +23,7 @@ from .headers import get_keys, get_author, get_key
 
 from .utilities.io import print_level
 from .utilities.sextractor import run_sex
-from .utilities.splusdata import connect_splus_cloud, download_splus_stamps, download_splus_detection_image, download_splus_lupton_rgb
+from .utilities.splusdata import connect_splus_cloud
 
 @dataclass
 class _galaxy:
@@ -38,7 +40,7 @@ class SCubes:
         self.control = control(args)
         self.galaxy = self._galaxy()
         self.galaxy.coords = self.galaxy.skycoord()
-        self.conn = None
+        self._conn = None
         self._init_spectra()
 
     def _init_spectra(self):
@@ -48,6 +50,13 @@ class SCubes:
         self.flam__b = None
         self.fnu__b = None
         self.headers__b = None
+
+    @property
+    def conn(self):
+        if self._conn is None:
+            ctrl = self.control
+            self._conn = connect_splus_cloud(ctrl.username, ctrl.password)
+        return self._conn
 
     def _check_errors(self):
         return all([exists(_) for _ in self.wimages])
@@ -89,20 +98,21 @@ class SCubes:
                 has_magzp = False
                 break
         return has_magzp
-                    
+
     def get_stamps(self):
         gal = self.galaxy
         ctrl = self.control
-        output_dir = ctrl.output_dir
-        if self.conn is None:
-            self.conn = connect_splus_cloud(username=ctrl.username, password=ctrl.password)
-        self.stamps = download_splus_stamps(
-            self.conn, gal.ra, gal.dec, ctrl.size, ctrl.tile, gal.name, 
-            bands=list(WAVE_EFF.keys()),
-            output_dir=output_dir, 
-            download_weight=True, 
-            overwrite=ctrl.force
-        )
+        self.stamps = []
+        for filt in tqdm(list(WAVE_EFF.keys()), desc=f'{gal.name} @ {ctrl.tile} - downloading', leave=True, position=0):
+            fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swp.fits.fz')
+            self.stamps.append(fname)
+            if not isfile(fname) or ctrl.force:
+                _ = self.conn.stamp(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=False, option=ctrl.tile, filename=fname)
+            # Download_weight:
+            fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swpweight.fits.fz')
+            self.stamps.append(fname)
+            if not isfile(fname) or ctrl.force:
+                _ = self.conn.stamp(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=True, option=ctrl.tile, filename=fname)
         # SHORTCUTS
         self.images = [img for img in self.stamps if 'swp.' in img]
         self.wimages = [img for img in self.stamps if 'swpweight.' in img]
@@ -118,37 +128,37 @@ class SCubes:
     def get_detection_image(self):
         gal = self.galaxy
         ctrl = self.control
-        output_dir = ctrl.output_dir
-        if self.conn is None:
-            self.conn = connect_splus_cloud(username=ctrl.username, password=ctrl.password)
-        self.detection_image = download_splus_detection_image(
-            self.conn, gal.ra, gal.dec, ctrl.size, ctrl.tile, gal.name, 
-            output_dir=output_dir, 
-            overwrite=ctrl.force
-        )
-        # UPDATE DETECTION IMAGE HEADER
-        with fits.open(self.detection_image, 'update') as f:
+        band = 'G,R,I,Z'
+        self.detection_image = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{ctrl.size}x{ctrl.size}_detection.fits')
+        if not isfile(self.detection_image) or ctrl.force:
+            print_level(f' {gal.name} @ {ctrl.tile} - downloading detection image')
+            t = self.conn.stamp_detection(ra=gal.ra, dec=gal.dec, size=ctrl.size, bands=band, option=ctrl.tile)  #, filename=join(output_dir, fname))
+            phdu = fits.PrimaryHDU()
             # UPDATE HEADER WCS
-            w = WCS(f[1].header)
-            f[1].header.update(w.to_header())
+            w = WCS(t[1].header)
+            t[1].header.update(w.to_header())
+            author = get_author(t[1].header)
             # ADD AUTHOR TO HEADER IF AUTHOR IS UNKNOWN
-            author = get_author(f[1].header)
             if author == 'unknown':
                 print_level('Writting header key AUTHOR to detection image', 1, ctrl.verbose)
                 author = get_author(self.headers__b[0])
-                f[1].header.set('AUTHOR', value=author, comment='Who ran the software')
+                t[1].header.set('AUTHOR', value=author, comment='Who ran the software')
+            ihdu = fits.ImageHDU(data=t[1].data, header=t[1].header, name='IMAGE')
+            hdul = fits.HDUList([phdu, ihdu])
+            hdul.writeto(self.detection_image, overwrite=ctrl.force)
 
     def get_lupton_rgb(self):
         gal = self.galaxy
         ctrl = self.control
-        output_dir = ctrl.output_dir
-        if self.conn is None:
-            self.conn = connect_splus_cloud(username=ctrl.username, password=ctrl.password)
-        self.lupton_rgb = download_splus_lupton_rgb(
-            self.conn, gal.ra, gal.dec, ctrl.size, ctrl.tile, gal.name, 
-            output_dir=output_dir, 
-            overwrite=ctrl.force
-        )
+        #conn = self.get_splusdata_conn()
+        fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{ctrl.size}x{ctrl.size}.png')
+        if not isfile(fname) or ctrl.force:
+            print_level(f'{gal.name} @ {ctrl.tile} - downloading RGB image')
+            img = self.conn.lupton_rgb(ra=gal.ra, dec=gal.dec, size=ctrl.size, option=ctrl.tile) 
+            img.save(fname, 'PNG')
+        else:
+            img = Image.open(fname)
+        self.lupton_rgb = img.transpose(Image.FLIP_TOP_BOTTOM)
 
     def get_zero_points_correction(self):
         """ Get corrections of zero points for location in the field. """
@@ -258,15 +268,13 @@ class SCubes:
                   "THETA_IMAGE", "A_IMAGE", "B_IMAGE", "MAG_AUTO", "FWHM_IMAGE",
                   "CLASS_STAR"]
 
-        filter_name =join(ctrl.data_dir, 'sex_data/tophat_3.0_3x3.conv')
-        starnnw_name = join(ctrl.data_dir, 'sex_data/default.nnw')
-        #checkimg_name = join(ctrl.output_dir, dimg.replace('detection', 'segmentation'))
-        #output_name = join(ctrl.output_dir, dimg.replace('detection', 'sexcat'))
+        filter_name =join(ctrl.sexdata_dir, 'tophat_3.0_3x3.conv')
+        starnnw_name = join(ctrl.sexdata_dir, 'default.nnw')
         checkimg_name = dimg.replace('detection', 'segmentation')
         output_name = dimg.replace('detection', 'sexcat')
+
         # configuration for SExtractor photometry
         config = SPLUS_DEFAULT_SEXTRACTOR_CONFIG
-
         config.update({
             'DETECT_THRESH': ctrl.detect_thresh,
             'FILTER_NAME': filter_name,
@@ -315,7 +323,8 @@ class SCubes:
         sources = daofind(data)
         return sources
     
-    def update_masks(self, sewregions, detection_mask, unmask_stars=None):
+    #def update_masks(self, sewregions, detection_mask, unmask_stars=None):
+    def update_masks(self, sewregions, unmask_stars=None):        
         ctrl = self.control
         unmask_stars = [] if unmask_stars is None else unmask_stars
         ddata = fits.getdata(self.detection_image, ext=1)
@@ -330,11 +339,13 @@ class SCubes:
                     print_level(f'{mask.bbox.extent} min: {min(mask.bbox.extent)} {_slices}', 2, ctrl.verbose)
                     stars_mask[_slices] *= 1 - mask.data
         stars_mask = np.where(stars_mask == 1, 0, 2)
-        resulting_mask = detection_mask + stars_mask
+        #resulting_mask = detection_mask + stars_mask
+        resulting_mask = stars_mask
         masked_ddata = np.where(resulting_mask > 0, 0, ddata)
         return masked_ddata, resulting_mask
 
-    def plot_mask(self, masked_ddata, resulting_mask, r_circ, sewregions, daoregions=None, save_fig=False):
+    #def plot_mask(self, masked_ddata, resulting_mask, r_circ, sewregions, daoregions=None, save_fig=False):
+    def plot_mask(self, masked_ddata, resulting_mask, sewregions, daoregions=None, save_fig=False):        
         ctrl = self.control
         dhdu = fits.open(self.detection_image)
         ddata = dhdu[1].data
@@ -348,14 +359,14 @@ class SCubes:
         ax1 = plt.subplot(221, projection=wcs)
         self.get_lupton_rgb()
         ax1.imshow(self.lupton_rgb, origin='lower')
-        r_circ.plot(color='y', lw=1.5)
+        # r_circ.plot(color='y', lw=1.5)
         for sregion in sewregions:
             sregion.plot(ax=ax1, color='g')
         ax1.set_title('RGB')
         # ax2
         ax2 = plt.subplot(222, projection=wcs)
         ax2.imshow(ddata, cmap='Greys_r', origin='lower', vmin=-0.1, vmax=3.5)
-        r_circ.plot(color='y', lw=1.5)
+        # r_circ.plot(color='y', lw=1.5)
         for n, sregion in enumerate(sewregions):
             sregion.plot(ax=ax2, color='g')
             ax2.annotate(repr(n), (sregion.center.x, sregion.center.y), color='green')
@@ -369,7 +380,7 @@ class SCubes:
         for n, sregion in enumerate(sewregions):
             sregion.plot(ax=ax3, color='g')
         ax3.imshow(masked_ddata, cmap='Greys_r', origin='lower', vmin=-0.1, vmax=3.5)
-        r_circ.plot(color='y', lw=1.5)
+        # r_circ.plot(color='y', lw=1.5)
         ax3.set_title('Masked')
         # ax4
         ax4 = plt.subplot(224, projection=wcs)
@@ -392,7 +403,7 @@ class SCubes:
    
     def _calc_masks(self, save_fig=False, run_DAOfinder=False, unmask_stars=None):
         print_level('Calculating mask...')
-        r_circ, detection_mask = self.get_main_circle()
+        #r_circ, detection_mask = self.get_main_circle()
         print_level('Running SExtractor to get photometry...')
         sewregions = self.run_sex()
         daoregions = None
@@ -401,8 +412,10 @@ class SCubes:
             daopos = np.transpose((daocat['xcentroid'], daocat['ycentroid']))
             daorad = 4*(abs(daocat['sharpness']) + abs(daocat['roundness1']) + abs(daocat['roundness2']))
             daoregions = [CirclePixelRegion(center=PixCoord(x, y), radius=z) for (x, y), z in zip(daopos, daorad)]
-        masked_ddata, resulting_mask = self.update_masks(sewregions=sewregions, detection_mask=detection_mask, unmask_stars=unmask_stars)
-        fig = self.plot_mask(masked_ddata, resulting_mask, r_circ, sewregions, daoregions=daoregions, save_fig=save_fig)
+        #masked_ddata, resulting_mask = self.update_masks(sewregions=sewregions, detection_mask=detection_mask, unmask_stars=unmask_stars)
+        masked_ddata, resulting_mask = self.update_masks(sewregions=sewregions, unmask_stars=unmask_stars)
+        #fig = self.plot_mask(masked_ddata, resulting_mask, r_circ, sewregions, daoregions=daoregions, save_fig=save_fig)
+        fig = self.plot_mask(masked_ddata, resulting_mask, sewregions, daoregions=daoregions, save_fig=save_fig)
         return resulting_mask, fig
     
     def _create_mask_hdu(self, resulting_mask, save_mask=False):
