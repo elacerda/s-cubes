@@ -15,6 +15,7 @@ class control:
         self._make_output_dir()
 
     def _correct_dirpath(self):
+        self.sexdata_dir = join(self.data_dir, self.sexdata_dir)
         self.zpcorr_dir = join(self.data_dir, self.zpcorr_dir)
         self.zp_table = join(self.data_dir, self.zp_table)
         self.output_dir = join(self.work_dir, self.galaxy)
