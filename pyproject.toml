@@ -31,7 +31,7 @@ dependencies = [
 dynamic = ["version", "readme"]
 
 [project.scripts]
-scubes = "scubes:scubes"
+scubes = "scubes.entry_points:scubes"
 
 [project.urls]
 Homepage = "https://github.com/elacerda/s-cubes"

@@ -1,6 +1,6 @@
 from os import getcwd
 
-from .. import __author__
+from . import __author__
 
 DATA_DIR = 'data'
 ZPCORR_DIR = 'zpcorr_iDR4'
@@ -77,4 +77,28 @@ SPLUS_ARGS = {
     'dec': ['pos', dict(metavar='DEC', help="Galaxy's declination")],
     'galaxy': ['pos', dict(metavar='GALAXY_NAME', help="Galaxy's name")],
     'specz': ['pos', dict(type=float, metavar='REDSHIFT', help='Spectroscopic or photometric redshift of the galaxy')],
+}
+
+SPLUS_DEFAULT_SEXTRACTOR_CONFIG = {
+    'DETECT_TYPE': 'CCD',
+    'DETECT_MINAREA': 4,
+    'ANALYSIS_THRESH': 3.0,
+    'FILTER': 'Y',
+    'DEBLEND_NTHRESH': 64,
+    'DEBLEND_MINCONT': 0.0002,
+    'CLEAN': 'Y',
+    'CLEAN_PARAM': 1.0,
+    'MASK_TYPE': 'CORRECT',
+    'PHOT_APERTURES': 5.45454545,
+    'PHOT_AUTOPARAMS': '3.0,1.82',
+    'PHOT_PETROPARAMS': '2.0,2.73',
+    'PHOT_FLUXFRAC': '0.2,0.5,0.7,0.9',
+    'MAG_ZEROPOINT': 20,
+    'MAG_GAMMA': 4.0,
+    'PIXEL_SCALE': 0.55,
+    'BACK_FILTERSIZE': 7,
+    'BACKPHOTO_TYPE': 'LOCAL',
+    'BACKPHOTO_THICK': 48,
+    'CHECKIMAGE_TYPE': 'SEGMENTATION',
+    'NTHREADS': '2',
 }

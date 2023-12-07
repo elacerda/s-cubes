@@ -69,12 +69,3 @@ def read_first_line(filename):
         while l.startswith('#'):
             l = f.readline()
     return l.strip()
-
-def grep(file, pattern):
-    ret_line = None
-    with open(file,'r') as f:
-        for line in f:
-            if re.search(pattern, line):
-                ret_line = line
-    return ret_line.strip()
-                

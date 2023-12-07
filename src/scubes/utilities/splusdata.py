@@ -6,11 +6,7 @@ from astropy.io import fits
 from os.path import join, isfile
 from splusdata.core import AuthenticationError
 
-
-from .constants import WAVE_EFF
 from .io import print_level
-
-filter_wheel = list(WAVE_EFF.keys())
 
 def connect_splus_cloud(username=None, password=None):
     n_tries = 0
@@ -22,12 +18,11 @@ def connect_splus_cloud(username=None, password=None):
             n_tries += 1
     return conn
 
-def download_splus_tiles(conn, tile, output_dir=None, band=None, download_weight=True, overwrite=False):
+def download_splus_tiles(conn, tile, bands, output_dir=None, download_weight=True, overwrite=False):
     fnames = []
     if output_dir is None:
         output_dir = '.'
-    filt_iter = filter_wheel if band is None else [band]
-    for filt in tqdm(filt_iter, desc=f'{tile} - downloading', leave=False, position=1):
+    for filt in tqdm(bands, desc=f'{tile} - downloading', leave=False, position=1):
         fname = join(output_dir, f'{tile}_{filt}_swp.fits.fz')
         fnames.append(fname)
         if not isfile(fname) or overwrite:
@@ -39,12 +34,11 @@ def download_splus_tiles(conn, tile, output_dir=None, band=None, download_weight
                 wt = conn.field_frame(field=tile, band=filt, weight=True, filename=fname)
     return fnames
 
-def download_splus_stamps(conn, ra, dec, size, tile, obj_name, output_dir=None, band=None, download_weight=True, overwrite=False):
+def download_splus_stamps(conn, ra, dec, size, tile, obj_name, bands, output_dir=None, download_weight=True, overwrite=False):
     fnames = []
     if output_dir is None:
         output_dir = '.'
-    filt_iter = filter_wheel if band is None else [band]
-    for filt in tqdm(filt_iter, desc=f'{obj_name} @ {tile} - downloading', leave=False, position=1):
+    for filt in tqdm(bands, desc=f'{obj_name} @ {tile} - downloading', leave=False, position=1):
         fname = join(output_dir, f'{obj_name}_{tile}_{filt}_{size}x{size}_swp.fits.fz')
         fnames.append(fname)
         if not isfile(fname) or overwrite:

@@ -16,10 +16,11 @@ from scipy.interpolate import RectBivariateSpline
 from astropy.wcs.utils import skycoord_to_pixel as sky2pix
 
 from .control import control
+from .constants import WAVE_EFF, NAMES_CORRESPONDENT, SPLUS_DEFAULT_SEXTRACTOR_CONFIG
+from .headers import get_keys, get_author, get_key
+
+from .utilities.io import print_level
 from .utilities.sextractor import run_sex
-from .utilities.headers import get_keys, get_author, get_key
-from .utilities.constants import WAVE_EFF, NAMES_CORRESPONDENT
-from .utilities.io import print_level, grep
 from .utilities.splusdata import connect_splus_cloud, download_splus_stamps, download_splus_detection_image, download_splus_lupton_rgb
 
 @dataclass
@@ -97,6 +98,7 @@ class SCubes:
             self.conn = connect_splus_cloud(username=ctrl.username, password=ctrl.password)
         self.stamps = download_splus_stamps(
             self.conn, gal.ra, gal.dec, ctrl.size, ctrl.tile, gal.name, 
+            bands=list(WAVE_EFF.keys()),
             output_dir=output_dir, 
             download_weight=True, 
             overwrite=ctrl.force
@@ -165,7 +167,6 @@ class SCubes:
         ctrl = self.control
         zp_table = ctrl.zp_table
         print_level(f'Reading ZPs table: {zp_table}')
-        zptab = grep(zp_table, ctrl.tile)
         zpt = pd.read_csv(zp_table)
         cols = [col.replace('ZP_', '') if 'ZP_' in col else col for col in zpt.columns]
         zpt.columns = cols
@@ -264,37 +265,18 @@ class SCubes:
         checkimg_name = dimg.replace('detection', 'segmentation')
         output_name = dimg.replace('detection', 'sexcat')
         # configuration for SExtractor photometry
-        config = {
-            'DETECT_TYPE': 'CCD',
-            'DETECT_MINAREA': 4,
+        config = SPLUS_DEFAULT_SEXTRACTOR_CONFIG
+
+        config.update({
             'DETECT_THRESH': ctrl.detect_thresh,
-            'ANALYSIS_THRESH': 3.0,
-            'FILTER': 'Y',
             'FILTER_NAME': filter_name,
-            'DEBLEND_NTHRESH': 64,
-            'DEBLEND_MINCONT': 0.0002,
-            'CLEAN': 'Y',
-            'CLEAN_PARAM': 1.0,
-            'MASK_TYPE': 'CORRECT',
-            'PHOT_APERTURES': 5.45454545,
-            'PHOT_AUTOPARAMS': '3.0,1.82',
-            'PHOT_PETROPARAMS': '2.0,2.73',
-            'PHOT_FLUXFRAC': '0.2,0.5,0.7,0.9',
             'SATUR_LEVEL': ctrl.satur_level,
-            'MAG_ZEROPOINT': 20,
-            'MAG_GAMMA': 4.0,
             'GAIN': h.get(get_key('GAIN', get_author(h))),
-            'PIXEL_SCALE': 0.55,
             'SEEING_FWHM': h.get(get_key('PSFFWHM', get_author(h))),
             'STARNNW_NAME': starnnw_name,
             'BACK_SIZE': ctrl.back_size,
-            'BACK_FILTERSIZE': 7,
-            'BACKPHOTO_TYPE': 'LOCAL',
-            'BACKPHOTO_THICK': 48,
-            'CHECKIMAGE_TYPE': 'SEGMENTATION',
             'CHECKIMAGE_NAME': checkimg_name,
-            'NTHREADS': '2',
-        }
+        })
 
         sewcat = run_sex(
             sex_path=ctrl.sextractor, 

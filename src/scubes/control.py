@@ -2,7 +2,6 @@ from os import makedirs
 from os.path import join
 
 from .utilities.io import check_units, print_level
-from .utilities.constants import WAVE_EFF
 
 class control:
     def __init__(self, args):
