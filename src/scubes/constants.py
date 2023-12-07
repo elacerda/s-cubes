@@ -5,6 +5,7 @@ from . import __author__
 DATA_DIR = 'data'
 ZPCORR_DIR = 'zpcorr_iDR4'
 ZP_TABLE = 'iDR4_zero-points.csv'
+SEXDATA_DIR = 'sex'
 
 MOTD_TOP = '┌─┐   ┌─┐┬ ┬┌┐ ┌─┐┌─┐ '
 MOTD_MID = '└─┐───│  │ │├┴┐├┤ └─┐ '
@@ -65,6 +66,7 @@ SPLUS_ARGS = {
     'satur_level': ['S', dict(default=1600.0, type=float, help='Saturation level for the png images.')],
     'data_dir': ['d', dict(default=DATA_DIR, help='Data directory. All input data should be located here.')],
     'zpcorr_dir': ['Z', dict(default=ZPCORR_DIR, help='Zero-point correction directory (relative to DATA_DIR).')],
+    'sexdata_dir': ['X', dict(default=SEXDATA_DIR, help='SExtractor data directory (relative to DATA_DIR).')],
     'zp_table': ['z', dict(default=ZP_TABLE, help='Zero-point table (relative to DATA_DIR).')],
     'back_size': ['B', dict(default=64, type=int, help='Background mesh size for SExtractor.')],
     'detect_thresh': ['T', dict(default=1.1, type=float, help='Detection threshold for SExtractor.')],
