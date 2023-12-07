@@ -6,7 +6,8 @@ Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository include data 
 
 - Python 3.10
 - SExtractor installed either locally or system-wide
-- `sewpy` [SExtractor python wrapper](https://sewpy.readthedocs.io/en/latest/installation.html) is added to this repository as a git submodule.
+- `sewpy` [SExtractor python wrapper](https://github.com/megalut/sewpy) is added to this repository as a git submodule.
+- An user account at [S-PLUS Cloud](https://splus.cloud/) in order to access the necessary data.
 
 # Installation
 
@@ -36,25 +37,37 @@ Install S-Cubes (go back to s-cubes directory)
 pip3 install .
 
 ```
-Type `scubes --help`:
-
-```console
-usage: scubes [-h] [-r] [-c] [-f] [-b BANDS] [-l SIZE] [-a ANGSIZE] [-w WORK_DIR] 
-              [-o OUTPUT_DIR] [-x SEXTRACTOR] [-p CLASS_STAR] [-v] [--debug] 
-              [--satur_level SATUR_LEVEL] [--data_dir DATA_DIR] [--zpcorr_dir ZPCORR_DIR] 
-              [--zp_table ZP_TABLE] [--back_size BACK_SIZE] [--detect_thresh DETECT_THRESH]
-              SPLUS_TILE RA DEC GALAXY_NAME REDSHIFT
-
-┌─┐   ┌─┐┬ ┬┌┐ ┌─┐┌─┐  | Create S-PLUS galaxies data cubes, a.k.a. S-CUBES. 
-└─┐───│  │ │├┴┐├┤ └─┐  | S-CUBES is an organized FITS file with data, errors, 
-└─┘   └─┘└─┘└─┘└─┘└─┘  | mask and metadata about some galaxy present on any 
----------------------- + S-PLUS observed tile. Any problem contact:
-(...)
-```
+Type `scubes --help` for help and usage.
 
 # Running example
 
-TODO
+This example will create a 500x500 pixels cube (at redshift=0.009627) with the 12-bands images from S-PLUS TILE HYDRA-0045 for the NGC3312 galaxy. The fluxes and errors are calculated based on the calibration of the zero points of S-PLUS iDR4. The stamps are made centered at coordinates RA 10h37m02.5s and DEC -27d33'56". The resultant files will be created at directory `workdir` and the program will retrieve the data from directory data, with a tree like this one:
+
+```console
+data
+├── iDR4_zero-points.csv
+├── sex_data
+│   └── tophat_3.0_3x3.conv
+└── zpcorr_iDR4
+    ├── SPLUS_F378_offsets_grid.npy
+    ├── SPLUS_F395_offsets_grid.npy
+    ├── SPLUS_F410_offsets_grid.npy
+    ├── SPLUS_F430_offsets_grid.npy
+    ├── SPLUS_F515_offsets_grid.npy
+    ├── SPLUS_F660_offsets_grid.npy
+    ├── SPLUS_F861_offsets_grid.npy
+    ├── SPLUS_G_offsets_grid.npy
+    ├── SPLUS_I_offsets_grid.npy
+    ├── SPLUS_R_offsets_grid.npy
+    ├── SPLUS_U_offsets_grid.npy
+    └── SPLUS_Z_offsets_grid.npy
+```
+
+The call to the entry-point script `scubes` to this example would be:
+
+```console
+scubes --data_dir data --zpcorr_dir zpcorr_iDR4 --zp_table iDR4_zero-points.csv --w workdir -l 500 -a 110 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312 0.009627
+```
 
 # License
 
