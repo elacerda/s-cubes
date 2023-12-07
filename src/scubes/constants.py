@@ -72,6 +72,8 @@ SPLUS_ARGS = {
     'detect_thresh': ['T', dict(default=1.1, type=float, help='Detection threshold for SExtractor.')],
     'username': ['U', dict(default=None, help='S-PLUS Cloud username.')],
     'password': ['P', dict(default=None, help='S-PLUS Cloud password.')],
+    'mask_stars': ['M', dict(action='store_true', default=False, help='Run SExtractor to auto-identify stars on stamp.')],
+    'det_img': ['I', dict(action='store_true', default=False, help='Downloads detection image for the stamp. Needed if --mask_stars is active.')],
 
     # positional arguments
     'tile': ['pos', dict(metavar='SPLUS_TILE', help='Name of the S-PLUS tile')],

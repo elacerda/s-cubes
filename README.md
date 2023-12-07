@@ -43,7 +43,7 @@ Type `scubes --help` for help and usage.
 
 This example will create a 500x500 pixels cube (at redshift=0.009627) with the 12-bands images from S-PLUS TILE HYDRA-0045 for the NGC3312 galaxy. The fluxes and errors are calculated based on the calibration of the zero points of S-PLUS iDR4. The stamps are made centered at coordinates RA 10h37m02.5s and DEC -27d33'56". The resultant files will be created at directory `workdir` and the program will retrieve the data from directory data, with a tree like this one:
 
-```console
+```
 data
 ├── iDR4_zero-points.csv
 ├── sex_data
@@ -66,7 +66,7 @@ data
 The call to the entry-point script `scubes` to this example would be:
 
 ```console
-scubes --data_dir data --zpcorr_dir zpcorr_iDR4 --zp_table iDR4_zero-points.csv --w workdir -l 500 -a 110 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312 0.009627
+scubes -IMr --data_dir data --zpcorr_dir zpcorr_iDR4 --zp_table iDR4_zero-points.csv --w workdir -l 500 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312 0.009627
 ```
 
 # License

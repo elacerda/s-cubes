@@ -1,8 +1,5 @@
 import sys
-from shutil import which
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
-
-from .io import print_level
 
 class readFileArgumentParser(ArgumentParser):
     '''
@@ -80,39 +77,3 @@ def create_parser(args_dict, program_description=None):
             kwargs['help'] = f'{_tmp} Default value is %(default)s'
         parser.add_argument(*option_string, **kwargs)
     return parser
-
-def parse_arguments(argv, parser):
-    '''
-    Parse the command-line arguments with `parser` in `argv` list of arguments.
-
-    Parameters
-    ----------
-    argv : list
-        List of arguments such as `sys.argv`.
-
-    parser : :class:`argparse.ArgumentParser`
-        Parser to `argv` command-line arguments.
-
-    Returns
-    -------
-    args : :class:`argparse.Namespace`
-        The arguments namespace class attributes.
-    '''
-    # CREATE PARSER
-    args = parser.parse_args(args=argv[1:])
-    _sex = which(args.sextractor)
-    if _sex is None:
-        print_level(f'{args.sextractor}: SExtractor exec not found', 1, args.verbose)
-        _SExtr_names = ['sex', 'source-extractor']
-        for name in _SExtr_names:
-            _sex = which(name)
-            if _sex is None:
-                print_level(f'{name}: SExtractor exec not found', 2, args.verbose)
-            else:
-                print_level(f'{name}: SExtractor found. Forcing --sextractor={_sex}', 1, args.verbose)
-                args.sextractor = _sex
-                pass
-        if _sex is None:
-            print_level(f'SExtractor not found')
-            sys.exit(1)
-    return args

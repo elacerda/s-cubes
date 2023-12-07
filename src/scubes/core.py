@@ -532,26 +532,43 @@ class SCubes:
             self.efnu__byx = dataerr*self.f0__b[:, None, None]*self.fnu_unit
             self.eflam__byx = scale*(self.efnu__byx*_c/self.wl__b[:, None, None]**2).to(self.flam_unit).value
 
-    def create_cube(self, cube_file=None, get_mask=True, flam_scale=None):
+    def download_data(self):
+        ctrl = self.control
+        self.get_stamps()
+        if ctrl.mask_stars and not ctrl.det_img:
+            print_level('For mask detection image is required. Overwriting --det_img')
+            ctrl.det_img = True
+        if ctrl.det_img:
+            self.get_detection_image()
+
+    def create_cube(self, flam_scale=None):
         flam_scale = 1e19 if flam_scale is None else flam_scale
         ctrl = self.control
-        cube_h = self.headers__b[0].copy()
-        _cube_file =  join(ctrl.output_dir, f'{self.galaxy.name}-cube.fits')
-        cube_file =_cube_file if cube_file is None else cube_file
 
+        # CUBE CHECK
+        cube_filename = f'{ctrl.prefix_filename}_cube.fits'
+        cube_path = join(ctrl.output_dir, cube_filename)
+        if exists(cube_path) and not ctrl.redo:
+            raise OSError('Cube exists!')
+        
+        # DOWNLOAD AND CALIBRATE DATA
+        self.download_data()
+        self.calibrate_stamps()
+        
         # CREATE SPECTRA
         self.spectra(flam_scale=flam_scale)
 
         # DELETE BOGUS INFO
+        cube_h = self.headers__b[0].copy()
         for _k in ['FILTER', 'MAGZP', 'NCOMBINE', 'EFFTIME', 'GAIN', 'PSFFWHM']:
             k = get_key(_k, get_author(cube_h))
             if cube_h.get(k, None) is not None:
                 print_level(f'create_cube: deleting header key {k}', 2, ctrl.verbose)
                 del cube_h[k]    
-
+        
         # UPDATE WCS IN HEADER
         cube_h.update(self.stamp_WCS_to_cube_header(cube_h))
-
+        
         # CREATE CUBE
         prim_hdu = fits.PrimaryHDU()
         flam_hdu = fits.ImageHDU(self.flam__byx, cube_h)
@@ -566,33 +583,21 @@ class SCubes:
         for hdu in hdu_list:
             hdu.header['BSCALE'] = (flam_scale, 'Linear factor in scaling equation')
             hdu.header['BZERO'] = (0, 'Zero point in scaling equation')
-            hdu.header['BUNIT'] = (f'{self.flam_unit}', 'Physical units of the array values')
-        if get_mask:
+            hdu.header['BUNIT'] = (f'{self.flam_unit}', 'Physical units of the array values')       
+        
+        # MASK STARS
+        if ctrl.mask_stars:
             mask_hdul = self.create_mask_hdu()     # HDUList
             mask_hdu = mask_hdul[1].copy()
             mask_hdu.header['EXTNAME'] = ('MASK', 'Boolean mask of the galaxy')
             hdu_list.append(mask_hdu)
+        
+        # METADATA
         meta_hdu = self.create_metadata_hdu()  # BinTableHDU
         meta_hdu.header['EXTNAME'] = 'METADATA'
         hdu_list.append(meta_hdu)
 
         # SAVE CUBE
-        print_level(f'writting cube {cube_file}', 1, ctrl.verbose)
-        fits.HDUList(hdu_list).writeto(cube_file, overwrite=True)
+        print_level(f'writting cube {cube_path}', 1, ctrl.verbose)
+        fits.HDUList(hdu_list).writeto(cube_path, overwrite=True)
         print_level(f'Cube successfully created!')
-
-    def make(self, get_mask=True, det_img=True, flam_scale=None):
-        ctrl = self.control
-        output_dir = ctrl.output_dir
-        cube_filename = f'{ctrl.prefix_filename}_cube.fits'
-        cube_path = join(output_dir, cube_filename)
-        if exists(cube_path) and not ctrl.redo:
-            raise OSError('Cube exists!')
-        self.get_stamps()
-        if get_mask and not det_img:
-            print_level('For mask detection image is required. Overwriting det_img=True')
-            det_img = True
-        if det_img:
-            self.get_detection_image()
-        self.calibrate_stamps()
-        self.create_cube(cube_path, get_mask=get_mask, flam_scale=flam_scale)
