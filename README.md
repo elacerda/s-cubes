@@ -1,6 +1,6 @@
 # S-Cubes
 
-Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository include data files to calibrate stamps with iDR4 zero-points correction.
+Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository include data files to calibrate stamps with iDR4 zero-points correction and SExtractor to identify stars along the stamp (optionally).
 
 # Requirements
 
@@ -41,32 +41,12 @@ Type `scubes --help` for help and usage.
 
 # Running example
 
-This example will create a 500x500 pixels cube (at redshift=0.009627) with the 12-bands images from S-PLUS TILE HYDRA-0045 for the NGC3312 galaxy. The fluxes and errors are calculated based on the calibration of the zero points of S-PLUS iDR4. The stamps are made centered at coordinates RA 10h37m02.5s and DEC -27d33'56". The resultant files will be created at directory `workdir` and the program will retrieve the data from directory data, with a tree like this one:
-
-```
-data
-├── iDR4_zero-points.csv
-├── sex_data
-│   └── tophat_3.0_3x3.conv
-└── zpcorr_iDR4
-    ├── SPLUS_F378_offsets_grid.npy
-    ├── SPLUS_F395_offsets_grid.npy
-    ├── SPLUS_F410_offsets_grid.npy
-    ├── SPLUS_F430_offsets_grid.npy
-    ├── SPLUS_F515_offsets_grid.npy
-    ├── SPLUS_F660_offsets_grid.npy
-    ├── SPLUS_F861_offsets_grid.npy
-    ├── SPLUS_G_offsets_grid.npy
-    ├── SPLUS_I_offsets_grid.npy
-    ├── SPLUS_R_offsets_grid.npy
-    ├── SPLUS_U_offsets_grid.npy
-    └── SPLUS_Z_offsets_grid.npy
-```
+This example will create a 500x500 pixels cube (at redshift=0.009627) with the 12-bands images from S-PLUS TILE HYDRA-0045 for the NGC3312 galaxy. The fluxes and errors are calculated based on the calibration of the zero points of S-PLUS iDR4 (package included). The stamps are made centered at coordinates RA 10h37m02.5s and DEC -27d33'56". The resultant files will be created at directory `workdir`.
 
 The call to the entry-point script `scubes` to this example would be:
 
 ```console
-scubes -IMr --data_dir data --zpcorr_dir zpcorr_iDR4 --zp_table iDR4_zero-points.csv --w workdir -l 500 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312 0.009627
+scubes --det_img --mask_stars --redo --w workdir -l 500 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312 0.009627
 ```
 
 # License
