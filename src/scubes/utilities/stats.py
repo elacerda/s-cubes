@@ -1,31 +1,9 @@
-from importlib import resources
-from .data import sex
-
-__data_files__ = resources.files(sex)
-
-SEX_TOPHAT_FILTER = str(__data_files__ / 'tophat_3.0_3x3.conv') 
-SEX_DEFAULT_FILTER = str(__data_files__ / 'default.conv') 
-SEX_DEFAULT_STARNNW = str(__data_files__ / 'default.nnw') 
-
-from sewpy import SEW
 from os.path import join
 from astropy.io import fits
+from .sextractor import run_sex
 
-from .io import print_level
+def estimate_fwhm(sex_path, detection_fits, data_path, work_dir=None, output_file=None, verbose=0):
 
-def run_sex(sex_path, detection_fits, input_config, output_params, work_dir=None, output_file=None, overwrite=True, verbose=0):
-    print_level('Running SExtractor for config:', 2, verbose)
-    print_level(input_config, 2, verbose)
-
-    sew = SEW(workdir='.' if work_dir is None else work_dir, config=input_config, sexpath=sex_path, params=output_params)
-    sewcat = sew(detection_fits)
-    
-    if output_file is not None:
-        sewcat['table'].write(output_file, format='fits', overwrite=overwrite)
-
-    return sewcat
-
-def run_default_catalog(sex_path, detection_fits, work_dir=None, output_file=None, verbose=0):
     params = [
         'NUMBER', 'X_IMAGE', 'Y_IMAGE',
         'THETA_WORLD', 'ERRTHETA_WORLD', 'ERRA_IMAGE', 'ERRB_IMAGE',
@@ -36,12 +14,8 @@ def run_default_catalog(sex_path, detection_fits, work_dir=None, output_file=Non
         'ELLIPTICITY','MU_THRESHOLD', 'THRESHOLD', 'BACKGROUND', 'THETA_IMAGE',
         'A_IMAGE', 'B_IMAGE','FLUX_RADIUS','ISOAREA_IMAGE'
     ]
-
     h = fits.getheader(detection_fits, ext=1)
-    cgim_type = 'SEGMENTATION, APERTURES, OBJECTS'
-    cgim_seg_name = join(work_dir, 'defcat_SEGM.fits')
-    cgim_ape_name = join(work_dir, 'defcat_APER.fits')
-    cgim_obj_name = join(work_dir, 'defcat_OBJ.fits')
+
     config = {
         'BACK_FILTERSIZE': 3,
         'BACK_SIZE': 256,
@@ -53,14 +27,14 @@ def run_default_catalog(sex_path, detection_fits, work_dir=None, output_file=Non
         'DETECT_MINAREA': 5,
         'FILTER_THRESH': '',
         'FILTER': 'Y',
-        'FILTER_NAME': SEX_DEFAULT_FILTER,
+        'FILTER_NAME': join(data_path, 'default.conv'),
         'CLEAN': 'Y',
         'CLEAN_PARAM': 1.0,
         'DEBLEND_NTHRESH': 32,
         'DEBLEND_MINCONT': 0.005,
         'MASK_TYPE': 'CORRECT',
         'WEIGHT_TYPE': 'BACKGROUND',
-        'WEIGHT_IMAGE': join(work_dir, 'defcat_weight.fits'),
+        'WEIGHT_IMAGE': join(work_dir, 'estfwhm_weight.fits'),
         'WEIGHT_THRESH': '',
         'WEIGHT_GAIN': 'Y',
         'GAIN': h.get('GAIN'),
@@ -77,12 +51,12 @@ def run_default_catalog(sex_path, detection_fits, work_dir=None, output_file=Non
         'PHOT_FLUXFRAC': 0.5,
         'SATUR_LEVEL': h.get('SATURATE'),
         'SATUR_KEY': 'SATURATE',
-        'STARNNW_NAME': SEX_DEFAULT_STARNNW,
+        'STARNNW_NAME': join(data_path, 'default.nnw'),
         'SEEING_FWHM': 1.1,
-        'CATALOG_NAME': join(work_dir, 'defcat.cat'),
-        'PARAMETERS_NAME': cgim_type,
+        'CATALOG_NAME': join(work_dir, 'estfwhm.cat'),
+        'PARAMETERS_NAME': join(work_dir, 'estfwhm_params.sex'),
         'CHECKIMAGE_TYPE': 'SEGMENTATION, APERTURES, OBJECTS',
-        'CHECKIMAGE_NAME': f'{cgim_seg_name}, {cgim_ape_name}, {cgim_obj_name}',
+        'CHECKIMAGE_NAME': f"{join(work_dir, 'estfwhm_SEGM.fits')}, {join(work_dir, 'estfwhm_APER.fits')}, {join(work_dir, 'estfwhm_OBJ.fits')}",
         'INTERP_TYPE': 'NONE',
         'INTERP_MAXYLAG': 4,
         'INTERP_MAXXLAG': 4,
@@ -96,14 +70,21 @@ def run_default_catalog(sex_path, detection_fits, work_dir=None, output_file=Non
         'CATALOG_TYPE': 'FITS_LDAC',
         'VERBOSE_TYPE': 'NORMAL',
         'WRITE_XML': 'Y',
-        'XML_NAME': join(work_dir, 'defcat_sexout.xml'),
+        'XML_NAME': join(work_dir, 'sexout.xml'),
         'NTHREADS': 2,
     }
 
-    sew = SEW(workdir='.' if work_dir is None else work_dir, config=config, sexpath=sex_path, params=params)
-    sewcat = sew(detection_fits)
-    
-    if output_file is not None:
-        sewcat['table'].write(output_file, format='fits', overwrite=True)
+    sewcat = run_sex(
+        sex_path=sex_path,
+        detection_fits=detection_fits,
+        input_config=config,
+        output_params=params,
+        work_dir=work_dir,
+        output_file=output_file,
+        verbose=verbose,
+    )
 
-    return sewcat
+
+
+
+   

@@ -18,13 +18,15 @@ from scipy.interpolate import RectBivariateSpline
 from astropy.wcs.utils import skycoord_to_pixel as sky2pix
 
 from .control import control
-from .headers import get_keys, get_author, get_key
+from .headers import get_author, get_key
 from .constants import WAVE_EFF, NAMES_CORRESPONDENT, \
     SPLUS_DEFAULT_SEXTRACTOR_CONFIG, \
     SPLUS_DEFAULT_SEXTRACTOR_PARAMS
+
 from .utilities.io import print_level
 from .utilities.sextractor import run_sex
 from .utilities.splusdata import connect_splus_cloud
+
 
 @dataclass
 class _galaxy:
@@ -265,8 +267,6 @@ class SCubes:
         dimg = self.detection_image
         h = fits.getheader(dimg, ext=1)
 
-        filter_name =join(ctrl.sexdata_dir, 'tophat_3.0_3x3.conv')
-        starnnw_name = join(ctrl.sexdata_dir, 'default.nnw')
         checkimg_name = dimg.replace('detection', 'segmentation')
         output_name = dimg.replace('detection', 'sexcat')
 
@@ -274,11 +274,9 @@ class SCubes:
         config = SPLUS_DEFAULT_SEXTRACTOR_CONFIG
         config.update({
             'DETECT_THRESH': ctrl.detect_thresh,
-            'FILTER_NAME': filter_name,
             'SATUR_LEVEL': ctrl.satur_level,
             'GAIN': h.get(get_key('GAIN', get_author(h))),
             'SEEING_FWHM': h.get(get_key('PSFFWHM', get_author(h))),
-            'STARNNW_NAME': starnnw_name,
             'BACK_SIZE': ctrl.back_size,
             'CHECKIMAGE_NAME': checkimg_name,
         })

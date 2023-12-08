@@ -30,6 +30,13 @@ dependencies = [
 ]
 dynamic = ["version", "readme"]
 
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"scubes.data" = ["*", "zpcorr_iDR4/*"]
+"scubes.utilities.data" = ["*", "sex/*"]
+
 [project.scripts]
 scubes = "scubes.entry_points:scubes"
 

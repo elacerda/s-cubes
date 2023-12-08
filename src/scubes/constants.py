@@ -1,11 +1,7 @@
 from os import getcwd
 
-from . import __author__
-
-DATA_DIR = 'data'
-ZPCORR_DIR = 'zpcorr_iDR4'
-ZP_TABLE = 'iDR4_zero-points.csv'
-SEXDATA_DIR = 'sex'
+from . import __author__, __zp_cat__, __zpcorr_path__
+from .utilities.sextractor import SEX_TOPHAT_FILTER, SEX_DEFAULT_STARNNW
 
 MOTD_TOP = '┌─┐   ┌─┐┬ ┬┌┐ ┌─┐┌─┐ '
 MOTD_MID = '└─┐───│  │ │├┴┐├┤ └─┐ '
@@ -64,10 +60,8 @@ SPLUS_ARGS = {
     'verbose': ['v', dict(action='count', default=0, help='Verbosity level.')],
     'debug': ['D', dict(action='store_true', default=False, help='Enable debug mode.')],
     'satur_level': ['S', dict(default=1600.0, type=float, help='Saturation level for the png images.')],
-    'data_dir': ['d', dict(default=DATA_DIR, help='Data directory. All input data should be located here.')],
-    'zpcorr_dir': ['Z', dict(default=ZPCORR_DIR, help='Zero-point correction directory (relative to DATA_DIR).')],
-    'sexdata_dir': ['X', dict(default=SEXDATA_DIR, help='SExtractor data directory (relative to DATA_DIR).')],
-    'zp_table': ['z', dict(default=ZP_TABLE, help='Zero-point table (relative to DATA_DIR).')],
+    'zpcorr_dir': ['Z', dict(default=__zpcorr_path__, help='Zero-point correction directory.')],
+    'zp_table': ['z', dict(default=__zp_cat__, help='Zero-point table.')],
     'back_size': ['B', dict(default=64, type=int, help='Background mesh size for SExtractor.')],
     'detect_thresh': ['T', dict(default=1.1, type=float, help='Detection threshold for SExtractor.')],
     'username': ['U', dict(default=None, help='S-PLUS Cloud username.')],
@@ -84,6 +78,8 @@ SPLUS_ARGS = {
 }
 
 SPLUS_DEFAULT_SEXTRACTOR_CONFIG = {
+    'FILTER_NAME': SEX_TOPHAT_FILTER,
+    'STARNNW_NAME': SEX_DEFAULT_STARNNW,
     'DETECT_TYPE': 'CCD',
     'DETECT_MINAREA': 4,
     'ANALYSIS_THRESH': 3.0,
