@@ -6,8 +6,10 @@ from astropy.coordinates import SkyCoord
 
 def print_level(msg, level=0, verbose=0):
     import __main__ as main
-
-    __script_name__ = basename(main.__file__)
+    try:
+        __script_name__ = basename(main.__file__)
+    except AttributeError:
+        __script_name__ = ''
 
     if verbose >= level:
         print(f'[{datetime.now().isoformat()}] - {__script_name__}: {msg}')
