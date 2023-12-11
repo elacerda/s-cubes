@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import pandas as pd
+from os import remove
 from PIL import Image
 from tqdm import tqdm
 import astropy.units as u
@@ -24,9 +25,9 @@ from .constants import WAVE_EFF, NAMES_CORRESPONDENT, \
     SPLUS_DEFAULT_SEXTRACTOR_PARAMS
 
 from .utilities.io import print_level
+from .utilities.stats import robustStat
 from .utilities.sextractor import run_sex
 from .utilities.splusdata import connect_splus_cloud
-
 
 @dataclass
 class _galaxy:
@@ -133,23 +134,33 @@ class SCubes:
         ctrl = self.control
         band = 'G,R,I,Z'
         self.detection_image = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{ctrl.size}x{ctrl.size}_detection.fits')
+        fwhm = None
         if not isfile(self.detection_image) or ctrl.force:
             print_level(f' {gal.name} @ {ctrl.tile} - downloading detection image')
             t = self.conn.stamp_detection(ra=gal.ra, dec=gal.dec, size=ctrl.size, bands=band, option=ctrl.tile)  #, filename=join(output_dir, fname))
             phdu = fits.PrimaryHDU()
+
             # UPDATE HEADER WCS
             w = WCS(t[1].header)
             t[1].header.update(w.to_header())
             author = get_author(t[1].header)
+
             # ADD AUTHOR TO HEADER IF AUTHOR IS UNKNOWN
             if author == 'unknown':
                 print_level('Writting header key AUTHOR to detection image', 1, ctrl.verbose)
                 author = get_author(self.headers__b[0])
                 t[1].header.set('AUTHOR', value=author, comment='Who ran the software')
+
             ihdu = fits.ImageHDU(data=t[1].data, header=t[1].header, name='IMAGE')
             hdul = fits.HDUList([phdu, ihdu])
             hdul.writeto(self.detection_image, overwrite=ctrl.force)
 
+            # estimate_fwhm:
+            #pixscale = self.headers__b[0].get('PIXSCALE')
+            #output_file = self.detection_image.replace('detection', 'calcfwhm')
+            #fwhm = calc_fwhm(ctrl.sextractor, self.detection_image, pixscale=pixscale, work_dir=ctrl.output_dir, output_file=output_file, verbose=ctrl.verbose)
+            #fits.setval(self.detection_image, 'PSFFWHM', value=fwhm, comment='', ext=1)
+                        
     def get_lupton_rgb(self):
         gal = self.galaxy
         ctrl = self.control
@@ -265,31 +276,45 @@ class SCubes:
     def run_sex(self):
         ctrl = self.control
         dimg = self.detection_image
-        h = fits.getheader(dimg, ext=1)
 
         checkimg_name = dimg.replace('detection', 'segmentation')
         output_name = dimg.replace('detection', 'sexcat')
 
         # configuration for SExtractor photometry
-        config = SPLUS_DEFAULT_SEXTRACTOR_CONFIG
-        config.update({
-            'DETECT_THRESH': ctrl.detect_thresh,
-            'SATUR_LEVEL': ctrl.satur_level,
-            'GAIN': h.get(get_key('GAIN', get_author(h))),
-            'SEEING_FWHM': h.get(get_key('PSFFWHM', get_author(h))),
-            'BACK_SIZE': ctrl.back_size,
-            'CHECKIMAGE_NAME': checkimg_name,
-        })
+        i = 0
 
-        sewcat = run_sex(
-            sex_path=ctrl.sextractor, 
-            detection_fits=dimg, 
-            input_config=config, 
-            output_params=SPLUS_DEFAULT_SEXTRACTOR_PARAMS, 
-            work_dir=ctrl.output_dir, 
-            output_file=output_name, 
-            verbose=ctrl.verbose
-        )
+        while i < 2:
+            h = fits.getheader(dimg, ext=1)
+
+            config = SPLUS_DEFAULT_SEXTRACTOR_CONFIG
+            config.update({
+                'DETECT_THRESH': ctrl.detect_thresh,
+                'SATUR_LEVEL': ctrl.satur_level,
+                'GAIN': h.get(get_key('GAIN', get_author(h))),
+                'SEEING_FWHM': h.get(get_key('PSFFWHM', get_author(h))),  #, h.get('PSFFWHM', None)),
+                'BACK_SIZE': ctrl.back_size,
+                'CHECKIMAGE_NAME': checkimg_name,
+            })
+
+            sewcat = run_sex(
+                sex_path=ctrl.sextractor, 
+                detection_fits=dimg, 
+                input_config=config, 
+                output_params=SPLUS_DEFAULT_SEXTRACTOR_PARAMS, 
+                work_dir=ctrl.output_dir, 
+                output_file=output_name, 
+                verbose=ctrl.verbose
+            )
+
+            if not i:
+                stats = robustStat(sewcat['table']['FWHM_IMAGE']) 
+                psffwhm = stats['median']*0.55
+                fits.setval(self.detection_image, 'HIERARCH OAJ PRO FWHMMEAN', value=psffwhm, comment='', ext=1)
+                files_to_remove = ['params.txt', 'conv.txt', 'config.txt', 'default.psf']
+                for _f in files_to_remove:
+                    f = join(ctrl.output_dir, _f)
+                    remove(f)
+            i += 1
 
         print_level(f'Using CLASS_STAR > {ctrl.class_star:.2f} star/galaxy separator...', 1, ctrl.verbose)
         sewpos = np.transpose((sewcat['table']['X_IMAGE'], sewcat['table']['Y_IMAGE']))
