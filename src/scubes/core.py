@@ -281,7 +281,7 @@ class SCubes:
         output_name = dimg.replace('detection', 'sexcat')
 
         # configuration for SExtractor photometry
-        i = 0
+        i = 0 if ctrl.estimate_fwhm else 1
 
         while i < 2:
             h = fits.getheader(dimg, ext=1)
