@@ -1,7 +1,7 @@
 from os import makedirs
 from os.path import join
 
-from .utilities.io import check_units, print_level
+from .utilities.io import convert_coord_to_degrees, print_level
 
 class control:
     def __init__(self, args):
@@ -16,7 +16,7 @@ class control:
         self._make_output_dir()
 
     def _parse_coords(self):
-        self.ra, self.dec = check_units(self.ra, self.dec)
+        self.ra, self.dec = convert_coord_to_degrees(self.ra, self.dec)
 
     def _make_output_dir(self):
         try: 
