@@ -52,7 +52,8 @@ SPLUS_ARGS = {
     'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files.')],
     'bands': ['b', dict(default=list(WAVE_EFF.keys()), nargs='+', help='List of S-PLUS bands (space separated).')],
     'size': ['l', dict(default=500, type=int, help='Size of the cube in pixels.')],
-    'angsize': ['a', dict(default=50, type=float, help="Galaxy's Angular size in arcsec.")],
+    ''
+    #'angsize': ['a', dict(default=50, type=float, help="Galaxy's Angular size in arcsec.")],
     'work_dir': ['w', dict(default=getcwd(), help='Working directory.')],
     'output_dir': ['o', dict(default=getcwd(), help='Output directory.')],
     'sextractor': ['x', dict(default='sex', help='Path to SExtractor executable.')],
@@ -109,3 +110,4 @@ SPLUS_DEFAULT_SEXTRACTOR_PARAMS = [
     'A_IMAGE', 'B_IMAGE', 'MAG_AUTO', 'FWHM_IMAGE', 'CLASS_STAR'
 ]
 
+#iDR4_FORNAX_RUN_7_106_Fornax_SPLUS-s28s33.00025, HYDRA_FULL+SPLUS-n17s10.00020, SPLUS-n16s09.00003

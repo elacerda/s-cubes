@@ -37,15 +37,23 @@ class _galaxy:
     redshift: float
 
     def skycoord(self, frame='icrs'):
-        return SkyCoord(ra=self.ra, dec=self.dec, frame=frame)
+        return SkyCoord(ra=self.ra, dec=self.dec, frame=frame, unit='deg')
     
 class SCubes:
     def __init__(self, args):
-        self.control = control(args)
-        self.galaxy = self._galaxy()
-        self.galaxy.coords = self.galaxy.skycoord()
         self._conn = None
+        self.control = control(args)
+        self._init_galaxy()
         self._init_spectra()
+
+    def _init_galaxy(self):
+        self.galaxy = self._galaxy()
+        gal = self.galaxy
+        gal.ra = self.control.ra
+        gal.dec = self.control.dec
+        gal.name = self.control.galaxy
+        gal.redshift = self.control.specz
+        self.galaxy.coords = self.galaxy.skycoord()
 
     def _init_spectra(self):
         self.wl__b = np.array([WAVE_EFF[b] for b in self.control.bands])*u.Angstrom
@@ -222,6 +230,7 @@ class SCubes:
         if not self.check_zero_points():
             self.add_magzp_headers()
 
+    '''
     def get_main_circle(self):
         ctrl = self.control
         dhdu = fits.open(self.detection_image)
@@ -272,6 +281,7 @@ class SCubes:
         dmask = np.zeros(ddata.shape)
         dmask[distance > angsize] = 1
         return r_circ, dmask
+    '''
     
     def run_sex(self):
         ctrl = self.control
