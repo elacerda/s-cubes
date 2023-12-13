@@ -39,6 +39,7 @@ include-package-data = true
 
 [project.scripts]
 scubes = "scubes.entry_points:scubes"
+get_lupton_RGB = "scubes.entry_points:get_lupton_RGB"
 
 [project.urls]
 Homepage = "https://github.com/elacerda/s-cubes"
