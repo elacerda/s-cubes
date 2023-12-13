@@ -23,14 +23,13 @@ class readFileArgumentParser(ArgumentParser):
 
 def create_parser(args_dict, program_description=None):
     '''
-    Create the parser for the arguments of the `scubes` entry-point console script.
-    It uses two constants defined at `scubes.utilities.constants.py`. The program 
-    description `SPLUS_PROG_DESC` and the  dictionary of arguments `SPLUS_ARGS`.
+    Create the parser for the arguments keys on `args_dict` to `s-cubes` 
+    entry-points console scripts.
 
     It uses :class:`readFileArgumentParser` to include the option to read the 
     arguments from a file using the prefix @ before the filename::
 
-        scubes @file.args
+        entrypoint @file.args
 
     Parameters
     ----------

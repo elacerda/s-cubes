@@ -16,7 +16,7 @@ from astropy.coordinates import SkyCoord
 from os.path import join, exists, isfile
 from regions import PixCoord, CirclePixelRegion
 from scipy.interpolate import RectBivariateSpline
-from astropy.wcs.utils import skycoord_to_pixel as sky2pix
+#from astropy.wcs.utils import skycoord_to_pixel as sky2pix
 
 from .control import control
 from .headers import get_author, get_key
