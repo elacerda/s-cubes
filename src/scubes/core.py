@@ -1,20 +1,18 @@
 import sys
 import numpy as np
 import pandas as pd
-from os import remove
 from PIL import Image
 from tqdm import tqdm
 import astropy.units as u
 from astropy.io import fits
 from astropy.wcs import WCS
+from os import remove, makedirs
 from astropy.table import Table
 from dataclasses import dataclass
 import astropy.constants as const
-from photutils import DAOStarFinder
 from matplotlib import pyplot as plt
 from astropy.coordinates import SkyCoord
 from os.path import join, exists, isfile
-from regions import PixCoord, CirclePixelRegion
 from scipy.interpolate import RectBivariateSpline
 #from astropy.wcs.utils import skycoord_to_pixel as sky2pix
 
@@ -25,9 +23,11 @@ from .constants import WAVE_EFF, NAMES_CORRESPONDENT, \
     SPLUS_DEFAULT_SEXTRACTOR_PARAMS
 
 from .utilities.io import print_level
+from .utilities.plots import plot_mask
 from .utilities.stats import robustStat
-from .utilities.sextractor import run_sex
-from .utilities.splusdata import connect_splus_cloud
+from .utilities.daofinder import DAOregions
+from .utilities.sextractor import run_sex, SEWregions, unmask_sewregions
+from .utilities.splusdata import connect_splus_cloud, detection_image_hdul, get_lupton_rgb
 
 @dataclass
 class _galaxy:
@@ -39,10 +39,24 @@ class _galaxy:
     def skycoord(self, frame='icrs'):
         return SkyCoord(ra=self.ra, dec=self.dec, frame=frame, unit='deg')
     
+class _control(control):
+    def __init__(self, args):
+        super().__init__(args)
+        self.output_dir = join(self.work_dir, self.galaxy)
+        print_level(f'output_dir: {self.output_dir}', 2, self.verbose)
+        print_level(f'prefix_filename: {self.prefix_filename}', 2, self.verbose)
+        self._make_output_dir()
+
+    def _make_output_dir(self):
+        try: 
+            makedirs(self.output_dir)
+        except FileExistsError:
+            print_level(f'{self.output_dir}: directory already exists', 2, self.verbose)    
+
 class SCubes:
     def __init__(self, args):
         self._conn = None
-        self.control = control(args)
+        self.control = _control(args)
         self._init_galaxy()
         self._init_spectra()
 
@@ -142,32 +156,19 @@ class SCubes:
         ctrl = self.control
         band = 'G,R,I,Z'
         self.detection_image = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{ctrl.size}x{ctrl.size}_detection.fits')
-        fwhm = None
         if not isfile(self.detection_image) or ctrl.force:
             print_level(f' {gal.name} @ {ctrl.tile} - downloading detection image')
-            t = self.conn.stamp_detection(ra=gal.ra, dec=gal.dec, size=ctrl.size, bands=band, option=ctrl.tile)  #, filename=join(output_dir, fname))
-            phdu = fits.PrimaryHDU()
-
-            # UPDATE HEADER WCS
-            w = WCS(t[1].header)
-            t[1].header.update(w.to_header())
-            author = get_author(t[1].header)
+            kw = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, bands=band, option=ctrl.tile)
+            hdul = detection_image_hdul(self.conn, wcs=True, **kw)
+            author = get_author(hdul[1].header)
 
             # ADD AUTHOR TO HEADER IF AUTHOR IS UNKNOWN
             if author == 'unknown':
                 print_level('Writting header key AUTHOR to detection image', 1, ctrl.verbose)
                 author = get_author(self.headers__b[0])
-                t[1].header.set('AUTHOR', value=author, comment='Who ran the software')
+                hdul[1].header.set('AUTHOR', value=author, comment='Who ran the software')
 
-            ihdu = fits.ImageHDU(data=t[1].data, header=t[1].header, name='IMAGE')
-            hdul = fits.HDUList([phdu, ihdu])
             hdul.writeto(self.detection_image, overwrite=ctrl.force)
-
-            # estimate_fwhm:
-            #pixscale = self.headers__b[0].get('PIXSCALE')
-            #output_file = self.detection_image.replace('detection', 'calcfwhm')
-            #fwhm = calc_fwhm(ctrl.sextractor, self.detection_image, pixscale=pixscale, work_dir=ctrl.output_dir, output_file=output_file, verbose=ctrl.verbose)
-            #fits.setval(self.detection_image, 'PSFFWHM', value=fwhm, comment='', ext=1)
                         
     def get_lupton_rgb(self):
         gal = self.galaxy
@@ -176,11 +177,11 @@ class SCubes:
         fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{ctrl.size}x{ctrl.size}.png')
         if not isfile(fname) or ctrl.force:
             print_level(f'{gal.name} @ {ctrl.tile} - downloading RGB image')
-            img = self.conn.lupton_rgb(ra=gal.ra, dec=gal.dec, size=ctrl.size, option=ctrl.tile) 
-            img.save(fname, 'PNG')
+            kw = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, option=ctrl.tile)
+            img = get_lupton_rgb(self.conn, transpose=True, **kw)
         else:
             img = Image.open(fname)
-        self.lupton_rgb = img.transpose(Image.FLIP_TOP_BOTTOM)
+        self.lupton_rgb = img
 
     def get_zero_points_correction(self):
         """ Get corrections of zero points for location in the field. """
@@ -282,7 +283,7 @@ class SCubes:
         dmask[distance > angsize] = 1
         return r_circ, dmask
     '''
-    
+
     def run_sex(self):
         ctrl = self.control
         dimg = self.detection_image
@@ -316,7 +317,7 @@ class SCubes:
                 verbose=ctrl.verbose
             )
 
-            if not i:
+            if not i and ctrl.estimate_fwhm:
                 stats = robustStat(sewcat['table']['FWHM_IMAGE']) 
                 psffwhm = stats['median']*0.55
                 fits.setval(self.detection_image, 'HIERARCH OAJ PRO FWHMMEAN', value=psffwhm, comment='', ext=1)
@@ -326,126 +327,34 @@ class SCubes:
                     remove(f)
             i += 1
 
-        print_level(f'Using CLASS_STAR > {ctrl.class_star:.2f} star/galaxy separator...', 1, ctrl.verbose)
-        sewpos = np.transpose((sewcat['table']['X_IMAGE'], sewcat['table']['Y_IMAGE']))
-        radius = 3.0 * (sewcat['table']['FWHM_IMAGE'] / 0.55)
-        sidelim = 80
-        # CHECK NAXIS1,2 or 2,1
-        shape = (h.get('NAXIS2'), h.get('NAXIS1'))
-        mask = sewcat['table']['CLASS_STAR'] > ctrl.class_star
-        mask &= sewcat['table']['X_IMAGE'] > sidelim
-        mask &= sewcat['table']['X_IMAGE'] < (shape[0] - sidelim)
-        mask &= sewcat['table']['Y_IMAGE'] > sidelim
-        mask &= sewcat['table']['Y_IMAGE'] < (shape[0] - sidelim)
-        mask &= sewcat['table']['FWHM_IMAGE'] > 0
-        sewregions = [CirclePixelRegion(center=PixCoord(x, y), radius=z) for (x, y), z in zip(sewpos[mask], radius[mask])]
-        
-        return sewregions
-
-    def DAOfinder(self, data):
-        "calculate photometry using DAOfinder"
-        # DETECT TOO MUCH HII REGIONS
-        mean, median, std = 0, 0, 0.5
-        print_level(('mean', 'median', 'std'))
-        print_level((mean, median, std))
-        print_level('Running DAOfinder...')
-        daofind = DAOStarFinder(fwhm=4.0, sharplo=0.2, sharphi=0.9, roundlo=-0.5, roundhi=0.5, threshold=5. * std)
-        sources = daofind(data)
-        return sources
-    
-    #def update_masks(self, sewregions, detection_mask, unmask_stars=None):
-    def update_masks(self, sewregions, unmask_stars=None):        
-        ctrl = self.control
-        unmask_stars = [] if unmask_stars is None else unmask_stars
-        ddata = fits.getdata(self.detection_image, ext=1)
-        stars_mask = np.ones(ddata.shape)
-        for n, sregion in enumerate(sewregions):
-            if n not in unmask_stars:
-                mask = sregion.to_mask()
-                if (min(mask.bbox.extent) < 0) or (max(mask.bbox.extent) > ctrl.size):
-                    print_level(f'Region is out of range for extent {mask.bbox.extent}')
-                else:
-                    _slices = (slice(mask.bbox.iymin, mask.bbox.iymax), slice(mask.bbox.ixmin, mask.bbox.ixmax))
-                    print_level(f'{mask.bbox.extent} min: {min(mask.bbox.extent)} {_slices}', 2, ctrl.verbose)
-                    stars_mask[_slices] *= 1 - mask.data
-        stars_mask = np.where(stars_mask == 1, 0, 2)
-        #resulting_mask = detection_mask + stars_mask
-        resulting_mask = stars_mask
-        masked_ddata = np.where(resulting_mask > 0, 0, ddata)
-        return masked_ddata, resulting_mask
-
-    #def plot_mask(self, masked_ddata, resulting_mask, r_circ, sewregions, daoregions=None, save_fig=False):
-    def plot_mask(self, masked_ddata, resulting_mask, sewregions, daoregions=None, save_fig=False):        
-        ctrl = self.control
-        dhdu = fits.open(self.detection_image)
-        ddata = dhdu[1].data
-        dheader = dhdu[1].header
-        wcs = WCS(dheader)
-        # FIGURE
-        plt.rcParams['figure.figsize'] = (12, 10)
-        plt.ion()
-        fig = plt.figure()
-        # ax1
-        ax1 = plt.subplot(221, projection=wcs)
-        self.get_lupton_rgb()
-        ax1.imshow(self.lupton_rgb, origin='lower')
-        # r_circ.plot(color='y', lw=1.5)
-        for sregion in sewregions:
-            sregion.plot(ax=ax1, color='g')
-        ax1.set_title('RGB')
-        # ax2
-        ax2 = plt.subplot(222, projection=wcs)
-        ax2.imshow(ddata, cmap='Greys_r', origin='lower', vmin=-0.1, vmax=3.5)
-        # r_circ.plot(color='y', lw=1.5)
-        for n, sregion in enumerate(sewregions):
-            sregion.plot(ax=ax2, color='g')
-            ax2.annotate(repr(n), (sregion.center.x, sregion.center.y), color='green')
-        if daoregions is not None:
-            for dregion in daoregions:
-                dregion.plot(ax=ax2, color='m')
-        ax2.set_title('Detection')
-        # ax3
-        ax3 = plt.subplot(223, projection=wcs)
-        stars_mask = np.ones(ddata.shape)
-        for n, sregion in enumerate(sewregions):
-            sregion.plot(ax=ax3, color='g')
-        ax3.imshow(masked_ddata, cmap='Greys_r', origin='lower', vmin=-0.1, vmax=3.5)
-        # r_circ.plot(color='y', lw=1.5)
-        ax3.set_title('Masked')
-        # ax4
-        ax4 = plt.subplot(224, projection=wcs)
-        ax4.imshow(resulting_mask, cmap='Greys_r', origin='lower')
-        ax4.set_title('Mask')
-        fig.subplots_adjust(wspace=.05, hspace=.2)
-        for ax in [ax1, ax2, ax3, ax4]:
-            if daoregions is not None:
-                for dregions in daoregions:
-                    dregions.plot(ax=ax, color='m')
-            ax.set_xlabel('RA')
-            ax.set_ylabel('Dec')
-        if save_fig:
-            fig_filename = join(ctrl.output_dir, f'{ctrl.prefix_filename}_maskMosaic.png')
-            print_level(f'Saving fig to {fig_filename}')
-            fig.savefig(fig_filename, format='png', dpi=180)
-            plt.close(fig)
-            fig = None
-        return fig     
-   
+        return SEWregions(sewcat=sewcat, class_star=ctrl.class_star, shape=(h.get('NAXIS2'), h.get('NAXIS1')), verbose=ctrl.verbose)
+     
     def _calc_masks(self, save_fig=False, run_DAOfinder=False, unmask_stars=None):
+        ctrl = self.control
         print_level('Calculating mask...')
         #r_circ, detection_mask = self.get_main_circle()
         print_level('Running SExtractor to get photometry...')
         sewregions = self.run_sex()
+        ddata = fits.getdata(self.detection_image, ext=1)
         daoregions = None
         if run_DAOfinder:
-            daocat = self.DAOfinder(data=fits.getdata(self.detection_image, ext=1))
-            daopos = np.transpose((daocat['xcentroid'], daocat['ycentroid']))
-            daorad = 4*(abs(daocat['sharpness']) + abs(daocat['roundness1']) + abs(daocat['roundness2']))
-            daoregions = [CirclePixelRegion(center=PixCoord(x, y), radius=z) for (x, y), z in zip(daopos, daorad)]
+            daoregions = DAOregions(data=ddata)
         #masked_ddata, resulting_mask = self.update_masks(sewregions=sewregions, detection_mask=detection_mask, unmask_stars=unmask_stars)
-        masked_ddata, resulting_mask = self.update_masks(sewregions=sewregions, unmask_stars=unmask_stars)
+        masked_ddata, resulting_mask = unmask_sewregions(data=ddata, sewregions=sewregions, size=ctrl.size, unmask_stars=unmask_stars, verbose=ctrl.verbose)
+        self.get_lupton_rgb()
+        prefix_filename = join(ctrl.output_dir, ctrl.prefix_filename)
+        fig = plot_mask(
+            detection_image=self.detection_image, 
+            lupton_rgb=self.lupton_rgb, 
+            masked_ddata=masked_ddata, 
+            resulting_mask=resulting_mask, 
+            sewregions=sewregions, 
+            daoregions=daoregions, 
+            save_fig=save_fig,
+            prefix_filename=prefix_filename
+        )
         #fig = self.plot_mask(masked_ddata, resulting_mask, r_circ, sewregions, daoregions=daoregions, save_fig=save_fig)
-        fig = self.plot_mask(masked_ddata, resulting_mask, sewregions, daoregions=daoregions, save_fig=save_fig)
+        #fig = self.plot_mask(masked_ddata, resulting_mask, sewregions, daoregions=daoregions, save_fig=save_fig)
         return resulting_mask, fig
     
     def _create_mask_hdu(self, resulting_mask, save_mask=False):
