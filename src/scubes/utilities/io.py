@@ -17,27 +17,29 @@ def print_level(msg, level=0, verbose=0):
 def check_units(ra, dec):
     # Pattern to match: any letter (a-z, A-Z) or "°"
     # Default unit is degrees, so if no unit, then is assumed as degs. 
-    def check(input_string):
+    def check_deg(input_string):
         pattern = r'[a-zA-Z°]'
         # re.search returns a match object if the pattern is found, None otherwise
         if re.search(pattern, input_string):
-            return True
+            return input_string
         else:
-            return False
+            return input_string + '°'
 
+    def check(input_string):
+        pattern = r'[hdms]'
+        x = re.search(pattern, input_string)
+        if x is None:
+            return check_deg(input_string)
+        else:
+            return input_string
+        
     if not isinstance(ra, str):
         ra = str(ra)
 
     if not isinstance(dec, str):
         dec = str(dec)
 
-    if not check(ra):
-        ra += '°'
-
-    if not check(dec):
-        dec += '°'
-    
-    return ra, dec
+    return check(ra), check(dec)
 
 def convert_coord_to_degrees(ra, dec, frame='icrs'):
     """
