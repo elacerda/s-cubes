@@ -39,14 +39,18 @@ pip3 install .
 ```
 Type `scubes --help` for help and usage.
 
-# Running example
+# Entry-point scripts
+
+This package includes three entry-point command-line scripts: `scubes`, `sex_mask_stars` and `get_lupton_rgb`. In order to obtain a detailed description and the script usage run them with --help argument.
+
+# `scubes` Running example
 
 This example will create a 500x500 pixels cube (at redshift=0.009627) with the 12-bands images from S-PLUS TILE HYDRA-0045 for the NGC3312 galaxy. The fluxes and errors are calculated based on the calibration of the zero points of S-PLUS iDR4 (package included). The stamps are made centered at coordinates RA 10h37m02.5s and DEC -27d33'56". The resultant files will be created at directory `workdir`.
 
 The call to the entry-point script `scubes` to this example would be:
 
 ```console
-scubes --det_img --mask_stars --redo --w workdir -l 500 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312 0.009627
+scubes -I -M -F --w workdir -l 500 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312 0.009627
 ```
 
 # License

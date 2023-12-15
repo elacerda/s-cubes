@@ -10,23 +10,16 @@ from os import remove, makedirs
 from astropy.table import Table
 from dataclasses import dataclass
 import astropy.constants as const
-from matplotlib import pyplot as plt
 from astropy.coordinates import SkyCoord
 from os.path import join, exists, isfile
 from scipy.interpolate import RectBivariateSpline
-#from astropy.wcs.utils import skycoord_to_pixel as sky2pix
 
 from .control import control
+from .mask_stars import maskStars
 from .headers import get_author, get_key
-from .constants import WAVE_EFF, NAMES_CORRESPONDENT, \
-    SPLUS_DEFAULT_SEXTRACTOR_CONFIG, \
-    SPLUS_DEFAULT_SEXTRACTOR_PARAMS
+from .constants import WAVE_EFF, NAMES_CORRESPONDENT 
 
 from .utilities.io import print_level
-from .utilities.plots import plot_mask
-from .utilities.stats import robustStat
-from .utilities.daofinder import DAOregions
-from .utilities.sextractor import run_sex, SEWregions, unmask_sewregions
 from .utilities.splusdata import connect_splus_cloud, detection_image_hdul, get_lupton_rgb
 
 @dataclass
@@ -56,7 +49,8 @@ class _control(control):
 class SCubes:
     def __init__(self, args):
         self._conn = None
-        self.control = _control(args)
+        self.args = args
+        self.control = _control(self.args)
         self._init_galaxy()
         self._init_spectra()
 
@@ -284,130 +278,7 @@ class SCubes:
         return r_circ, dmask
     '''
 
-    def run_sex(self):
-        ctrl = self.control
-        dimg = self.detection_image
-
-        checkimg_name = dimg.replace('detection', 'segmentation')
-        output_name = dimg.replace('detection', 'sexcat')
-
-        # configuration for SExtractor photometry
-        i = 0 if ctrl.estimate_fwhm else 1
-
-        while i < 2:
-            h = fits.getheader(dimg, ext=1)
-
-            config = SPLUS_DEFAULT_SEXTRACTOR_CONFIG
-            config.update({
-                'DETECT_THRESH': ctrl.detect_thresh,
-                'SATUR_LEVEL': ctrl.satur_level,
-                'GAIN': h.get(get_key('GAIN', get_author(h))),
-                'SEEING_FWHM': h.get(get_key('PSFFWHM', get_author(h))),  #, h.get('PSFFWHM', None)),
-                'BACK_SIZE': ctrl.back_size,
-                'CHECKIMAGE_NAME': checkimg_name,
-            })
-
-            sewcat = run_sex(
-                sex_path=ctrl.sextractor, 
-                detection_fits=dimg, 
-                input_config=config, 
-                output_params=SPLUS_DEFAULT_SEXTRACTOR_PARAMS, 
-                work_dir=ctrl.output_dir, 
-                output_file=output_name, 
-                verbose=ctrl.verbose
-            )
-
-            if not i and ctrl.estimate_fwhm:
-                stats = robustStat(sewcat['table']['FWHM_IMAGE']) 
-                psffwhm = stats['median']*0.55
-                fits.setval(self.detection_image, 'HIERARCH OAJ PRO FWHMMEAN', value=psffwhm, comment='', ext=1)
-                files_to_remove = ['params.txt', 'conv.txt', 'config.txt', 'default.psf']
-                for _f in files_to_remove:
-                    f = join(ctrl.output_dir, _f)
-                    remove(f)
-            i += 1
-
-        return SEWregions(sewcat=sewcat, class_star=ctrl.class_star, shape=(h.get('NAXIS2'), h.get('NAXIS1')), verbose=ctrl.verbose)
      
-    def _calc_masks(self, save_fig=False, run_DAOfinder=False, unmask_stars=None):
-        ctrl = self.control
-        print_level('Calculating mask...')
-        #r_circ, detection_mask = self.get_main_circle()
-        print_level('Running SExtractor to get photometry...')
-        sewregions = self.run_sex()
-        ddata = fits.getdata(self.detection_image, ext=1)
-        daoregions = None
-        if run_DAOfinder:
-            daoregions = DAOregions(data=ddata)
-        #masked_ddata, resulting_mask = self.update_masks(sewregions=sewregions, detection_mask=detection_mask, unmask_stars=unmask_stars)
-        masked_ddata, resulting_mask = unmask_sewregions(data=ddata, sewregions=sewregions, size=ctrl.size, unmask_stars=unmask_stars, verbose=ctrl.verbose)
-        self.get_lupton_rgb()
-        prefix_filename = join(ctrl.output_dir, ctrl.prefix_filename)
-        fig = plot_mask(
-            detection_image=self.detection_image, 
-            lupton_rgb=self.lupton_rgb, 
-            masked_ddata=masked_ddata, 
-            resulting_mask=resulting_mask, 
-            sewregions=sewregions, 
-            daoregions=daoregions, 
-            save_fig=save_fig,
-            prefix_filename=prefix_filename
-        )
-        #fig = self.plot_mask(masked_ddata, resulting_mask, r_circ, sewregions, daoregions=daoregions, save_fig=save_fig)
-        #fig = self.plot_mask(masked_ddata, resulting_mask, sewregions, daoregions=daoregions, save_fig=save_fig)
-        return resulting_mask, fig
-    
-    def _create_mask_hdu(self, resulting_mask, save_mask=False):
-        ctrl = self.control
-        dhdu = fits.open(self.detection_image)
-        mhdul = dhdu.copy()
-        mhdul[1].data = resulting_mask
-        if save_mask:
-            mhdul[1].header['IMGTYPE'] = ('MASK', 'boolean mask')
-            del mhdul[1].header['EXPTIME']
-            #del mhdul[1].header['FILTER']
-            del mhdul[1].header[get_key('GAIN', get_author(mhdul[1].header))]
-            #del mhdul[1].header[get_key('PSFFWHM', get_author(mhdul[1].header))]
-            mask_filename = join(ctrl.output_dir, f'{ctrl.prefix_filename}_mask.fits')
-            print_level(f'Saving mask to {mask_filename}')
-            mhdul.writeto(mask_filename, overwrite=True)
-        return mhdul
-
-    def create_mask_hdu(self):
-        ctrl = self.control
-        mask_filename = f'{ctrl.prefix_filename}_mask.fits'
-        if isfile(mask_filename):
-            resulting_mask = fits.open(mask_filename)
-        else:           
-            resulting_mask, fig = self._calc_masks()
-            unmask_sexstars = True
-            unmask_stars = []
-            while unmask_sexstars:
-                in_opt = input('(UN)mask SExtractor stars? [(Y)es|(r)edo|(n)o|(q)uit]:').lower()
-                if in_opt == 'y':
-                    newindx = input('type (space separated) the detections numbers to be unmasked: ')
-                    unmask_stars += [int(i) for i in newindx.split()]
-                    print_level(f'Current stars numbers are: {unmask_stars}')
-                    unmask_sexstars = True
-                elif in_opt == 'r':
-                    unmask_stars = []
-                elif in_opt == 'n' or in_opt == '':
-                    unmask_stars = []
-                    unmask_sexstars = False
-                    # save figure
-                    fig_filename = join(ctrl.output_dir, f'{ctrl.prefix_filename}_maskMosaic.png')
-                    print_level(f'Saving fig to {fig_filename}', 1, ctrl.verbose)
-                    fig.savefig(fig_filename, format='png', dpi=180)
-                    plt.close(fig)
-                elif in_opt == 'q':
-                    Warning('Exiting!')
-                    sys.exit(1)
-                else:
-                    raise IOError('Option %s not recognized' % in_opt)
-                if len(unmask_stars) or in_opt == 'r':
-                    resulting_mask, fig = self._calc_masks(unmask_stars=unmask_stars)
-        return self._create_mask_hdu(resulting_mask, save_mask=True)
-
     def stamp_WCS_to_cube_header(self, header):
         img = self.images[0]
         w = WCS(header)
@@ -529,7 +400,10 @@ class SCubes:
         
         # MASK STARS
         if ctrl.mask_stars:
-            mask_hdul = self.create_mask_hdu()     # HDUList
+            self.get_lupton_rgb()
+            mask = maskStars(args=self.args, detection_image=self.detection_image, lupton_rgb=self.lupton_rgb, output_dir=ctrl.output_dir)
+            # HDUList
+            mask_hdul = mask.hdul  
             mask_hdu = mask_hdul[1].copy()
             mask_hdu.header['EXTNAME'] = ('MASK', 'Boolean mask of the galaxy')
             hdu_list.append(mask_hdu)
