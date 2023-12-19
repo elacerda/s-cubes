@@ -53,8 +53,9 @@ def unmask_sewregions(data, sewregions, size, unmask_stars=None, verbose=0):
                 _slices = (slice(mask.bbox.iymin, mask.bbox.iymax), slice(mask.bbox.ixmin, mask.bbox.ixmax))
                 print_level(f'{mask.bbox.extent} min: {min(mask.bbox.extent)} {_slices}', 2, verbose)
                 stars_mask[_slices] *= 1 - mask.data
+    # TODO: CHANGE TO BOOL ?
     stars_mask = np.where(stars_mask == 1, 0, 2)
     #resulting_mask = detection_mask + stars_mask
-    resulting_mask = stars_mask
+    resulting_mask = stars_mask.astype('bool')
     masked_data = np.where(resulting_mask > 0, 0, data)
     return masked_data, resulting_mask
