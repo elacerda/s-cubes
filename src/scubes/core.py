@@ -338,11 +338,11 @@ class SCubes:
         self.flam__byx = scale*(self.fnu__byx*_c/self.wl__b[:, None, None]**2).to(self.flam_unit).value
 
         if self._check_errors():
-            weidata = self._get_data_spectra(self.wimages, 1)
-            dataclip = np.clip(self.data__byx, 0, np.infty)
+            weidata__byx = np.abs(self._get_data_spectra(self.wimages, 1))
+            dataclip__byx = np.abs(self.data__byx)
             gain__byx = self.gain__b[:, None, None]
-            dataerr = 1/weidata + dataclip/gain__byx
-            self.efnu__byx = dataerr*self.f0__b[:, None, None]*self.fnu_unit
+            dataerr__byx = np.sqrt(1/weidata__byx + dataclip__byx/gain__byx)
+            self.efnu__byx = dataerr__byx*self.f0__b[:, None, None]*self.fnu_unit
             self.eflam__byx = scale*(self.efnu__byx*_c/self.wl__b[:, None, None]**2).to(self.flam_unit).value
 
     def download_data(self):
@@ -397,7 +397,15 @@ class SCubes:
             hdu.header['BSCALE'] = (flam_scale, 'Linear factor in scaling equation')
             hdu.header['BZERO'] = (0, 'Zero point in scaling equation')
             hdu.header['BUNIT'] = (f'{self.flam_unit}', 'Physical units of the array values')       
-        
+
+        # MASK WEIGHTS
+        # XXX: TODO ADD MASK WEIGHTS < 0
+        # CREATE MASK WEIGHTS HDU
+        # self.create_weights_mask()
+        # mask_hdu.header['EXTNAME'] = ('WMASK', 'Boolean mask of the weights')
+            
+        #   -------> mask_neg_weigths__yx = (weights <= 0).sum(axis=0)
+            
         # MASK STARS
         if ctrl.mask_stars:
             self.get_lupton_rgb()
@@ -405,6 +413,7 @@ class SCubes:
             # HDUList
             mask_hdul = mask.hdul  
             mask_hdu = mask_hdul[1].copy()
+
             mask_hdu.header['EXTNAME'] = ('MASK', 'Boolean mask of the galaxy')
             hdu_list.append(mask_hdu)
         
