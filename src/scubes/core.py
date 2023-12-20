@@ -169,6 +169,7 @@ class SCubes:
         ctrl = self.control
         #conn = self.get_splusdata_conn()
         fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{ctrl.size}x{ctrl.size}.png')
+        self.lupton_rgb_filename = fname
         if not isfile(fname) or ctrl.force:
             print_level(f'{gal.name} @ {ctrl.tile} - downloading RGB image')
             kw = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, option=ctrl.tile)
@@ -361,6 +362,22 @@ class SCubes:
         wmask_hdu = fits.ImageHDU(wmask__yx)
         wmask_hdu.header['EXTNAME'] = ('WEIMASK', 'Sum of negative weight pixels (from 1 to 12)')
         return wmask_hdu
+    
+    def remove_downloaded_data(self):
+        print_level('Removing downloaded data"')
+        ctrl = self.control
+        for f, wf in zip(self.images, self.wimages):
+            print_level(f'removing file {f}', 1, ctrl.verbose)
+            remove(f)
+            print_level(f'removing file {f}', 1, ctrl.verbose)
+            remove(wf)
+        files_to_remove = [self.detection_image, self.lupton_rgb_filename]
+        for f in files_to_remove:
+            if isfile(f):
+                print_level(f'removing file {f}', 1, ctrl.verbose)
+                remove(f)
+            else:
+                print_level(f'file {f} do not exists', 1, ctrl.verbose)
 
     def create_cube(self, flam_scale=None):
         flam_scale = 1e19 if flam_scale is None else flam_scale
@@ -429,3 +446,5 @@ class SCubes:
         print_level(f'writting cube {cube_path}', 1, ctrl.verbose)
         fits.HDUList(hdu_list).writeto(cube_path, overwrite=True)
         print_level(f'Cube successfully created!')
+
+        self.remove_downloaded_data() if ctrl.remove_downloaded_data else None

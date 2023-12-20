@@ -69,7 +69,7 @@ SPLUS_ARGS = {
     'mask_stars': ['M', dict(action='store_true', default=False, help='Run SExtractor to auto-identify stars on stamp.')],
     'det_img': ['I', dict(action='store_true', default=False, help='Downloads detection image for the stamp. Needed if --mask_stars is active.')],
     'estimate_fwhm': ['F', dict(action='store_true', default=False, help='Runs SExtractor two times estimating the SEEING_FWHM of the detection image.')],
-#    'remove _data': ['m']
+    'remove_downloaded_data': ['R', dict(action='store_true', default=False, help='Remove the downloaded data from splusdata at the end of the run.')],
 
     # positional arguments
     'tile': ['pos', dict(metavar='SPLUS_TILE', help='Name of the S-PLUS tile')],
