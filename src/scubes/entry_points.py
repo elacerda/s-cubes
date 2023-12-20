@@ -23,6 +23,26 @@ SPLUS_PROG_DESC = f'''
 
    {__author__}
 
+Parsing the RA and DEC inputs to astropy.coordinates.SkyCoord():
+
+    RA=03h28m19.59s                 RA(parsed)=03h28m19.59s
+    DEC=-31d04m05.26392275s         DEC(parsed)=-31d04m05.26392275s
+    astropy.coordinates.SkyCoord() object:
+    <SkyCoord (ICRS): (ra, dec) in deg
+        (52.081625, -31.06812887)>
+
+    RA=03:28:19.59                  RA(parsed)=03:28:19.59°
+    DEC=-31:04:05.26392275          DEC(parsed)=-31:04:05.26392275°
+    astropy.coordinates.SkyCoord() object:
+    <SkyCoord (ICRS): (ra, dec) in deg
+        (3.47210833, -31.06812887)>
+
+    RA=03d28'19.59"                 RA(parsed)=03d28'19.59"
+    DEC=-31d04'05.26392275"         DEC(parsed)=-31d04'05.26392275"
+    astropy.coordinates.SkyCoord() object:
+    <SkyCoord (ICRS): (ra, dec) in deg
+        (3.47210833, -31.06812887)>
+
 '''
 
 SPLUS_ARGS = {
@@ -49,6 +69,7 @@ SPLUS_ARGS = {
     'mask_stars': ['M', dict(action='store_true', default=False, help='Run SExtractor to auto-identify stars on stamp.')],
     'det_img': ['I', dict(action='store_true', default=False, help='Downloads detection image for the stamp. Needed if --mask_stars is active.')],
     'estimate_fwhm': ['F', dict(action='store_true', default=False, help='Runs SExtractor two times estimating the SEEING_FWHM of the detection image.')],
+#    'remove _data': ['m']
 
     # positional arguments
     'tile': ['pos', dict(metavar='SPLUS_TILE', help='Name of the S-PLUS tile')],
