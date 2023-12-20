@@ -57,5 +57,6 @@ def unmask_sewregions(data, sewregions, size, unmask_stars=None, verbose=0):
     stars_mask = np.where(stars_mask == 1, 0, 2)
     #resulting_mask = detection_mask + stars_mask
     resulting_mask = stars_mask.astype('bool')
-    masked_data = np.where(resulting_mask > 0, 0, data)
+    #masked_data = np.where(resulting_mask > 0, 0, data)
+    masked_data = np.where(resulting_mask, 0, data)
     return masked_data, resulting_mask

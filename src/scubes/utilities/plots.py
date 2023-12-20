@@ -18,7 +18,7 @@ def plot_mask(detection_image, lupton_rgb, masked_ddata, resulting_mask, sewregi
     plt.ion()
     if fig is None:
         fig = plt.figure()
-    # ax1
+    # AX1
     ax1 = plt.subplot(221, projection=wcs)
 
     ax1.imshow(lupton_rgb, origin='lower')
@@ -26,7 +26,7 @@ def plot_mask(detection_image, lupton_rgb, masked_ddata, resulting_mask, sewregi
     for sregion in sewregions:
         sregion.plot(ax=ax1, color='g')
     ax1.set_title('RGB')
-    # ax2
+    # AX2
     ax2 = plt.subplot(222, projection=wcs)
     ax2.imshow(ddata, cmap='Greys_r', origin='lower', vmin=-0.1, vmax=3.5)
     # r_circ.plot(color='y', lw=1.5)
@@ -37,7 +37,7 @@ def plot_mask(detection_image, lupton_rgb, masked_ddata, resulting_mask, sewregi
         for dregion in daoregions:
             dregion.plot(ax=ax2, color='m')
     ax2.set_title('Detection')
-    # ax3
+    # AX3
     ax3 = plt.subplot(223, projection=wcs)
     stars_mask = np.ones(ddata.shape)
     for n, sregion in enumerate(sewregions):
@@ -45,7 +45,7 @@ def plot_mask(detection_image, lupton_rgb, masked_ddata, resulting_mask, sewregi
     ax3.imshow(masked_ddata, cmap='Greys_r', origin='lower', vmin=-0.1, vmax=3.5)
     # r_circ.plot(color='y', lw=1.5)
     ax3.set_title('Masked')
-    # ax4
+    # AX4
     ax4 = plt.subplot(224, projection=wcs)
     ax4.imshow(resulting_mask, cmap='Greys_r', origin='lower')
     ax4.set_title('Mask')

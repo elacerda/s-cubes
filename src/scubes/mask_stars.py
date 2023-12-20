@@ -1,17 +1,17 @@
 import sys
 from os import remove
 from os.path import join
+from astropy.wcs import WCS
 from astropy.io import fits
-from matplotlib import pyplot as plt
-
 from .control import control
+from matplotlib import pyplot as plt
 from .headers import get_key, get_author
 from .constants import SPLUS_DEFAULT_SEXTRACTOR_CONFIG, SPLUS_DEFAULT_SEXTRACTOR_PARAMS
 
 from .utilities.io import print_level
 from .utilities.plots import plot_mask
-from .utilities.daofinder import DAOregions
 from .utilities.stats import robustStat
+from .utilities.daofinder import DAOregions
 from .utilities.sextractor import unmask_sewregions,SEWregions, run_sex
 
 class _control(control):
@@ -28,7 +28,7 @@ class maskStars:
         self.fig = None
         self.mask()
 
-    def calc_masks(self, input_config, output_parameters, unmask_stars=None, run_DAOfinder=False):
+    def calc_masks(self, input_config, output_parameters, unmask_stars=None, run_DAOfinder=False, save_fig=False):
         ctrl = self.control
 
         print_level('Calculating mask...')
@@ -74,7 +74,7 @@ class maskStars:
             resulting_mask=resulting_mask, 
             sewregions=sewregions, 
             daoregions=daoregions, 
-            save_fig=False,
+            save_fig=save_fig,
             prefix_filename=join(self.output_dir, ctrl.prefix_filename),
             fig=self.fig,
         )
@@ -82,36 +82,36 @@ class maskStars:
 
     def loop_mask(self, input_config, output_parameters):
         ctrl = self.control
-        #sex_path, detection_image, lupton_rgb, input_config, output_parameters, prefix_filename, size, class_star, estimate_fwhm=False, verbose=0):
 
-        resulting_mask = self.calc_masks(input_config, output_parameters, unmask_stars=None, run_DAOfinder=False)
+        resulting_mask = self.calc_masks(input_config=input_config, output_parameters=output_parameters, unmask_stars=None, run_DAOfinder=False, save_fig=ctrl.no_interact)
 
-        unmask_sexstars = True
-        unmask_stars = []
-        while unmask_sexstars:
-            in_opt = input('(UN)mask SExtractor stars? [(Y)es|(r)edo|(n)o|(q)uit]:').lower()
-            if in_opt == 'y':
-                newindx = input('type (space separated) the detections numbers to be unmasked: ')
-                unmask_stars += [int(i) for i in newindx.split()]
-                print_level(f'Current stars numbers are: {unmask_stars}')
-                unmask_sexstars = True
-            elif in_opt == 'r':
-                unmask_stars = []
-            elif in_opt == 'n' or in_opt == '':
-                unmask_stars = []
-                unmask_sexstars = False
-                # save figure
-                fig_filename = join(self.output_dir, f'{ctrl.prefix_filename}_maskMosaic.png')
-                print_level(f'Saving fig to {fig_filename}', 1, ctrl.verbose)
-                self.fig.savefig(fig_filename, format='png', dpi=180)
-                plt.close(self.fig)
-            elif in_opt == 'q':
-                Warning('Exiting!')
-                sys.exit(1)
-            else:
-                raise IOError('Option %s not recognized' % in_opt)
-            if len(unmask_stars) or in_opt == 'r':
-                resulting_mask = self.calc_masks(input_config, output_parameters, unmask_stars=unmask_stars, run_DAOfinder=False)
+        if not ctrl.no_interact:
+            unmask_sexstars = True
+            unmask_stars = []
+            while unmask_sexstars:
+                in_opt = input('(UN)mask SExtractor stars? [(Y)es|(r)edo|(n)o|(q)uit]:').lower()
+                if in_opt == 'y':
+                    newindx = input('type (space separated) the detections numbers to be unmasked: ')
+                    unmask_stars += [int(i) for i in newindx.split()]
+                    print_level(f'Current stars numbers are: {unmask_stars}')
+                    unmask_sexstars = True
+                elif in_opt == 'r':
+                    unmask_stars = []
+                elif in_opt == 'n' or in_opt == '':
+                    unmask_stars = []
+                    unmask_sexstars = False
+                    # save figure
+                    fig_filename = join(self.output_dir, f'{ctrl.prefix_filename}_maskMosaic.png')
+                    print_level(f'Saving fig to {fig_filename}', 1, ctrl.verbose)
+                    self.fig.savefig(fig_filename, format='png', dpi=180)
+                    plt.close(self.fig)
+                elif in_opt == 'q':
+                    Warning('Exiting!')
+                    sys.exit(1)
+                else:
+                    raise IOError('Option %s not recognized' % in_opt)
+                if len(unmask_stars) or in_opt == 'r':
+                    resulting_mask = self.calc_masks(input_config, output_parameters, unmask_stars=unmask_stars, run_DAOfinder=False)
         return resulting_mask
 
     def mask(self):
@@ -131,14 +131,16 @@ class maskStars:
             'CHECKIMAGE_NAME': self.detection_image.replace('detection', 'segmentation'),
         })
         output_parameters = SPLUS_DEFAULT_SEXTRACTOR_PARAMS
-        
+
         resulting_mask = self.loop_mask(input_config=input_config, output_parameters=output_parameters)
-        
-        mhdul = hdul.copy()
-        mhdul[1].data = resulting_mask
+
+        mhdul = fits.HDUList([fits.PrimaryHDU(), fits.ImageHDU(resulting_mask.astype('int'))])
+
+        # UPDATE HEADER
+        w = WCS(h)
+        mhdul[1].header.update(w.to_header())
         mhdul[1].header['IMGTYPE'] = ('MASK', 'boolean mask')
-        del mhdul[1].header['EXPTIME']
-        del mhdul[1].header[get_key('GAIN', get_author(mhdul[1].header))]
+        mhdul[1].header['EXTNAME'] = ('MASK', 'Boolean mask of the galaxy')
         print_level(f'Saving mask to {mask_filename}')
         mhdul.writeto(mask_filename, overwrite=True)
 
