@@ -40,7 +40,7 @@ pip3 install .
 
 ## Entry-point scripts
 
-This package includes three entry-point command-line scripts: `scubes`, `sex_mask_stars` and `get_lupton_rgb`. In order to obtain a detailed description and the script usage run them with **--help** argument.
+This package includes three entry-point command-line scripts: `scubes`, `sex_mask_stars` and `get_lupton_RGB`. In order to obtain a detailed description and the script usage run them with **--help** argument.
 
 ## `scubes` Running example
 
