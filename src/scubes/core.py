@@ -354,6 +354,14 @@ class SCubes:
         if ctrl.det_img:
             self.get_detection_image()
 
+    def create_weights_mask_hdu(self):
+        w__byx = self._get_data_spectra(self.wimages, 1)
+        wmask__byx = np.where(w__byx < 0, 1, 0)
+        wmask__yx = wmask__byx.sum(axis=0)
+        wmask_hdu = fits.ImageHDU(wmask__yx)
+        wmask_hdu.header['EXTNAME'] = ('WEIMASK', 'Sum of negative weight pixels (from 1 to 12)')
+        return wmask_hdu
+
     def create_cube(self, flam_scale=None):
         flam_scale = 1e19 if flam_scale is None else flam_scale
         ctrl = self.control
@@ -399,12 +407,7 @@ class SCubes:
             hdu.header['BUNIT'] = (f'{self.flam_unit}', 'Physical units of the array values')       
 
         # MASK WEIGHTS
-        # XXX: TODO ADD MASK WEIGHTS < 0
-        # CREATE MASK WEIGHTS HDU
-        # self.create_weights_mask()
-        # mask_hdu.header['EXTNAME'] = ('WMASK', 'Boolean mask of the weights')
-            
-        #   -------> mask_neg_weigths__yx = (weights <= 0).sum(axis=0)
+        hdu_list.append(self.create_weights_mask_hdu())
             
         # MASK STARS
         if ctrl.mask_stars:
@@ -414,7 +417,7 @@ class SCubes:
             mask_hdul = mask.hdul  
             mask_hdu = mask_hdul[1].copy()
 
-            mask_hdu.header['EXTNAME'] = ('MASK', 'Boolean mask of the galaxy')
+            mask_hdu.header['EXTNAME'] = ('STARMASK', 'Boolean mask of stars along the FOV')
             hdu_list.append(mask_hdu)
         
         # METADATA
