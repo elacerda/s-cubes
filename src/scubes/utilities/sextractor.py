@@ -4,11 +4,13 @@ from regions import PixCoord, CirclePixelRegion
 
 from .data import sex
 
-__data_files__ = resources.files(sex)
+import os
 
-SEX_TOPHAT_FILTER = str(__data_files__ / 'tophat_3.0_3x3.conv') 
-SEX_DEFAULT_FILTER = str(__data_files__ / 'default.conv') 
-SEX_DEFAULT_STARNNW = str(__data_files__ / 'default.nnw') 
+__data_files__ = sex.__path__[0]
+
+SEX_TOPHAT_FILTER = os.path.join(__data_files__, 'tophat_3.0_3x3.conv') 
+SEX_DEFAULT_FILTER = os.path.join(__data_files__, 'default.conv') 
+SEX_DEFAULT_STARNNW = os.path.join(__data_files__, 'default.nnw') 
 
 from sewpy import SEW
 from os.path import join
