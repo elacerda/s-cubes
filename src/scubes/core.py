@@ -409,10 +409,14 @@ class SCubes:
         
         # CREATE CUBE
         prim_hdu = fits.PrimaryHDU()
+        prim_hdu.header['SPECZ'] = (ctrl.specz, 'Spectroscopic redshift')
+        prim_hdu.header['PHOTZ'] = ('', 'Photometric redshift')
+        prim_hdu.header['TILE'] = ctrl.tile
+        prim_hdu.header['GALAXY'] = self.galaxy.name
+        for _k in ['X0TILE', 'Y0TILE']:
+            prim_hdu.header[_k] = cube_h[_k]
         flam_hdu = fits.ImageHDU(self.flam__byx, cube_h)
         flam_hdu.header['EXTNAME'] = ('DATA', 'Name of the extension')
-        flam_hdu.header['SPECZ'] = (ctrl.specz, 'Spectroscopic redshift')
-        flam_hdu.header['PHOTZ'] = ('', 'Photometric redshift')
         hdu_list = [prim_hdu, flam_hdu]
         if self._check_errors():
             eflam_hdu = fits.ImageHDU(self.eflam__byx, cube_h)
@@ -420,7 +424,7 @@ class SCubes:
             hdu_list.append(eflam_hdu)
         for hdu in hdu_list:
             hdu.header['BSCALE'] = (flam_scale, 'Linear factor in scaling equation')
-            hdu.header['BZERO'] = (0, 'Zero point in scaling equation')
+            hdu.header['BZERO'] = (0, 'Zero point in scaling equation') 
             hdu.header['BUNIT'] = (f'{self.flam_unit}', 'Physical units of the array values')       
 
         # MASK WEIGHTS
