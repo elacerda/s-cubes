@@ -4,3 +4,5 @@ workdir
 build
 __pycache__
 *.egg*
+**/.DS_Store
+
