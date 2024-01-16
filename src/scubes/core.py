@@ -422,7 +422,7 @@ class SCubes:
             eflam_hdu = fits.ImageHDU(self.eflam__byx, cube_h)
             eflam_hdu.header['EXTNAME'] = ('ERRORS', 'Name of the extension')
             hdu_list.append(eflam_hdu)
-        for hdu in hdu_list:
+        for hdu in hdu_list[1:]:
             hdu.header['BSCALE'] = (flam_scale, 'Linear factor in scaling equation')
             hdu.header['BZERO'] = (0, 'Zero point in scaling equation') 
             hdu.header['BUNIT'] = (f'{self.flam_unit}', 'Physical units of the array values')       
