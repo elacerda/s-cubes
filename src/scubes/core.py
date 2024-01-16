@@ -24,16 +24,86 @@ from .utilities.splusdata import connect_splus_cloud, detection_image_hdul, get_
 
 @dataclass
 class _galaxy:
+    '''
+    A data class representing galaxy information.
+
+    Attributes
+    ----------
+    ra : :class:`~astropy.units.Quantity`
+        Right Ascension of the galaxy.
+
+    dec : :class:`~astropy.units.Quantity`
+        Declination of the galaxy.
+
+    name : str
+        Name of the galaxy.
+
+    redshift : float
+        Redshift of the galaxy.
+
+    Methods
+    -------
+    skycoord(frame='icrs')
+        Get the `SkyCoord` object for the galaxy coordinates.
+
+    See Also
+    --------
+    :class:`~astropy.coordinates.SkyCoord`
+    '''    
     ra: u.quantity.Quantity
     dec: u.quantity.Quantity
     name: str
     redshift: float
 
     def skycoord(self, frame='icrs'):
+        '''
+        Get the `SkyCoord` object for the galaxy coordinates.
+
+        Parameters
+        ----------
+        frame : str, optional
+            Coordinate frame (default is 'icrs').
+
+        Returns
+        -------
+        :class:`~astropy.coordinates.SkyCoord`
+            SkyCoord object for the galaxy coordinates.
+        '''      
         return SkyCoord(ra=self.ra, dec=self.dec, frame=frame, unit='deg')
     
 class _control(control):
+    '''
+    Extended :class:`control` for handling specific arguments and directories.
+
+    Attributes
+    ----------
+    args : :class:`~argparse.Namespace`
+        Parsed command-line arguments.
+
+    output_dir : str
+        Output directory for storing results.
+
+    prefix_filename : str
+        Prefix for the output filenames.
+
+    Methods
+    -------
+    _make_output_dir()
+        Create the output directory.
+
+    See Also
+    --------
+    :class:`control`
+    '''
     def __init__(self, args):
+        '''
+        Initialize the _control object.
+
+        Parameters
+        ----------
+        args : :class:`~argparse.Namespace`
+            Parsed command-line arguments.
+        '''
         super().__init__(args)
         self.output_dir = join(self.work_dir, self.galaxy)
         print_level(f'output_dir: {self.output_dir}', 2, self.verbose)
@@ -41,13 +111,140 @@ class _control(control):
         self._make_output_dir()
 
     def _make_output_dir(self):
+        '''
+        Create the output directory.
+        '''   
         try: 
             makedirs(self.output_dir)
         except FileExistsError:
             print_level(f'{self.output_dir}: directory already exists', 2, self.verbose)    
 
 class SCubes:
+    '''
+    Class for creating S-PLUS galaxy data cubes (S-CUBES).
+
+    Attributes
+    ----------
+    args : :class:`~argparse.Namespace`
+        Parsed command-line arguments.
+
+    _conn : object
+        Connection object to the S-PLUS Cloud.
+
+    control : :class:`~_control`
+        Control object for handling specific arguments and directories.
+
+    galaxy : :class:`~_galaxy`
+        Galaxy object representing galaxy information.
+
+    wl__b : :class:`~numpy.ndarray`
+        Array of effective wavelengths for each band.
+
+    flam_unit : :class:`~astropy.units.Unit`
+        Unit for flux density.
+
+    fnu_unit : :class:`~astropy.units.Unit`
+        Unit for flux.
+
+    flam__b : :class:`~numpy.ndarray`
+        Array of flux density values.
+
+    fnu__b : :class:`~numpy.ndarray`
+        Array of flux values.
+
+    headers__b : list
+        List of headers for each band.
+
+    Methods
+    -------
+    _init_galaxy()
+        Initialize the _galaxy object.
+
+    _init_spectra()
+        Initialize the spectra arrays.
+
+    _check_errors()
+        Check if there are any errors in the data.
+
+    _get_headers_list(images=None, ext=1)
+        Get a list of headers for the given images.
+
+    _get_data_spectra(images=None, ext=1)
+        Get the data arrays for the given images.
+
+    _header_key_spectra(key)
+        Get header values for a specific key.
+
+    _m0()
+        Get the zero-point magnitude.
+
+    _gain()
+        Get the gain values.
+
+    _effexptime()
+        Get the effective exposure time.
+
+    _galaxy()
+        Create a _galaxy object.
+
+    check_zero_points()
+        Check if zero-point magnitudes are available.
+
+    get_stamps()
+        Download stamps for each band.
+
+    get_detection_image()
+        Download the detection image.
+
+    get_lupton_rgb()
+        Download the Lupton RGB image.
+
+    get_zero_points_correction()
+        Get corrections for zero points.
+
+    get_zero_points()
+        Get zero points from the specified table.
+
+    add_magzp_headers()
+        Add magnitude zero-point values to the image headers.
+
+    calibrate_stamps()
+        Calibrate the downloaded stamps.
+
+    stamp_WCS_to_cube_header(header)
+        Convert stamp WCS to cube header.
+
+    create_metadata_hdu(keys=None)
+        Create a metadata table HDU.
+
+    spectra(flam_scale=None)
+        Calculate the spectra arrays.
+
+    download_data()
+        Download stamps, detection image, and Lupton RGB image.
+
+    create_weights_mask_hdu()
+        Create a weights mask HDU.
+
+    remove_downloaded_data()
+        Remove downloaded stamp, detection image, and Lupton RGB image files.
+
+    create_cube(flam_scale=None)
+        Create the data cube.
+
+    See Also
+    --------
+    :class:`~_control`, :class:`~_galaxy`, :class:`control`
+    '''    
     def __init__(self, args):
+        '''
+        Initialize the SCubes object.
+
+        Parameters
+        ----------
+        args : :class:`~argparse.Namespace`
+            Parsed command-line arguments.
+        '''        
         self._conn = None
         self.args = args
         self.control = _control(self.args)
@@ -55,6 +252,9 @@ class SCubes:
         self._init_spectra()
 
     def _init_galaxy(self):
+        '''
+        Initialize the _galaxy object.
+        '''        
         self.galaxy = self._galaxy()
         gal = self.galaxy
         gal.ra = self.control.ra
@@ -64,6 +264,9 @@ class SCubes:
         self.galaxy.coords = self.galaxy.skycoord()
 
     def _init_spectra(self):
+        '''
+        Initialize the spectra arrays.
+        '''        
         self.wl__b = np.array([WAVE_EFF[b] for b in self.control.bands])*u.Angstrom
         self.flam_unit = u.erg / u.cm / u.cm / u.s / u.AA
         self.fnu_unit = u.erg / u.s / u.cm / u.cm / u.Hz
@@ -73,23 +276,82 @@ class SCubes:
 
     @property
     def conn(self):
+        '''
+        Get the connection object to the S-PLUS Cloud.
+
+        Returns
+        -------
+        object
+            Connection object to the S-PLUS Cloud.
+        '''        
         if self._conn is None:
             ctrl = self.control
             self._conn = connect_splus_cloud(ctrl.username, ctrl.password)
         return self._conn
 
     def _check_errors(self):
+        '''
+        Check if there are any errors in the data.
+
+        Returns
+        -------
+        bool
+            True if no errors, False otherwise.
+        '''        
         return all([exists(_) for _ in self.wimages])
 
     def _get_headers_list(self, images=None, ext=1):
+        '''
+        Get a list of headers for the given images.
+
+        Parameters
+        ----------
+        images : list, optional
+            List of image filenames, by default None.
+        ext : int, optional
+            FITS extension number, by default 1.
+
+        Returns
+        -------
+        list
+            List of headers for each image.
+        '''        
         images = self.images if images is None else images
         return [fits.getheader(img, ext=ext) for img in images]
 
     def _get_data_spectra(self, images=None, ext=1):
+        '''
+        Get data spectra from FITS images.
+
+        Parameters
+        ----------
+        images : list of str, optional
+            List of FITS image filenames, by default None.
+        ext : int, optional
+            FITS extension from which to extract data, by default 1.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+            Array of data spectra from the specified FITS images.
+        '''        
         images = self.images if images is None else images
         return np.array([fits.getdata(img, ext=ext) for img in images])
 
     def _header_key_spectra(self, key):
+        '''
+        Extract values for a specific header key from a set of spectra headers.
+
+        Parameters
+        ----------
+        key : str
+            Header key to extract values.
+
+        Returns
+        -------
+        :class:`numpy.ndarray`
+            Array of values corresponding to the specified header key across multiple spectra.
+        '''        
         values = []
         for i, h in enumerate(self.headers__b):
             author = get_author(h)
@@ -98,19 +360,34 @@ class SCubes:
         return np.array(values)
 
     def _m0(self):
+        '''
+        Get the zero-point magnitude.
+        '''        
         return self._header_key_spectra('MAGZP')
     
     def _gain(self):
+        '''
+        Get the gain values.
+        '''
         return self._header_key_spectra('GAIN')
     
     def _effexptime(self):
+        '''
+        Get the effective exposure time.
+        '''
         return self._header_key_spectra('EFFTIME')
     
     def _galaxy(self):
+        '''
+        Create a _galaxy object.
+        '''
         c = self.control
         return _galaxy(ra=c.ra, dec=c.dec, name=c.galaxy, redshift=c.specz)
     
     def check_zero_points(self):
+        '''
+        Check if zero-point magnitudes are available.        
+        '''
         has_magzp = True
         for h in self.headers__b:
             mzp_key = get_key('MAGZP', get_author(h))
@@ -120,6 +397,9 @@ class SCubes:
         return has_magzp
 
     def get_stamps(self):
+        '''
+        Download stamps for each band.
+        '''
         gal = self.galaxy
         ctrl = self.control
         self.stamps = []
@@ -146,6 +426,9 @@ class SCubes:
         self.headers__b = self._get_headers_list(self.images, ext=1)
     
     def get_detection_image(self):
+        '''
+        Download the detection image.        
+        '''
         gal = self.galaxy
         ctrl = self.control
         band = 'G,R,I,Z'
@@ -165,6 +448,9 @@ class SCubes:
             hdul.writeto(self.detection_image, overwrite=ctrl.force)
                         
     def get_lupton_rgb(self):
+        '''
+        Download the Lupton RGB image.        
+        '''
         gal = self.galaxy
         ctrl = self.control
         #conn = self.get_splusdata_conn()
@@ -179,7 +465,9 @@ class SCubes:
         self.lupton_rgb = img
 
     def get_zero_points_correction(self):
-        """ Get corrections of zero points for location in the field. """
+        '''
+        Get corrections for zero points.
+        '''
         ctrl = self.control
         x0, x1, nbins = 0, 9200, 32
         xgrid = np.linspace(x0, x1, nbins + 1)
@@ -192,6 +480,9 @@ class SCubes:
         self.zpcorr = zpcorr
 
     def get_zero_points(self):
+        '''
+        Get zero points from the specified table.
+        '''
         ctrl = self.control
         zp_table = ctrl.zp_table
         print_level(f'Reading ZPs table: {zp_table}')
@@ -203,6 +494,9 @@ class SCubes:
         self.get_zero_points_correction()
 
     def add_magzp_headers(self):
+        '''
+        Add magnitude zero-point values to the image headers.
+        '''
         ctrl = self.control
         gal = self.galaxy
         self.get_zero_points()
@@ -223,6 +517,9 @@ class SCubes:
         self.headers__b = headers
          
     def calibrate_stamps(self):
+        '''
+        Calibrate the downloaded stamps.
+        '''
         if not self.check_zero_points():
             self.add_magzp_headers()
 
@@ -278,9 +575,21 @@ class SCubes:
         dmask[distance > angsize] = 1
         return r_circ, dmask
     '''
-
      
     def stamp_WCS_to_cube_header(self, header):
+        '''
+        Convert WCS information from stamp to cube header.
+
+        Parameters
+        ----------
+        header : :class:`~astropy.io.fits.Header`
+            FITS header containing WCS information.
+
+        Returns
+        -------
+        :class:`~astropy.io.fits.Header`
+            Cube header with updated WCS information.
+        '''        
         img = self.images[0]
         w = WCS(header)
         w = WCS(fits.getheader(img, 1))
@@ -297,6 +606,19 @@ class SCubes:
         return nw.to_header()
 
     def create_metadata_hdu(self, keys=None):
+        '''
+        Create a metadata table HDU.
+
+        Parameters
+        ----------
+        keys : list, optional
+            List of header keys, by default None.
+
+        Returns
+        -------
+        :class:`~astropy.io.fits.hdu.table.BinTableHDU`
+            Metadata table HDU.
+        '''  
         tab = []
         names = ['FILTER', 'WAVE_EFF', 'EXPTIME']
         tab.append(self.control.bands)
@@ -326,6 +648,14 @@ class SCubes:
         return meta_hdu
 
     def spectra(self, flam_scale=None):
+        '''
+        Calculate the spectra arrays.
+
+        Parameters
+        ----------
+        flam_scale : float, optional
+            Scaling factor for flux density, by default None.
+        '''        
         flam_scale = 1e-19 if flam_scale is None else flam_scale
         _c = const.c
         scale = (1/flam_scale)
@@ -356,6 +686,14 @@ class SCubes:
             self.get_detection_image()
 
     def create_weights_mask_hdu(self):
+        '''
+        Create a weights mask HDU.
+
+        Returns
+        -------
+        :class:`~astropy.io.fits.hdu.image.ImageHDU`
+            Weight mask HDU.
+        '''
         w__byx = self._get_data_spectra(self.wimages, 1)
         wmask__byx = np.where(w__byx < 0, 1, 0)
         wmask__yx = wmask__byx.sum(axis=0)
@@ -364,6 +702,9 @@ class SCubes:
         return wmask_hdu
     
     def remove_downloaded_data(self):
+        '''
+        Remove downloaded stamp, detection image, and Lupton RGB image files.
+        '''        
         print_level('Removing downloaded data"')
         ctrl = self.control
         for f, wf in zip(self.images, self.wimages):
@@ -380,6 +721,19 @@ class SCubes:
                 print_level(f'file {f} do not exists', 1, ctrl.verbose)
 
     def create_cube(self, flam_scale=None):
+        '''
+        Create a data cube from S-PLUS galaxy stamps.
+
+        Parameters
+        ----------
+        flam_scale : float, optional
+            Scaling factor for flux density, by default None.
+
+        Raises
+        ------
+        OSError
+            Raises an error if the cube already exists and redo is not specified.
+        '''        
         flam_scale = 1e19 if flam_scale is None else flam_scale
         ctrl = self.control
 

@@ -43,7 +43,7 @@ def create_parser(args_dict, program_description=None):
 
     Returns
     -------
-    parser : :class:`argparse.ArgumentParser`
+    parser : argparse.ArgumentParser
         The arguments parser.
 
     See Also

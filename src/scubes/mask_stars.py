@@ -15,11 +15,41 @@ from .utilities.daofinder import DAOregions
 from .utilities.sextractor import unmask_sewregions,SEWregions, run_sex
 
 class _control(control):
+    '''
+    Subclass of `control` for managing specific settings.
+    
+    Parameters
+    ----------
+    args : :class:`argparse.Namespace`
+        Command-line arguments parsed by :function:`argparse.ArgumentParser.parse_args()` 
+        for control and configuration.
+    
+    output_dir : str, optional
+        Output directory to save results. Default is '.'.
+    '''    
     def __init__(self, args, output_dir='.'):
         super().__init__(args)
         self.output_dir = output_dir
 
 class maskStars:
+    '''
+    Class for performing star masking on an image.
+
+    Parameters
+    ----------
+    args : :class:`argparse.Namespace`
+        Command-line arguments parsed by :function:`argparse.ArgumentParser.parse_args()` 
+        for control and configuration.
+
+    detection_image : str
+        Detection image where stars are detected.
+
+    lupton_rgb : str
+        Lupton RGB image for display.
+
+    output_dir : str, optional
+        Output directory to save results. Default is '.'.
+    '''
     def __init__(self, args, detection_image, lupton_rgb, output_dir='.'):
         self.control = _control(args)
         self.detection_image = detection_image
@@ -29,6 +59,33 @@ class maskStars:
         self.mask()
 
     def calc_masks(self, input_config, output_parameters, unmask_stars=None, run_DAOfinder=False, save_fig=False):
+        '''
+        Calculate stars mask using SExtractor. If `self.control.estimate_fwhm` 
+        is True will run the mask two times in order to estimate the Full width 
+        at half maximum (FWHM) of the detection image.
+
+        Parameters
+        ----------
+        input_config : dict
+            Settings for SExtractor.
+
+        output_parameters : dict
+            Output parameters for SExtractor.
+
+        unmask_stars : list of int, optional
+            List of star indices to unmask.
+
+        run_DAOfinder : bool, optional
+            Run DAOregions. Default is False.
+
+        save_fig : bool, optional
+            Save the generated figure. Default is False.
+
+        Returns
+        -------
+        resulting_mask : ndarray
+            Resulting mask.
+        '''
         ctrl = self.control
 
         print_level('Calculating mask...')
@@ -57,7 +114,7 @@ class maskStars:
         
         h = fits.getheader(self.detection_image, ext=1)
         
-        sewregions =  SEWregions(sewcat=sewcat, class_star=ctrl.class_star, shape=(h.get('NAXIS2'), h.get('NAXIS1')), verbose=ctrl.verbose)
+        sewregions = SEWregions(sewcat=sewcat, class_star=ctrl.class_star, shape=(h.get('NAXIS2'), h.get('NAXIS1')), verbose=ctrl.verbose)
         
         data = fits.getdata(self.detection_image, ext=1)
         
@@ -81,6 +138,22 @@ class maskStars:
         return resulting_mask
 
     def loop_mask(self, input_config, output_parameters):
+        '''
+        Execute the interactive masking loop.
+
+        Parameters
+        ----------
+        input_config : dict
+            Settings for SExtractor.
+
+        output_parameters : dict
+            Output parameters for SExtractor.
+
+        Returns
+        -------
+        resulting_mask : ndarray
+            Resulting mask.
+        '''        
         ctrl = self.control
 
         resulting_mask = self.calc_masks(input_config=input_config, output_parameters=output_parameters, unmask_stars=None, run_DAOfinder=False, save_fig=ctrl.no_interact)
@@ -115,6 +188,9 @@ class maskStars:
         return resulting_mask
 
     def mask(self):
+        '''
+        Perform star masking on the detection image.
+        '''        
         ctrl = self.control
         mask_filename = self.detection_image.replace('detection', 'mask')
         

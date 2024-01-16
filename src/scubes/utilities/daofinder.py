@@ -5,7 +5,28 @@ from regions import PixCoord, CirclePixelRegion
 from .io import print_level
 
 def DAOfinder(data, mean=0, median=0, std=0.5):
-    "calculate photometry using DAOfinder"
+    '''
+    Calculate photometry using DAOStarFinder.
+
+    Parameters
+    ----------
+    data : array-like
+        The 2D array from which to extract sources.
+
+    mean : float, optional
+        The mean background value. Defaults to 0.
+
+    median : float, optional
+        The median background value. Defaults to 0.
+        
+    std : float, optional
+        The standard deviation of the background. Defaults to 0.5.
+
+    Returns
+    -------
+    Table
+        A table containing the found sources and their properties.
+    '''    
     # DETECT TOO MUCH HII REGIONS
     print_level(('mean', 'median', 'std'))
     print_level((mean, median, std))
@@ -15,6 +36,19 @@ def DAOfinder(data, mean=0, median=0, std=0.5):
     return sources
 
 def DAOregions(data):
+    '''
+    Extract circular regions around sources found by DAOfinder.
+
+    Parameters
+    ----------
+    data : array-like
+        The 2D array from which to extract sources.
+
+    Returns
+    -------
+    list
+        List of CirclePixelRegion objects representing the regions around the detected sources.
+    '''    
     daocat = DAOfinder(data=data)
     daopos = np.transpose((daocat['xcentroid'], daocat['ycentroid']))
     daorad = 4*(abs(daocat['sharpness']) + abs(daocat['roundness1']) + abs(daocat['roundness2']))

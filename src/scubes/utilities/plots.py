@@ -7,6 +7,43 @@ from .io import print_level
 from .splusdata import get_lupton_rgb
 
 def plot_mask(detection_image, lupton_rgb, masked_ddata, resulting_mask, sewregions, daoregions=None, save_fig=False, prefix_filename=None, fig=None):
+    '''
+    Plot a mosaic showing various images and regions related to source detection and masking.
+
+    Parameters
+    ----------
+    detection_image : str
+        The path to the FITS file containing the detection image.
+
+    lupton_rgb : array-like
+        The RGB image array used for plotting.
+
+    masked_ddata : array-like
+        The masked detection image data.
+
+    resulting_mask : array-like
+        The resulting mask array.
+
+    sewregions : list of CirclePixelRegion
+        List of regions around sources detected by SExtractor.
+
+    daoregions : list of CirclePixelRegion, optional
+        List of regions around sources detected by DAOStarFinder. Defaults to None.
+
+    save_fig : bool, optional
+        If True, save the figure as an image file. Defaults to False.
+
+    prefix_filename : str, optional
+        The prefix for the saved figure filename. Defaults to 'OBJECT'.
+        
+    fig : matplotlib.figure.Figure, optional
+        The existing figure to use. If None, a new figure will be created. Defaults to None.
+
+    Returns
+    -------
+    matplotlib.figure.Figure or None
+        The generated figure if save_fig is False, otherwise None.
+    '''    
     prefix_filename = 'OBJECT' if prefix_filename is None else prefix_filename
     
     dhdu = fits.open(detection_image)

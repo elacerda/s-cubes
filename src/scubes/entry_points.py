@@ -111,7 +111,20 @@ def scubes_argparse(args):
     return args
 
 def scubes():
+    '''
+    Entry-point function for creating S-PLUS galaxy data cubes (S-CUBES).
+
+    Raises
+    ------
+    SystemExit
+        If SExtractor is not found.
+
+    Returns
+    -------
+    None
+    '''
     from .core import SCubes
+
 
     parser = create_parser(args_dict=SPLUS_ARGS, program_description=SPLUS_PROG_DESC)
     args = scubes_argparse(parser.parse_args(args=sys.argv[1:]))
@@ -167,6 +180,25 @@ def get_lupton_RGB_argsparse(args):
     return args
 
 def _get_lupton_RGB(conn, args, save_img=True):
+    '''
+    Downloads S-PLUS RGB images using the `splusdata` module.
+
+    Parameters
+    ----------
+    conn : object
+        Connection object to the S-PLUS Cloud.
+
+    args : :class:`argparse.Namespace`
+        Parsed command-line arguments.
+
+    save_img : bool, optional
+        Flag to save the downloaded image (default is True).
+
+    Returns
+    -------
+    :class:`PIL.Image.Image`
+        Downloaded RGB image.
+    '''
     from .utilities.splusdata import get_lupton_rgb
  
     if args.galaxy is None:
@@ -180,6 +212,13 @@ def _get_lupton_RGB(conn, args, save_img=True):
     return img
 
 def get_lupton_RGB():
+    '''
+    Entry-point function for downloading S-PLUS RGB images.
+
+    Returns
+    -------
+    None
+    '''
     from .utilities.splusdata import connect_splus_cloud
 
     parser = create_parser(args_dict=SPLUS_RGB_ARGS, program_description=SPLUS_RGB_DESC)
@@ -221,9 +260,34 @@ SPLUS_SEX_MASK_STARS_DESC = f'''
 '''
 
 def sex_mask_stars_args(args):
+    '''
+    A specific parser for command-line arguments used in the `sex_mask_stars` function.
+
+    Parameters
+    ----------
+    args : :class:`argparse.Namespace`
+        Command-line arguments parsed by :function:`argparse.ArgumentParser.parse_args()`
+
+    Returns
+    -------
+    :class:`argparse.Namespace`
+        Parsed command-line arguments.
+    '''
     return get_lupton_RGB_argsparse(scubes_argparse(args))
     
 def sex_mask_stars():
+    '''
+    Uses S-PLUS detection image and SExtractor to identify stars on the FOV.
+
+    Raises
+    ------
+    SystemExit
+        If the detection file exists.
+
+    Returns
+    -------
+    None
+    '''
     from .mask_stars import maskStars
     from .headers import get_author
     

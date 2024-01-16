@@ -5,6 +5,21 @@ from datetime import datetime
 from astropy.coordinates import SkyCoord
 
 def print_level(msg, level=0, verbose=0):
+    '''
+    Print a message with a specified verbosity level.
+
+    Parameters
+    ----------
+    msg : str
+        The message to be printed.
+
+    level : int, optional
+        The verbosity level of the message. Defaults to 0.
+
+    verbose : int, optional
+        The overall verbosity level. Messages with verbosity levels less than or equal to
+        this value will be printed. Defaults to 0.
+    '''    
     import __main__ as main
     try:
         __script_name__ = basename(main.__file__)
@@ -15,6 +30,22 @@ def print_level(msg, level=0, verbose=0):
         print(f'[{datetime.now().isoformat()}] - {__script_name__}: {msg}')
 
 def check_units(ra, dec):
+    '''
+    Check and add units to the input coordinates if units are missing.
+
+    Parameters
+    ----------
+    ra : str or numeric
+        Right ascension coordinate.
+
+    dec : str or numeric
+        Declination coordinate.
+
+    Returns
+    -------
+    tuple
+        Tuple containing the checked and possibly modified right ascension and declination.
+    '''    
     # Pattern to match: any letter (a-z, A-Z) or "°"
     # Default unit is degrees, so if no unit, then is assumed as degs. 
     def check_deg(input_string):
@@ -42,10 +73,25 @@ def check_units(ra, dec):
     return check(ra), check(dec)
 
 def convert_coord_to_degrees(ra, dec, frame='icrs'):
-    """
-    Convert the coordinate to degrees.
-    This should be called before any specific function that requires coordinates.
-    """
+    '''
+    Convert the input celestial coordinates to degrees.
+
+    Parameters
+    ----------
+    ra : str or numeric
+        Right ascension coordinate.
+
+    dec : str or numeric
+        Declination coordinate.
+
+    frame : str, optional
+        Reference frame for the coordinates. Defaults to 'icrs'.
+
+    Returns
+    -------
+    tuple
+        Tuple containing the right ascension and declination converted to degrees.
+    '''
     ra, dec = check_units(ra, dec)
 
     # Create a SkyCoord object
@@ -55,18 +101,19 @@ def convert_coord_to_degrees(ra, dec, frame='icrs'):
     return c.ra.deg, c.dec.deg
 
 def read_first_line(filename):
-    """Return the first record of the given filename
+    '''
+    Return the first non-commented record of the given filename.
 
     Parameters
     ----------
     filename : str
-        The name of the file for which to get the first record
+        The name of the file for which to get the first record.
 
     Returns
     -------
     str
-        The first not commented record found in the given filename
-    """
+        The first non-commented record found in the given filename.
+    '''
     with open(filename) as f:
         l = f.readline()
         # jump comments

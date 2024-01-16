@@ -1,22 +1,32 @@
 import numpy as np
 
 def robustStat(arr, sigma=3, iters=5, med=False):
-    """
+    '''
     Computes various robust statistics for an input array.
 
-    Args:
-        arr (numpy array): The input array.
-        sigma (float, optional): The number of standard deviations allowed for data to be considered as outlier.
-            Defaults to 3.
-        iters (int, optional): The number of iterations to perform the outlier rejection process. Defaults to 5.
-        array. If not None, this overrides the `sigma` and `iters` parameters. Defaults to None.
-        med (bool, optional): If True, use the median absolute deviation (MAD) instead of the standard deviation for
-            outlier rejection. Defaults to False.
+    Parameters
+    ----------
+    arr : numpy array
+        The input array.
 
-    Returns:
-        dict: A dictionary containing the maximum, minimum, mean, median, standard deviation, fraction of rejected
-            data points, robust standard deviation (nmad), and robust standard deviation (rms) of the input array.
-    """
+    sigma : float, optional
+        The number of standard deviations allowed for data to be considered as an outlier.
+        Defaults to 3.
+        
+    iters : int, optional
+        The number of iterations to perform the outlier rejection process. Defaults to 5.
+
+    med : bool, optional
+        If True, use the median absolute deviation (MAD) instead of the standard deviation for
+        outlier rejection. Defaults to False.
+
+    Returns
+    -------
+    dict
+        A dictionary containing the maximum, minimum, mean, median, standard deviation,
+        fraction of rejected data points, robust standard deviation (nmad), and robust
+        standard deviation (rms) of the input array.
+    '''
     from astropy.stats import mad_std
 
     arr = np.array(list(filter(lambda v: v==v, arr)))
