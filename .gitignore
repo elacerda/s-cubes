@@ -1,8 +1,0 @@
-wdir
-workdir
-.venv
-build
-__pycache__
-*.egg*
-**/.DS_Store
-

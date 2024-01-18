@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>README &mdash; S-Cubes 0.13.0-beta documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=b7963fea"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="s-cubes" href="modules.html" />
+    <link rel="prev" title="S-Cubes documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            S-Cubes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">README</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#entry-point-scripts">Entry-point scripts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scubes-running-example"><code class="docutils literal notranslate"><span class="pre">scubes</span></code> Running example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">s-cubes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">S-Cubes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">README</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/README.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="readme">
+<h1>README<a class="headerlink" href="#readme" title="Permalink to this heading"></a></h1>
+<p>Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository
+include data files to calibrate stamps with iDR4 zero-points correction
+and SExtractor to identify stars along the stamp (optionally).</p>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Python 3.10</p></li>
+<li><p><strong>SExtractor</strong> installed either <em>locally</em> or <em>system-wide</em></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sewpy</span></code> <a class="reference external" href="https://github.com/megalut/sewpy">SExtractor python
+wrapper</a> is added to this
+repository as a git submodule.</p></li>
+<li><p>An user account at <a class="reference external" href="https://splus.cloud/">S-PLUS Cloud</a> in order
+to access the necessary data.</p></li>
+</ul>
+</section>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>Clone repository with the <code class="docutils literal notranslate"><span class="pre">sewpy</span></code> submodule:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">git clone --recurse-submodules https://github.com/elacerda/s-cubes.git</span>
+<span class="go">cd s-cubes</span>
+</pre></div>
+</div>
+<p>Create and activate a virtual enviroment for the package instalation and
+usage:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python3 -m venv .venv</span>
+<span class="go">source .venv/bin/activate</span>
+</pre></div>
+</div>
+<p>Install <code class="docutils literal notranslate"><span class="pre">sewpy</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cd external/sewpy &amp;&amp; pip3 install . &amp;&amp; cd -</span>
+</pre></div>
+</div>
+<p>Install S-Cubes (go back to s-cubes directory)</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">pip3 install .</span>
+</pre></div>
+</div>
+</section>
+<section id="entry-point-scripts">
+<h2>Entry-point scripts<a class="headerlink" href="#entry-point-scripts" title="Permalink to this heading"></a></h2>
+<p>This package includes three entry-point command-line scripts:
+<code class="docutils literal notranslate"><span class="pre">scubes</span></code>, <code class="docutils literal notranslate"><span class="pre">sex_mask_stars</span></code> and <code class="docutils literal notranslate"><span class="pre">get_lupton_RGB</span></code>. In order to
+obtain a detailed description and the script usage run them with
+<strong>–help</strong> argument.</p>
+</section>
+<section id="scubes-running-example">
+<h2><code class="docutils literal notranslate"><span class="pre">scubes</span></code> Running example<a class="headerlink" href="#scubes-running-example" title="Permalink to this heading"></a></h2>
+<p>This example will create a <strong>500x500</strong> pixels cube (at
+redshift=<em>0.009627</em>) with the 12-bands images from <strong>S-PLUS TILE
+HYDRA-0045</strong> for the <em>NGC3312</em> galaxy. The fluxes and errors are
+calculated based on the calibration of the zero points of <strong>S-PLUS
+iDR4</strong> (<em>data package included</em>), but they are <strong>not corrected for
+Galactic extinction</strong>.</p>
+<p>The stamps are made centered at coordinates RA <em>10h37m02.5s</em> and DEC
+<em>-27d33’56”</em>. Examples of how RA and DEC will be parsed by the code:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>RA=03h28m19.59s                 RA(parsed)=03h28m19.59s
+DEC=-31d04m05.26392275s         DEC(parsed)=-31d04m05.26392275s
+astropy.coordinates.SkyCoord() object:
+&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (52.081625, -31.06812887)&gt;
+
+RA=03:28:19.59                  RA(parsed)=03:28:19.59°
+DEC=-31:04:05.26392275          DEC(parsed)=-31:04:05.26392275°
+astropy.coordinates.SkyCoord() object:
+&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (3.47210833, -31.06812887)&gt;
+
+RA=03d28&#39;19.59&quot;                 RA(parsed)=03d28&#39;19.59&quot;
+DEC=-31d04&#39;05.26392275&quot;         DEC(parsed)=-31d04&#39;05.26392275&quot;
+astropy.coordinates.SkyCoord() object:
+&lt;SkyCoord (ICRS): (ra, dec) in deg
+    (3.47210833, -31.06812887)&gt;
+</pre></div>
+</div>
+<p>The resultant files will be created at directory <em>workdir</em>.</p>
+<p>The program also uses SExtractor in order to create a spatial mask of
+stars, attempting to remove the areas enclosed by the brightest ones
+along the FOV (<em>-M</em> optional argument). Do not forget to include the
+SExtractor executable path using the option <em>-x</em>.</p>
+<p>The call to the entry-point script <code class="docutils literal notranslate"><span class="pre">scubes</span></code> to this example would be:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">scubes -I -M -F --w workdir -l 500 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\&#39;56\&quot; NGC3312 0.009627</span>
+</pre></div>
+</div>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this heading"></a></h2>
+<p>This code is distributed under the <a class="reference external" href="LICENSE">GNU GENERAL PUBLIC LICENSE
+v3.0</a>. Please refer to the <code class="docutils literal notranslate"><span class="pre">LICENSE.txt</span></code> file in the
+repository for more details.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="S-Cubes documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-right" title="s-cubes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Eduardo Alberto Duarte Lacerda, Fábio Herpich.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
