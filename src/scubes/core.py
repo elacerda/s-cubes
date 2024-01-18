@@ -738,7 +738,8 @@ class SCubes:
         ctrl = self.control
 
         # CUBE CHECK
-        cube_filename = f'{ctrl.prefix_filename}_cube.fits'
+        #cube_filename = f'{ctrl.prefix_filename}_cube.fits'
+        cube_filename = f'{self.galaxy.name}_cube.fits'
         cube_path = join(ctrl.output_dir, cube_filename)
         if exists(cube_path) and not ctrl.redo:
             raise OSError('Cube exists!')
