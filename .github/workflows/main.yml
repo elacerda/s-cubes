@@ -1,4 +1,4 @@
-name: CI
+name: Compile and publish documentation
 
 on:
   push:
