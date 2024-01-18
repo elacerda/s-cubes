@@ -43,7 +43,7 @@ def detection_image_hdul(conn, wcs=False, **kwargs):
         information. Default is False.
 
     **kwargs : dict
-        Additional keyword arguments to be passed to :function:`conn.stamp_detection`.
+        Additional keyword arguments to be passed to :meth:`conn.stamp_detection`.
 
     Returns
     -------
@@ -84,7 +84,7 @@ def get_lupton_rgb(conn, transpose=False, save_img=False, filename=None, **kwarg
         the default filename is 'OBJECT.png'.
 
     **kwargs : dict
-        Additional keyword arguments to be passed to :function:`conn.lupton_rgb`.
+        Additional keyword arguments to be passed to :meth:`conn.lupton_rgb`.
 
     Returns
     -------

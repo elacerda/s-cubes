@@ -86,7 +86,7 @@ def scubes_argparse(args):
     Parameters
     ----------
     args : :class:`argparse.Namespace`
-        Command-line arguments parsed by :function:`argparse.ArgumentParser.parse_args()`
+        Command-line arguments parsed by :meth:`argparse.ArgumentParser.parse_args`
 
     Returns
     -------
@@ -163,7 +163,7 @@ def get_lupton_RGB_argsparse(args):
     Parameters
     ----------
     args : :class:`argparse.Namespace`
-        Command-line arguments parsed by :function:`argparse.ArgumentParser.parse_args()`
+        Command-line arguments parsed by :meth:`argparse.ArgumentParser.parse_args`
 
     Returns
     -------
@@ -266,7 +266,7 @@ def sex_mask_stars_args(args):
     Parameters
     ----------
     args : :class:`argparse.Namespace`
-        Command-line arguments parsed by :function:`argparse.ArgumentParser.parse_args()`
+        Command-line arguments parsed by :meth:`argparse.ArgumentParser.parse_args`
 
     Returns
     -------

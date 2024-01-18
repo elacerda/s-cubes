@@ -21,7 +21,7 @@ class _control(control):
     Parameters
     ----------
     args : :class:`argparse.Namespace`
-        Command-line arguments parsed by :function:`argparse.ArgumentParser.parse_args()` 
+        Command-line arguments parsed by :meth:`argparse.ArgumentParser.parse_args` 
         for control and configuration.
     
     output_dir : str, optional
@@ -38,7 +38,7 @@ class maskStars:
     Parameters
     ----------
     args : :class:`argparse.Namespace`
-        Command-line arguments parsed by :function:`argparse.ArgumentParser.parse_args()` 
+        Command-line arguments parsed by :meth:`argparse.ArgumentParser.parse_args` 
         for control and configuration.
 
     detection_image : str
