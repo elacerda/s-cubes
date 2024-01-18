@@ -9,7 +9,7 @@ import os
 import sys
 import sphinx_rtd_theme
 
-sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../'))
 
 project = 'S-Cubes'
 copyright = '2024, Eduardo Alberto Duarte Lacerda, Fábio Herpich'
