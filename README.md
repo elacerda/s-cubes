@@ -1,6 +1,6 @@
 # S-Cubes
 
-Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository include data files to calibrate stamps with iDR4 zero-points correction and SExtractor to identify stars along the stamp (optionally).
+Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository include data files to calibrate stamps with iDR4 zero-points correction and SExtractor to identify stars along the stamp (optionally). 
 
 ## Requirements
 
@@ -44,7 +44,7 @@ This package includes three entry-point command-line scripts: `scubes`, `sex_mas
 
 ## `scubes` Running example
 
-This example will create a **500x500** pixels cube (at redshift=*0.009627*) with the 12-bands images from **S-PLUS TILE _HYDRA-0045_** for the *NGC3312* galaxy. The fluxes and errors are calculated based on the calibration of the zero points of **S-PLUS iDR4** (*data package included*). 
+This example will create a **500x500** pixels cube (at redshift=*0.009627*) with the 12-bands images from **S-PLUS TILE _HYDRA-0045_** for the *NGC3312* galaxy. The fluxes and errors are calculated based on the calibration of the zero points of **S-PLUS iDR4** (*data package included*), but they are **not corrected for Galactic extinction**.
 
 The stamps are made centered at coordinates RA *10h37m02.5s* and DEC *-27d33'56"*. Examples of how RA and DEC will be parsed by the code:
 
