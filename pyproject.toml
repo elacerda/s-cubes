@@ -44,7 +44,7 @@ get_lupton_RGB = "scubes.entry_points:get_lupton_RGB"
 sex_mask_stars = "scubes.entry_points:sex_mask_stars"
 
 [project.urls]
-Homepage = "https://github.com/elacerda/s-cubes"
+Documentation = "http://elacerda.github.io/s-cubes"
 
 [tool.setuptools_scm]
 
