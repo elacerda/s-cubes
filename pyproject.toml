@@ -27,6 +27,7 @@ dependencies = [
     "tqdm",
     "photutils",
     "splusdata",
+    "sewpy @ git+https://github.com/megalut/sewpy.git@master"
 ]
 dynamic = ["version", "readme"]
 

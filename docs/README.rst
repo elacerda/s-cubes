@@ -10,23 +10,13 @@ Requirements
 
 -  Python 3.10
 -  **SExtractor** installed either *locally* or *system-wide*
--  ``sewpy`` `SExtractor python
-   wrapper <https://github.com/megalut/sewpy>`__ is added to this
-   repository as a git submodule.
 -  An user account at `S-PLUS Cloud <https://splus.cloud/>`__ in order
    to access the necessary data.
 
 Installation
 ------------
 
-Clone repository with the ``sewpy`` submodule:
-
-.. code:: console
-
-   git clone --recurse-submodules https://github.com/elacerda/s-cubes.git
-   cd s-cubes
-
-Create and activate a virtual enviroment for the package instalation and
+*(optional)* Create and activate a virtual enviroment for the package instalation and
 usage:
 
 .. code:: console
