@@ -18,7 +18,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Checkout submodules
-      run: git submodule update --init --recursive && pip cd external/sewpy && pip install . && cd -
+      run: |
+        git submodule update --init --recursive 
+        cd external/sewpy 
+        pip install . 
+        cd -
     - id: deployment
       uses: sphinx-notes/pages@v3
       with:
