@@ -248,6 +248,8 @@ class SCubes:
         self._conn = None
         self.args = args
         self.control = _control(self.args)
+        self.detection_image = None
+        self.lupton_rgb_filename = None
         self._init_galaxy()
         self._init_spectra()
 
@@ -491,6 +493,10 @@ class SCubes:
         zpt.columns = cols
         # New class properties
         self.zptab = zpt[zpt['Field'] == ctrl.tile]
+        if self.zptab.size == 0:
+            print_level(f'{ctrl.tile}: not found in zero-points table')
+            self.remove_downloaded_data()
+            sys.exit(1)
         self.get_zero_points_correction()
 
     def add_magzp_headers(self):
@@ -506,7 +512,11 @@ class SCubes:
             #h = fits.getheader(img, ext=1)
             h['TILE'] = ctrl.tile
             filtername = h['FILTER']
+            print(filtername)
+            #try:
             zp = float(self.zptab[NAMES_CORRESPONDENT[filtername]].item())
+            #except:
+
             x0 = h['X0TILE']
             y0 = h['Y0TILE']
             zp += round(self.zpcorr[filtername](x0, y0)[0][0], 5)
@@ -714,11 +724,12 @@ class SCubes:
             remove(wf)
         files_to_remove = [self.detection_image, self.lupton_rgb_filename]
         for f in files_to_remove:
-            if isfile(f):
-                print_level(f'removing file {f}', 1, ctrl.verbose)
-                remove(f)
-            else:
-                print_level(f'file {f} do not exists', 1, ctrl.verbose)
+            if f is not None:
+                if isfile(f):
+                    print_level(f'removing file {f}', 1, ctrl.verbose)
+                    remove(f)
+                else:
+                    print_level(f'file {f} do not exists', 1, ctrl.verbose)
 
     def create_cube(self, flam_scale=None):
         '''
