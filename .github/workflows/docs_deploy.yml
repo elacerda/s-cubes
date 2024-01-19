@@ -20,7 +20,7 @@ jobs:
       with:
         documentation_path: ./docs
         requirements_path: ./docs/requirements.txt
-        cache: true
+        cache: false
 #    - uses: peaceiris/actions-gh-pages@v3
 #      with:
 #        github_token: ${{ secrets.GITHUB_TOKEN }}
