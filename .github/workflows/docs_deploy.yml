@@ -15,12 +15,17 @@ jobs:
       pages: write
       id-token: write    
     steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Checkout submodules
+      run: git submodule update --init --recursive && pip cd external/sewpy && pip install . && cd -
     - id: deployment
       uses: sphinx-notes/pages@v3
       with:
         documentation_path: ./docs
         requirements_path: ./docs/requirements.txt
         cache: false
+        checkout: false
 #    - uses: peaceiris/actions-gh-pages@v3
 #      with:
 #        github_token: ${{ secrets.GITHUB_TOKEN }}
