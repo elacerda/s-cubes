@@ -4,7 +4,7 @@ from os.path import isfile
 from astropy.io import fits
 from os import getcwd, remove
 
-from . import __author__, __zp_cat__, __zpcorr_path__
+from . import __author__, __zp_cat__, __zpcorr_path__, __version__
 from .constants import WAVE_EFF
 
 from .utilities.io import print_level
@@ -125,8 +125,9 @@ def scubes():
     '''
     from .core import SCubes
 
-
     parser = create_parser(args_dict=SPLUS_ARGS, program_description=SPLUS_PROG_DESC)
+    # ADD VERSION OPTION
+    parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
     args = scubes_argparse(parser.parse_args(args=sys.argv[1:]))
     scubes = SCubes(args)
     scubes.create_cube(flam_scale=None)
