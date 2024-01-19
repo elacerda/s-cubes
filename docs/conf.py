@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath('../'))
 project = 'S-Cubes'
 copyright = '2024, Eduardo Alberto Duarte Lacerda and Fábio Herpich'
 author = 'Eduardo Alberto Duarte Lacerda and Fábio Herpich'
-release = '0.13.0-beta'
+version = release = '1.0.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
