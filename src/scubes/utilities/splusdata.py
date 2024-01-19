@@ -42,7 +42,7 @@ def detection_image_hdul(conn, wcs=False, **kwargs):
         If True, update the header with World Coordinate System (WCS)
         information. Default is False.
 
-    **kwargs : dict
+    \**kwargs : dict
         Additional keyword arguments to be passed to :meth:`conn.stamp_detection`.
 
     Returns
@@ -83,7 +83,7 @@ def get_lupton_rgb(conn, transpose=False, save_img=False, filename=None, **kwarg
         The filename to save the RGB image if `save_img` is True. If None,
         the default filename is 'OBJECT.png'.
 
-    **kwargs : dict
+    \**kwargs : dict
         Additional keyword arguments to be passed to :meth:`conn.lupton_rgb`.
 
     Returns

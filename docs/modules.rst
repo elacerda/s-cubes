@@ -1,5 +1,5 @@
-s-cubes
-=======
+scubes
+======
 
 .. toctree::
    :maxdepth: 4

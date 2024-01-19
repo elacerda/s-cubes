@@ -12,8 +12,8 @@ import sphinx_rtd_theme
 sys.path.insert(0, os.path.abspath('../'))
 
 project = 'S-Cubes'
-copyright = '2024, Eduardo Alberto Duarte Lacerda, Fábio Herpich'
-author = 'Eduardo Alberto Duarte Lacerda, Fábio Herpich'
+copyright = '2024, Eduardo Alberto Duarte Lacerda and Fábio Herpich'
+author = 'Eduardo Alberto Duarte Lacerda and Fábio Herpich'
 release = '0.13.0-beta'
 
 # -- General configuration ---------------------------------------------------
@@ -22,7 +22,7 @@ release = '0.13.0-beta'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_rtd_theme',
-    'sphinx.ext.napoleon',
+#    'sphinx.ext.napoleon',
 ]
 
 templates_path = ['_templates']
