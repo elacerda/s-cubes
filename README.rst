@@ -28,6 +28,12 @@ Requirements
 Installation
 ------------
 
+Clone the project:
+
+.. code:: console
+
+   git clone https://github.com/elacerda/s-cubes.git
+   
 *(optional)* Create and activate a virtual enviroment for the package
 instalation and usage:
 
