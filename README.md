@@ -1,8 +1,8 @@
 # S-Cubes
 
-![GitHub Tag](https://img.shields.io/github/v/tag/elacerda/s-cubes)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/elacerda/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?link=https%3A%2F%2Felacerda.github.io%2Fs-cubes%2F)
-[![GitHub License](https://img.shields.io/github/license/elacerda/s-cubes)](https://img.shields.io/github/license/elacerda/s-cubes?link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes%2Fblob%2Fmain%2FLICENSE.txt)
+![GitHub Tag](https://img.shields.io/github/v/tag/elacerda/s-cubes?include_prereleases&label=version&link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/elacerda/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?label=gh-pages&link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes%2Fblob%2Fmain%2F.github%2Fworkflows%2Fdocs_deploy.yml)
+![GitHub License](https://img.shields.io/github/license/elacerda/s-cubes?link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes%2Fblob%2Fmain%2FLICENSE.txt)
 
 Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository include data files to calibrate stamps with iDR4 zero-points correction and SExtractor to identify stars along the stamp (optionally). 
 
