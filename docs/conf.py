@@ -7,9 +7,14 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import os
 import sys
+import shutil
 import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../'))
+source = '../README.rst'
+destination = 'README.rst'
+
+shutil.copy(source, destination)
 
 project = 'S-Cubes'
 copyright = '2024, Eduardo Alberto Duarte Lacerda and Fábio Herpich'
