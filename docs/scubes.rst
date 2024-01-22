@@ -5,12 +5,9 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    scubes.utilities
-
-Submodules
-----------
 
 scubes.constants module
 -----------------------
@@ -56,14 +53,6 @@ scubes.mask\_stars module
 -------------------------
 
 .. automodule:: scubes.mask_stars
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: scubes
    :members:
    :undoc-members:
    :show-inheritance:

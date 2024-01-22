@@ -14,11 +14,10 @@ S-Cubes documentation
    :alt: GitHub License
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Contents:
+   :maxdepth: 2
 
-   README <../README.rst>
-   modules
+   README
+   scubes
 
 Indices and tables
 ==================

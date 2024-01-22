@@ -1,9 +1,6 @@
 scubes.utilities package
 ========================
 
-Submodules
-----------
-
 scubes.utilities.args module
 ----------------------------
 
@@ -56,14 +53,6 @@ scubes.utilities.stats module
 -----------------------------
 
 .. automodule:: scubes.utilities.stats
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: scubes.utilities
    :members:
    :undoc-members:
    :show-inheritance:
