@@ -46,7 +46,7 @@ instalation and usage:
    python3 -m venv .venv
    source .venv/bin/activate
 
-Install S-Cubes (go back to s-cubes directory)
+Install S-Cubes:
 
 .. code:: console
 
