@@ -10,6 +10,8 @@ import sys
 import shutil
 import sphinx_rtd_theme
 
+from scubes import __version__
+
 sys.path.insert(0, os.path.abspath('../'))
 source = '../README.rst'
 destination = 'README.rst'
@@ -19,7 +21,7 @@ shutil.copy(source, destination)
 project = 'S-Cubes'
 copyright = '2024, Eduardo Alberto Duarte Lacerda and Fábio Herpich'
 author = 'Eduardo Alberto Duarte Lacerda and Fábio Herpich'
-version = release = '1.0.0'
+version = release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
