@@ -17,10 +17,6 @@ S-Cubes
    :target: https://elacerda.github.io/s-cubes/index.html
    :alt: Website
 
-.. toctree::
-   :maxdepth: 3
-   :glob:
-
 Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository
 include data files to calibrate stamps with iDR4 zero-points correction
 and SExtractor to identify stars along the stamp (optionally).
