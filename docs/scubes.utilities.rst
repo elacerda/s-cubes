@@ -1,5 +1,5 @@
-scubes.utilities package
-========================
+scubes.utilities
+================
 
 scubes.utilities.args module
 ----------------------------

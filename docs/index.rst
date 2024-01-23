@@ -6,18 +6,14 @@
 S-Cubes documentation
 =====================
 
-.. image:: https://img.shields.io/github/v/tag/elacerda/s-cubes?include_prereleases&label=version&link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes
-   :alt: GitHub Tag
-.. image:: https://img.shields.io/github/actions/workflow/status/elacerda/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?label=gh-pages&link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes%2Fblob%2Fmain%2F.github%2Fworkflows%2Fdocs_deploy.yml
-   :alt: GitHub Actions Workflow Status
-.. image:: https://img.shields.io/github/license/elacerda/s-cubes?link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes%2Fblob%2Fmain%2FLICENSE.txt
-   :alt: GitHub License
-
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
+   :glob:
+   :caption: S-Cubes package
 
-   README
    scubes
+   
+.. include:: ../README.rst
 
 Indices and tables
 ==================
