@@ -17,7 +17,7 @@ S-Cubes homepage
 .. toctree::
    :maxdepth: 3
    :glob:
-   :caption: S-Cubes package
+   :caption: scubes package
 
    scubes
    
