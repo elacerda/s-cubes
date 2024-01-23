@@ -51,7 +51,7 @@ SPLUS_ARGS = {
     'clean': ['c', dict(action='store_true', default=False, help='Clean intermediate files after processing.')],
     'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files.')],
     'bands': ['b', dict(default=list(WAVE_EFF.keys()), nargs='+', help='List of S-PLUS bands (space separated).')],
-    'size': ['l', dict(default=500, type=int, help='Size of the cube in pixels.')],
+    'size': ['l', dict(default=500, type=int, help='Size of the cube in pixels. If size is a odd number, the program will choose the closest even integer.')],
     'no_interact': ['N', dict(action='store_true', default=False, help='Run only the automatic stars mask (a.k.a. do not check final mask)')],
     'work_dir': ['w', dict(default=getcwd(), help='Working directory.')],
     'output_dir': ['o', dict(default=getcwd(), help='Output directory.')],
@@ -93,6 +93,9 @@ def scubes_argparse(args):
     :class:`argparse.Namespace`
         Command-line arguments parsed.
     '''
+    # closest even
+    args.size = round(args.size/2)*2
+
     _sex = which(args.sextractor)
     if _sex is None:
         print_level(f'{args.sextractor}: SExtractor exec not found', 1, args.verbose)
