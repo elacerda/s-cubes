@@ -76,7 +76,6 @@ SPLUS_ARGS = {
     'ra': ['pos', dict(metavar='RA', help="Galaxy's right ascension")],
     'dec': ['pos', dict(metavar='DEC', help="Galaxy's declination")],
     'galaxy': ['pos', dict(metavar='GALAXY_NAME', help="Galaxy's name")],
-    'specz': ['pos', dict(type=float, metavar='REDSHIFT', help='Spectroscopic or photometric redshift of the galaxy')],
 }
 
 def scubes_argparse(args):

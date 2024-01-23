@@ -38,9 +38,6 @@ class _galaxy:
     name : str
         Name of the galaxy.
 
-    redshift : float
-        Redshift of the galaxy.
-
     Methods
     -------
     skycoord(frame='icrs')
@@ -53,7 +50,6 @@ class _galaxy:
     ra: u.quantity.Quantity
     dec: u.quantity.Quantity
     name: str
-    redshift: float
 
     def skycoord(self, frame='icrs'):
         '''
@@ -262,7 +258,6 @@ class SCubes:
         gal.ra = self.control.ra
         gal.dec = self.control.dec
         gal.name = self.control.galaxy
-        gal.redshift = self.control.specz
         self.galaxy.coords = self.galaxy.skycoord()
 
     def _init_spectra(self):
@@ -384,7 +379,7 @@ class SCubes:
         Create a _galaxy object.
         '''
         c = self.control
-        return _galaxy(ra=c.ra, dec=c.dec, name=c.galaxy, redshift=c.specz)
+        return _galaxy(ra=c.ra, dec=c.dec, name=c.galaxy)
     
     def check_zero_points(self):
         '''
@@ -775,8 +770,6 @@ class SCubes:
         
         # CREATE CUBE
         prim_hdu = fits.PrimaryHDU()
-        prim_hdu.header['SPECZ'] = (ctrl.specz, 'Spectroscopic redshift')
-        prim_hdu.header['PHOTZ'] = ('', 'Photometric redshift')
         prim_hdu.header['TILE'] = ctrl.tile
         prim_hdu.header['GALAXY'] = self.galaxy.name
         for _k in ['X0TILE', 'Y0TILE']:
