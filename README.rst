@@ -17,9 +17,12 @@ S-Cubes
    :target: https://elacerda.github.io/s-cubes/index.html
    :alt: Website
 
-Make galaxy cubes (X, Y, Lambda) with S-PLUS data. This repository
-include data files to calibrate stamps with iDR4 zero-points correction
-and SExtractor to identify stars along the stamp (optionally).
+S-Cubes is a python package designed to make galaxy cubes (X, Y, Lambda) with S-PLUS data. 
+The S-Cubes repository includes the scubes python package which allows the users to create 
+their own codes. It also includes the data files to calibrate stamps with iDR4 zero-points 
+correction and SExtractor to identify stars along the stamp (optionally).
+
+.. _require:
 
 Requirements
 ------------
@@ -28,6 +31,8 @@ Requirements
 -  **SExtractor** installed either *locally* or *system-wide*
 -  An user account at `S-PLUS Cloud <https://splus.cloud/>`__ in order
    to access the necessary data.
+
+.. _install:
 
 Installation
 ------------
@@ -52,6 +57,8 @@ Install S-Cubes:
 
    pip3 install .
 
+.. _scripts:
+
 Entry-point scripts
 -------------------
 
@@ -59,6 +66,8 @@ This package includes three entry-point command-line scripts:
 ``scubes``, ``sex_mask_stars`` and ``get_lupton_RGB``. In order to
 obtain a detailed description and the script usage run them with
 **–help** argument.
+
+.. _example:
 
 ``scubes`` Running example
 ..........................
@@ -105,14 +114,11 @@ The call to the entry-point script ``scubes`` to this example would be:
 
    scubes -I -M -F --w workdir -l 500 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312
 
+.. _license:
+
 License
 -------
 
 This code is distributed under the `GNU GENERAL PUBLIC LICENSE
 v3.0 <LICENSE>`__. Please refer to the ``LICENSE.txt`` file in the
 repository for more details.
-
-.. |GitHub Tag| image:: https://img.shields.io/github/v/tag/elacerda/s-cubes?include_prereleases&label=version&link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes
-.. |GitHub Actions Workflow Status| image:: https://img.shields.io/github/actions/workflow/status/elacerda/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?link=https%3A%2F%2Felacerda.github.io%2Fs-cubes%2F
-.. |GitHub License| image:: https://img.shields.io/github/license/elacerda/s-cubes
-   :target: https://img.shields.io/github/license/elacerda/s-cubes?link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes%2Fblob%2Fmain%2FLICENSE.txt

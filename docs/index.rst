@@ -3,8 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-S-Cubes documentation
-=====================
+S-Cubes homepage
+================
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+   :caption: Package documentation
+
+   gstart
+   makecube
 
 .. toctree::
    :maxdepth: 3
@@ -13,8 +21,6 @@ S-Cubes documentation
 
    scubes
    
-.. include:: ../README.rst
-
 Indices and tables
 ==================
 
