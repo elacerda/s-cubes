@@ -1,4 +1,3 @@
-from importlib import resources
 from importlib.metadata import version, metadata
 
 from . import data
