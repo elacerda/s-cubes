@@ -42,3 +42,10 @@ The call to the entry-point script ``scubes`` to this example would be:
 .. code:: console
 
    scubes -I -M -F --w workdir -l 500 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312
+
+See the script help for more options:
+
+.. code:: console
+
+    scubes --help
+    

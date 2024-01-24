@@ -9,7 +9,7 @@ S-Cubes homepage
 .. toctree::
    :maxdepth: 2
    :glob:
-   :caption: Package documentation
+   :caption: Documentation
 
    gstart
    makecube
