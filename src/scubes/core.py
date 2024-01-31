@@ -507,11 +507,7 @@ class SCubes:
             #h = fits.getheader(img, ext=1)
             h['TILE'] = ctrl.tile
             filtername = h['FILTER']
-            print(filtername)
-            #try:
             zp = float(self.zptab[NAMES_CORRESPONDENT[filtername]].item())
-            #except:
-
             x0 = h['X0TILE']
             y0 = h['Y0TILE']
             zp += round(self.zpcorr[filtername](x0, y0)[0][0], 5)
@@ -747,6 +743,7 @@ class SCubes:
         #cube_filename = f'{ctrl.prefix_filename}_cube.fits'
         cube_filename = f'{self.galaxy.name}_cube.fits'
         cube_path = join(ctrl.output_dir, cube_filename)
+        self.cube_path = cube_path
         if exists(cube_path) and not ctrl.redo:
             raise OSError('Cube exists!')
         
