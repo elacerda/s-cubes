@@ -56,3 +56,11 @@ scubes.utilities.stats module
    :members:
    :undoc-members:
    :show-inheritance:
+
+scubes.utilities.utils module
+-----------------------------
+
+.. automodule:: scubes.utilities.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,5 +1,4 @@
 import numpy as np
-from importlib import resources
 from regions import PixCoord, CirclePixelRegion
 
 from .data import sex
