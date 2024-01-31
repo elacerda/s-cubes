@@ -11,7 +11,7 @@ S-Cubes homepage
    :alt: GitHub Tag
 
 .. image:: https://img.shields.io/github/actions/workflow/status/elacerda/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?label=gh-pages
-   :target: https://github.com/elacerda/s-cubes/blob/main/.githu/workflows/docs_deploy.yml 
+   :target: https://github.com/elacerda/s-cubes/blob/main/.github/workflows/docs_deploy.yml 
    :alt: GitHub Actions Workflow Status
 
 .. image:: https://img.shields.io/github/license/elacerda/s-cubes
