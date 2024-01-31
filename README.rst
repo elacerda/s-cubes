@@ -27,7 +27,7 @@ correction and SExtractor to identify stars along the stamp (optionally).
 Requirements
 ------------
 
--  Python 3.10
+-  Python 3.8
 -  **SExtractor** installed either *locally* or *system-wide*
 -  An user account at `S-PLUS Cloud <https://splus.cloud/>`__ in order
    to access the necessary data.
