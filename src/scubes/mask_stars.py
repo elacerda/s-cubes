@@ -1,9 +1,9 @@
 import sys
 from os import remove
-from os.path import join
 from astropy.wcs import WCS
 from astropy.io import fits
 from .control import control
+from os.path import join, isfile
 from matplotlib import pyplot as plt
 from .headers import get_key, get_author
 from .constants import SPLUS_DEFAULT_SEXTRACTOR_CONFIG, SPLUS_DEFAULT_SEXTRACTOR_PARAMS
@@ -102,13 +102,16 @@ class maskStars:
                 output_file=self.detection_image.replace('detection', 'sexcat'), 
                 verbose=ctrl.verbose,
             )
+
+            files_to_remove = ['params.txt', 'conv.txt', 'config.txt', 'default.psf']
+            for _f in files_to_remove:
+                if isfile(_f):
+                    remove(join(self.output_dir, _f))
+
             if not i and ctrl.estimate_fwhm:
                 stats = robustStat(sewcat['table']['FWHM_IMAGE']) 
                 psffwhm = stats['median']*0.55
                 fits.setval(self.detection_image, 'HIERARCH OAJ PRO FWHMMEAN', value=psffwhm, comment='', ext=1)
-                files_to_remove = ['params.txt', 'conv.txt', 'config.txt', 'default.psf']
-                for _f in files_to_remove:
-                    remove(join(self.output_dir, _f))
                 input_config['SEEING_FWHM'] = psffwhm
             i += 1
         

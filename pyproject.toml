@@ -43,6 +43,7 @@ scubes = "scubes.entry_points:scubes"
 scubesml = "scubes.entry_points:scubesml"
 get_lupton_RGB = "scubes.utilities.utils:get_lupton_RGB"
 sex_mask_stars = "scubes.utilities.utils:sex_mask_stars"
+sex_mask_stars_cube = "scubes.utilities.utils:sex_mask_stars_cube"
 ml2header = "scubes.utilities.utils:ml2header"
 
 [project.urls]
