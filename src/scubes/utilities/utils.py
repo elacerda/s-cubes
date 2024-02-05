@@ -288,6 +288,20 @@ def sex_mask_stars_cube_argsparse(args):
     return args
 
 def sex_mask_stars_cube():
+    '''
+    Uses S-PLUS detection image and SExtractor to identify stars on the FOV.
+    This entry-point script uses a S-Cube as input to gather the needed 
+    information to the retrieve the correct detection image stamp.
+
+    Raises
+    ------
+    SystemExit
+        If the detection file exists.
+
+    Returns
+    -------
+    None
+    '''
     from ..mask_stars import maskStars
     from ..headers import get_author
     
