@@ -195,7 +195,7 @@ class maskStars:
         Perform star masking on the detection image.
         '''        
         ctrl = self.control
-        mask_filename = self.detection_image.replace('detection', 'mask')
+        mask_filename = self.detection_image.replace('detection', 'sexmask')
         
         hdul = fits.open(self.detection_image)
         h = hdul[1].header
