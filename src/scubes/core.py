@@ -487,7 +487,7 @@ class SCubes:
         cols = [col.replace('ZP_', '') if 'ZP_' in col else col for col in zpt.columns]
         zpt.columns = cols
         # New class properties
-        self.zptab = zpt[zpt['Field'] == ctrl.tile]
+        self.zptab = zpt[zpt['Field'].replace('_', '-') == ctrl.tile.replace('_', '-')]
         if self.zptab.size == 0:
             print_level(f'{ctrl.tile}: not found in zero-points table')
             self.remove_downloaded_data()
