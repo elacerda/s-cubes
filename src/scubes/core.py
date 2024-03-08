@@ -151,83 +151,6 @@ class SCubes:
     headers__b : list
         List of headers for each band.
 
-    Methods
-    -------
-    _init_galaxy()
-        Initialize the _galaxy object.
-
-    _init_spectra()
-        Initialize the spectra arrays.
-
-    _check_errors()
-        Check if there are any errors in the data.
-
-    _get_headers_list(images=None, ext=1)
-        Get a list of headers for the given images.
-
-    _get_data_spectra(images=None, ext=1)
-        Get the data arrays for the given images.
-
-    _header_key_spectra(key)
-        Get header values for a specific key.
-
-    _m0()
-        Get the zero-point magnitude.
-
-    _gain()
-        Get the gain values.
-
-    _effexptime()
-        Get the effective exposure time.
-
-    _galaxy()
-        Create a _galaxy object.
-
-    check_zero_points()
-        Check if zero-point magnitudes are available.
-
-    get_stamps()
-        Download stamps for each band.
-
-    get_detection_image()
-        Download the detection image.
-
-    get_lupton_rgb()
-        Download the Lupton RGB image.
-
-    get_zero_points_correction()
-        Get corrections for zero points.
-
-    get_zero_points()
-        Get zero points from the specified table.
-
-    add_magzp_headers()
-        Add magnitude zero-point values to the image headers.
-
-    calibrate_stamps()
-        Calibrate the downloaded stamps.
-
-    stamp_WCS_to_cube_header(header)
-        Convert stamp WCS to cube header.
-
-    create_metadata_hdu(keys=None)
-        Create a metadata table HDU.
-
-    spectra(flam_scale=None)
-        Calculate the spectra arrays.
-
-    download_data()
-        Download stamps, detection image, and Lupton RGB image.
-
-    create_weights_mask_hdu()
-        Create a weights mask HDU.
-
-    remove_downloaded_data()
-        Remove downloaded stamp, detection image, and Lupton RGB image files.
-
-    create_cube(flam_scale=None)
-        Create the data cube.
-
     See Also
     --------
     :class:`~_control`, :class:`~_galaxy`, :class:`control`
@@ -736,7 +659,7 @@ class SCubes:
         OSError
             Raises an error if the cube already exists and redo is not specified.
         '''        
-        flam_scale = 1e19 if flam_scale is None else flam_scale
+        flam_scale = 1e-19 if flam_scale is None else flam_scale
         ctrl = self.control
 
         # CUBE CHECK
