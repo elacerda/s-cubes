@@ -1,5 +1,8 @@
 from .utilities.sextractor import SEX_TOPHAT_FILTER, SEX_DEFAULT_STARNNW
 
+# Keys are the FILTER NAMES at the original fits.
+
+# EFF is the same as the pivot
 WAVE_EFF = {
     'U': 3563.0,
     'F378': 3770.0,
@@ -21,8 +24,14 @@ EXPTIMES = {
     'U': 681, 'G': 99, 'R': 120, 'I': 138, 'Z': 168,
 }
 
-NAMES_CORRESPONDENT = {
-    'F378': 'F378', 'F395': 'F395','F410': 'F410', 'F430': 'F430',
+FILTER_NAMES_ZP_TABLE = {
+    'F378': 'J0378', 'F395': 'J0395', 'F410': 'J0410', 'F430': 'J0430',
+    'F515': 'J0515', 'F660': 'J0660', 'F861': 'J0861', 
+    'U': 'u', 'G': 'g', 'R': 'r', 'I': 'i', 'Z': 'z',
+}
+
+FILTER_NAMES = {
+    'F378': 'F378', 'F395': 'F395', 'F410': 'F410', 'F430': 'F430',
     'F515': 'F515', 'F660': 'F660', 'F861': 'F861', 
     'U': 'uJAVA', 'G': 'gSDSS', 'R': 'rSDSS', 'I': 'iSDSS', 'Z': 'zSDSS',
 }

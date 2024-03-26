@@ -17,7 +17,7 @@ from scipy.interpolate import RectBivariateSpline
 from .control import control
 from .mask_stars import maskStars
 from .headers import get_author, get_key
-from .constants import WAVE_EFF, NAMES_CORRESPONDENT 
+from .constants import WAVE_EFF, FILTER_NAMES_ZP_TABLE, FILTER_NAMES
 
 from .utilities.io import print_level
 from .utilities.splusdata import connect_splus_cloud, detection_image_hdul, get_lupton_rgb
@@ -430,7 +430,7 @@ class SCubes:
             #h = fits.getheader(img, ext=1)
             h['TILE'] = ctrl.tile
             filtername = h['FILTER']
-            zp = float(self.zptab[NAMES_CORRESPONDENT[filtername]].item())
+            zp = float(self.zptab[FILTER_NAMES_ZP_TABLE[filtername]].item())
             x0 = h['X0TILE']
             y0 = h['Y0TILE']
             zp += round(self.zpcorr[filtername](x0, y0)[0][0], 5)
@@ -544,8 +544,9 @@ class SCubes:
             Metadata table HDU.
         '''  
         tab = []
-        names = ['FILTER', 'WAVE_EFF', 'EXPTIME']
+        names = ['FILTER', 'FILTNAME', 'WAVE_EFF', 'EXPTIME']
         tab.append(self.control.bands)
+        tab.append([FILTER_NAMES[k] for k in WAVE_EFF])
         tab.append(self.wl__b)
         tab.append(self.effexptime__b)
 
