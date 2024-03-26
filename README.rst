@@ -4,15 +4,12 @@ S-Cubes
 .. image:: https://img.shields.io/github/v/tag/elacerda/s-cubes?include_prereleases&label=version
    :target: https://github.com/elacerda/s-cubes
    :alt: GitHub Tag
-
 .. image:: https://img.shields.io/github/actions/workflow/status/elacerda/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?label=gh-pages
    :target: https://github.com/elacerda/s-cubes/blob/main/.github/workflows/docs_deploy.yml 
    :alt: GitHub Actions Workflow Status
-
 .. image:: https://img.shields.io/github/license/elacerda/s-cubes
    :target: https://github.com/elacerda/s-cubes/blob/main/LICENSE.txt
    :alt: GitHub License
-
 .. image:: https://img.shields.io/website?url=https%3A%2F%2Felacerda.github.io%2Fs-cubes%2F
    :target: https://elacerda.github.io/s-cubes/index.html
    :alt: Website
