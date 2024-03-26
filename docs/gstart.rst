@@ -49,14 +49,14 @@ Install S-Cubes:
 
 .. _scripts:
 
-Entry-point scripts
--------------------
+Entry-points
+------------
 
 This package includes various entry-point command-line scripts for 
 different tasks. They are: ``scubes``, ``scubesml``, ``get_lupton_RGB``,
 ``sex_mask_stars``, ``sex_mask_stars_cube`` and ``mltoheader``. 
 In order to obtain a detailed description and the script usage run them 
-with **–help** argument. See :ref:`How to create a cube`.
+with **–help** argument. See :ref:`How to create a cube` and :ref:`epscripts`.
 
 
 .. _lic:

@@ -1,3 +1,5 @@
+.. _createcube:
+
 How to create a cube
 ====================
 
@@ -8,27 +10,8 @@ calibration of the zero points of **S-PLUS iDR4** (*data package
 included*), but they are **not corrected for Galactic extinction**.
 
 The stamps are made centered at coordinates RA *10h37m02.5s* and DEC
-*-27d33’56"*. Examples of how RA and DEC will be parsed by the code:
-
-::
-
-   RA=03h28m19.59s                 RA(parsed)=03h28m19.59s
-   DEC=-31d04m05.26392275s         DEC(parsed)=-31d04m05.26392275s
-   astropy.coordinates.SkyCoord() object:
-   <SkyCoord (ICRS): (ra, dec) in deg
-       (52.081625, -31.06812887)>
-
-   RA=03:28:19.59                  RA(parsed)=03:28:19.59°
-   DEC=-31:04:05.26392275          DEC(parsed)=-31:04:05.26392275°
-   astropy.coordinates.SkyCoord() object:
-   <SkyCoord (ICRS): (ra, dec) in deg
-       (3.47210833, -31.06812887)>
-
-   RA=03d28'19.59"                 RA(parsed)=03d28'19.59"
-   DEC=-31d04'05.26392275"         DEC(parsed)=-31d04'05.26392275"
-   astropy.coordinates.SkyCoord() object:
-   <SkyCoord (ICRS): (ra, dec) in deg
-       (3.47210833, -31.06812887)>
+*-27d33’56"*. See :ref:`radeconv` for more information on how RA and
+DEC are parsed to the scripts.
 
 The resultant files will be created at directory *workdir*.
 
@@ -48,4 +31,8 @@ See the script help for more options:
 .. code:: console
 
     scubes --help
+    
+.. toctree::
+    :maxdepth: 2
+    :glob:
     
