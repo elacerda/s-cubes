@@ -1,7 +1,7 @@
 from .utilities.sextractor import SEX_TOPHAT_FILTER, SEX_DEFAULT_STARNNW
 
 WAVE_EFF = {
-    'U': 3536.0,
+    'U': 3563.0,
     'F378': 3770.0,
     'F395': 3940.0,
     'F410': 4094.0,
@@ -22,9 +22,9 @@ EXPTIMES = {
 }
 
 NAMES_CORRESPONDENT = {
-    'F378': 'J0378', 'F395': 'J0395','F410': 'J0410', 'F430': 'J0430', 
-    'F515': 'J0515', 'F660': 'J0660', 'F861': 'J0861', 
-    'U': 'u', 'G': 'g', 'R': 'r', 'I': 'i', 'Z': 'z',
+    'F378': 'F378', 'F395': 'F395','F410': 'F410', 'F430': 'F430',
+    'F515': 'F515', 'F660': 'F660', 'F861': 'F861', 
+    'U': 'uJAVA', 'G': 'gSDSS', 'R': 'rSDSS', 'I': 'iSDSS', 'Z': 'zSDSS',
 }
 
 SPLUS_DEFAULT_SEXTRACTOR_CONFIG = {

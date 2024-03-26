@@ -100,4 +100,3 @@ def plot_mask(detection_image, lupton_rgb, masked_ddata, resulting_mask, sewregi
         plt.close(fig)
         fig = None
     return fig     
-
