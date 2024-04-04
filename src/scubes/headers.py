@@ -10,7 +10,7 @@ MAR_KEYS = {
 
 KEYS = {
     'jype': JYPE_KEYS,
-    #'mar': MAR_KEYS,
+    'mar': MAR_KEYS,
 }
 
 AUTHORS = list(KEYS.keys())
@@ -80,5 +80,5 @@ def get_author(header):
     author = header.get('AUTHOR', None)
     if author is None:
         Warning(f'{author}: missing author, using jype dictionary')
-        author = 'jype'
+        author = 'mar'
     return author
