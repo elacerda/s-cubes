@@ -1,7 +1,7 @@
 .. _epscripts:
 
-Entry-point scripts
-===================
+Entry-point console scripts
+===========================
 
 The scubes package includes various entry-point command-line scripts for 
 different tasks. They are: :ref:`epscubes`, :ref:`epscubesml`, :ref:`epgetluptonrgb`,
@@ -36,15 +36,18 @@ Note that *10h37m2.5s* is a totally different angle from *10:37:2.5*
 
 ``scubes`` 
 ----------
+.. literalinclude:: ../src/scubes/entry_points.py
+    :language: python
+    :linenos:
+    :lines: 113-133
 
-:meth:`scubes.entry_points.scubes` is the main script of **S-Cubes**. It 
-calibrates the zero-points, calculates the fluxes and uncertainties for the 
-12-band images cropped from `S-PLUS <https://www.splus.iag.usp.br/>`__ 
-observed tiles. The stamps ared downloaded from 
-`S-PLUS Cloud <https://splus.cloud/>`__ and the zero-points for the 
-data-release 4 (DR4) are 
-`hard-coded <https://github.com/elacerda/s-cubes/tree/main/src/scubes/data>`__ 
-on the package.
+``scubes`` is the main script of **S-Cubes**. It calibrates the zero-points, 
+calculates the fluxes and uncertainties for the 12-band images cropped from 
+`S-PLUS <https://www.splus.iag.usp.br/>`__ observed tiles. The stamps are 
+downloaded from `S-PLUS Cloud <https://splus.cloud/>`__ and the zero-points 
+for the data-release 4 (DR4) are 
+`included <https://github.com/elacerda/s-cubes/tree/main/src/scubes/data>`__ 
+to the package.
 
 The usage of this script is detailed in :ref:`How to create a cube`.
 
@@ -52,28 +55,118 @@ The usage of this script is detailed in :ref:`How to create a cube`.
 
 ``scubesml`` 
 ------------
-xxx
+.. literalinclude:: ../src/scubes/entry_points.py
+    :language: python
+    :linenos:
+    :lines: 204-230
+
+``scubesml`` is the same as :ref:`epscubes` but gathering the needed input 
+information from a *masterlist*. 
+
+*Masterlist* is a csv text file in which one could gather information of a list 
+of objects to create cubes. The file must contain 11 columns with the following 
+header and informations. Some informations are not used by the program, but the 
+columns are required (marked with a **\***) in order to the code work.:
+
+#. **\*** ``SNAME``: A nickname for the object 
+#. ``NAME``: The name of the object
+#. **\*** ``FIELD``: S-PLUS Field (TILE) in which the program will search for the coordinates 
+#. **\*** ``RA__deg``: Right-ascencion in degrees 
+#. **\*** ``DEC__deg``: Declination in degrees 
+#. ``TYPE``: Morphological type of the object
+#. ``VELOCITY__kms``: Velocity of the object (in km/s)
+#. ``REDSHIFT``: Redshift of the object
+#. ``DISTANCE__Mpc``: Distance of the object in Mpc
+#. ``EBV__mag``: E(B-V) in magnitudes
+#. **\*** ``R50__pix``: R50 of the object in pixels 
+
+Masterlist file content example::
+
+    SNAME,NAME,FIELD,RA__deg,DEC__deg,TYPE,VELOCITY__kms,REDSHIFT,DISTANCE__Mpc,EBV__mag,R50__pix
+    S00001,NGC1344,SPLUS-s24s34,52.08196,-31.06817,G,1241.0,0.00414,18.364103654698095,0.0158,53.65902
+    S00002,ESO418-G008,SPLUS-s24s35,52.87771,-30.21333,G,1195.0,0.003987,17.683362136194148,0.0134,25.898617
+    (...)
+
+.. warning::
+    There are some differences betweeen ``scubesml`` and ``scubes``. The former does 
+    not have some options available on the latter (e.g. *--det_img*, *--mask_stars*, 
+    etc). Another difference is that at the end of the execution of the script, 
+    ``scubesml`` automatically runs the same routines executed by :ref:`epmltoheader`,
+    including all the masterlist information to the *primary header* of the cube.
+    Moreover, the size of the object (``scubes`` option *--size*) is created using 
+    the option *--size_multiplicator*. The size will be:
+
+    .. math::
+        S = S_{mult} \times R_{50}\ \mathrm{[pix]}
+
+Entry-point console ``scubesml`` call example:
+
+.. code:: console
+
+   scubesml --w workdir --size_multiplicator 10 -- MY_OBJECT /path/to/my_masterlist.csv
 
 .. _epgetluptonrgb:
 
 ``get_lupton_RGB`` 
 ------------------
-xxx
+.. literalinclude:: ../src/scubes/utilities/utils.py
+    :language: python
+    :linenos:
+    :lines: 95-108
+
+This script will generate a Lupton RGB for the coordinates and size required by
+the user. The imagem will be generated and downloaded from the 
+`S-PLUS Cloud <https://splus.cloud/>`__ server. 
+
+.. code:: console
+    
+    get_lupton_RGB -l 1500 -g NGC1365 -- SPLUS-s28s33 53.40004798 -36.14143008
 
 .. _epsexmaskstars:
 
 ``sex_mask_stars``
 ------------------
-xxx
+.. literalinclude:: ../src/scubes/utilities/utils.py
+    :language: python
+    :linenos:
+    :lines: 165-208
+
+``sex_mask_stars`` scripts uses SExtractor in order to create a spatial mask of
+stars, attempting to remove the areas enclosed by the brightest ones along the 
+FOV. This script implements the *--mask_stars* option of the scubes. 
+
+.. code:: console
+
+    sex_mask_stars --back_size 256 --class_star 0.4 -l 1500 -g NGC1365 -- SPLUS-s28s33 53.40004798 -36.14143008
 
 .. _epsexmaskstarscube:
 
 ``sex_mask_stars_cube`` 
 -----------------------
-xxx
+.. literalinclude:: ../src/scubes/utilities/utils.py
+    :language: python
+    :linenos:
+    :lines: 290-333
+
+The same as ``sex_mask_stars`` but gathering the required information to run from
+a cube generated by ``scubes`` or ``scubesml``.
+
+.. code:: console
+
+    sex_mask_stars_cube -p 0.3 -B 256 MYGALAXY_cube.fits
 
 .. _epmltoheader:
 
 ``mltoheader``
 --------------
-xxx
+.. literalinclude:: ../src/scubes/utilities/utils.py
+    :language: python
+    :linenos:
+    :lines: 418-438
+
+This script will add all masterlist information to the primary header of a S-CUBES 
+original cube.
+
+.. code:: console
+    
+    ml2header /path/to/MYGALAXY_cube.fits /path/to/my_masterlist.csv
