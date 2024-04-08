@@ -5,8 +5,8 @@ Entry-point console scripts
 
 The scubes package includes various entry-point command-line scripts for 
 different tasks. They are: :ref:`epscubes`, :ref:`epscubesml`, :ref:`epgetluptonrgb`,
-:ref:`epsexmaskstars`, :ref:`epsexmaskstarscube`, :ref:`epml2header`. Scripts 
-with the ``ml`` (master list) identificator are optimized to work with 
+:ref:`epsexmaskstars`, :ref:`epsexmaskstarscube`, :ref:`epml2header` and :ref:`epfilters`. 
+Scripts with the ``ml`` (master list) identificator are optimized to work with 
 information from with a list of objects used as input. The *cube* suffix will identify
 scripts which work with a cube produced by :ref:`epscubes` or :ref:`epscubesml` 
 as input.
@@ -39,7 +39,7 @@ Note that *10h37m2.5s* is a totally different angle from *10:37:2.5*
 .. literalinclude:: ../src/scubes/entry_points.py
     :language: python
     :linenos:
-    :lines: 113-133
+    :lines: 114-134
 
 ``scubes`` is the main script of **S-Cubes**. It calibrates the zero-points, 
 calculates the fluxes and uncertainties for the 12-band images cropped from 
@@ -58,7 +58,7 @@ The usage of this script is detailed in :ref:`How to create a cube`.
 .. literalinclude:: ../src/scubes/entry_points.py
     :language: python
     :linenos:
-    :lines: 204-230
+    :lines: 205-231
 
 ``scubesml`` is the same as :ref:`epscubes` but gathering the needed input 
 information from a *masterlist*. 
@@ -170,3 +170,19 @@ original cube.
 .. code:: console
     
     ml2header /path/to/MYGALAXY_cube.fits /path/to/my_masterlist.csv
+
+.. _epfilters:
+
+``scubes_filters``
+--------------
+.. literalinclude:: ../src/scubes/entry_points.py
+    :language: python
+    :linenos:
+    :lines: 247-269
+
+This script prints the S-PLUS filters information table formatted with the 
+required number of decimals.
+
+.. code:: console
+
+    scubes_filters --decimals 2

@@ -8,6 +8,8 @@ from .args import create_parser
 from .. import __author__
 from ..entry_points import SPLUS_MOTD_TOP, SPLUS_MOTD_MID, SPLUS_MOTD_BOT, SPLUS_MOTD_SEP
 
+from ..constants import BANDS
+
 #############################################################################
 #############################################################################
 #############################################################################
@@ -256,7 +258,6 @@ def sex_mask_stars_cube_argsparse(args):
     '''
     from shutil import which
     from .io import convert_coord_to_degrees
-    from ..constants import WAVE_EFF
 
     _sex = which(args.sextractor)
     if _sex is None:
@@ -281,7 +282,7 @@ def sex_mask_stars_cube_argsparse(args):
     h = args.header
     args.ra, args.dec = convert_coord_to_degrees(h['RA'], h['DEC'])
     args.size = int(h['SIZE'])
-    args.bands = list(WAVE_EFF.keys())
+    args.bands = BANDS
     args.tile = h['FIELD']
     args.galaxy = h['SNAME']
 

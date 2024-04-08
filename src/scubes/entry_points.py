@@ -2,8 +2,9 @@ import sys
 from os import getcwd
 from shutil import which
 
-from . import __author__, __zp_cat__, __zpcorr_path__, __version__
-from .constants import WAVE_EFF
+from . import __author__, __zp_cat__, __zpcorr_path__, __version__, __filters_table__
+
+from .constants import BANDS
 
 from .utilities.io import print_level
 from .utilities.args import create_parser
@@ -48,7 +49,7 @@ SCUBES_ARGS = {
     'redo': ['r', dict(action='store_true', default=False, help='Enable redo mode to overwrite final cubes.')],
     'clean': ['c', dict(action='store_true', default=False, help='Clean intermediate files after processing.')],
     'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files.')],
-    'bands': ['b', dict(default=list(WAVE_EFF.keys()), nargs='+', help='List of S-PLUS bands (space separated).')],
+    'bands': ['b', dict(default=BANDS, nargs='+', help='List of S-PLUS bands (space separated).')],
     'size': ['l', dict(default=500, type=int, help='Size of the cube in pixels. If size is a odd number, the program will choose the closest even integer.')],
     'no_interact': ['N', dict(action='store_true', default=False, help='Run only the automatic stars mask (a.k.a. do not check final mask)')],
     'work_dir': ['w', dict(default=getcwd(), help='Working directory.')],
@@ -146,7 +147,7 @@ SCUBESML_ARGS = {
     'redo': ['r', dict(action='store_true', default=False, help='Enable redo mode to overwrite final cubes.')],
     'clean': ['c', dict(action='store_true', default=False, help='Clean intermediate files after processing.')],
     'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files.')],
-    'bands': ['b', dict(default=list(WAVE_EFF.keys()), nargs='+', help='List of S-PLUS bands (space separated).')],
+    'bands': ['b', dict(default=BANDS, nargs='+', help='List of S-PLUS bands (space separated).')],
     'size_multiplicator': ['S', dict(default=10, type=int, help='Factor to multiply the R50__pix value of the masterlist to create the galaxy size. If size is a odd number, the program will choose the closest even integer.')],
     'work_dir': ['w', dict(default=getcwd(), help='Working directory.')],
     'output_dir': ['o', dict(default=getcwd(), help='Output directory.')],
@@ -229,3 +230,40 @@ def scubesml():
     # update masterlist information
     ml2header_updheader(scubes.cube_path, args.ml)
 
+SCUBES_FILTERS_PROG_DESC = f'''
+{SPLUS_MOTD_TOP} | scubes_filters entry-point script:
+{SPLUS_MOTD_MID} | 
+{SPLUS_MOTD_BOT} | Print the S-PLUS filters information.
+{SPLUS_MOTD_SEP} + 
+
+   {__author__}
+'''
+
+SCUBES_FILTERS_ARGS = {
+    # optional arguments
+    'decimals': ['d', dict(default=99, type=int, help='Format the numbers at the table.')],
+}
+
+def scubes_filters():
+    '''
+    Print the S-PLUS filters information.
+
+    Raises
+    ------
+    SystemExit
+        If masterlist not found
+
+    Returns
+    -------
+    None
+    '''
+
+    from . import __filters_table__
+
+    parser = create_parser(args_dict=SCUBES_FILTERS_ARGS, program_description=SCUBES_FILTERS_PROG_DESC)
+    parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
+    args = parser.parse_args(args=sys.argv[1:])
+
+    __filters_table__.round(decimals=args.decimals)
+
+    print(__filters_table__)

@@ -14,10 +14,12 @@ from astropy.coordinates import SkyCoord
 from os.path import join, exists, isfile
 from scipy.interpolate import RectBivariateSpline
 
+from . import __filters_table__
+
 from .control import control
 from .mask_stars import maskStars
 from .headers import get_author, get_key
-from .constants import WAVE_EFF, FILTER_NAMES_ZP_TABLE, FILTER_NAMES
+from .constants import FILTER_NAMES_ZP_TABLE, FILTER_NAMES, CENTRAL_WAVE, METADATA_NAMES
 
 from .utilities.io import print_level
 from .utilities.splusdata import connect_splus_cloud, detection_image_hdul, get_lupton_rgb
@@ -187,7 +189,7 @@ class SCubes:
         '''
         Initialize the spectra arrays.
         '''        
-        self.wl__b = np.array([WAVE_EFF[b] for b in self.control.bands])*u.Angstrom
+        self.wl__b = np.array(sorted([CENTRAL_WAVE[b] for b in self.control.bands]))*u.Angstrom
         self.flam_unit = u.erg / u.cm / u.cm / u.s / u.AA
         self.fnu_unit = u.erg / u.s / u.cm / u.cm / u.Hz
         self.flam__b = None
@@ -323,7 +325,7 @@ class SCubes:
         gal = self.galaxy
         ctrl = self.control
         self.stamps = []
-        for filt in tqdm(list(WAVE_EFF.keys()), desc=f'{gal.name} @ {ctrl.tile} - downloading', leave=True, position=0):
+        for filt in tqdm(list(CENTRAL_WAVE.keys()), desc=f'{gal.name} @ {ctrl.tile} - downloading', leave=True, position=0):
             fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swp.fits.fz')
             self.stamps.append(fname)
             if not isfile(fname) or ctrl.force:
@@ -544,10 +546,12 @@ class SCubes:
             Metadata table HDU.
         '''  
         tab = []
-        names = ['FILTER', 'FILTNAME', 'WAVE_EFF', 'EXPTIME']
-        tab.append(self.control.bands)
-        tab.append([FILTER_NAMES[k] for k in WAVE_EFF])
-        tab.append(self.wl__b)
+        names = []
+        items = ['filter', 'central_wave', 'pivot_wave']        
+        for k in items:
+            names.append(METADATA_NAMES[k])
+            tab.append(__filters_table__[k])
+        names.append('EXPTIME')
         tab.append(self.effexptime__b)
 
         # create metadata arrays from headers keys

@@ -1,28 +1,17 @@
+from astropy.io import ascii
 from .utilities.sextractor import SEX_TOPHAT_FILTER, SEX_DEFAULT_STARNNW
 
-# Keys are the FILTER NAMES at the original fits.
+from . import __filters_table__
 
-# EFF is the same as the pivot
-WAVE_EFF = {
-    'U': 3563.0,
-    'F378': 3770.0,
-    'F395': 3940.0,
-    'F410': 4094.0,
-    'F430': 4292.0,
-    'G': 4751.0,
-    'F515': 5133.0,
-    'R': 6258.0,
-    'F660': 6614.0,
-    'I': 7690.0,
-    'F861': 8611.0,
-    'Z': 8831.0,
+# This dictionary links the original filter names to the ones recorded on the 
+# original S-PLUS image fits
+FILTER_NAMES_FITS = {
+    'J0378': 'F378', 'J0395': 'F395', 'J0410': 'F410', 'J0430': 'F430',
+    'J0515': 'F515', 'J0660': 'F660', 'J0861': 'F861', 
+    'uJAVA': 'U', 'gSDSS': 'G', 'rSDSS': 'R', 'iSDSS': 'I', 'zSDSS': 'Z',
 }
 
-EXPTIMES = {
-    'F378': 660, 'F395': 354, 'F410': 177, 'F430': 171,  
-    'F515': 183, 'F660': 870, 'F861': 240,
-    'U': 681, 'G': 99, 'R': 120, 'I': 138, 'Z': 168,
-}
+FILTER_NAMES = {v: k for k, v in FILTER_NAMES_FITS.items()}
 
 FILTER_NAMES_ZP_TABLE = {
     'F378': 'J0378', 'F395': 'J0395', 'F410': 'J0410', 'F430': 'J0430',
@@ -30,10 +19,29 @@ FILTER_NAMES_ZP_TABLE = {
     'U': 'u', 'G': 'g', 'R': 'r', 'I': 'i', 'Z': 'z',
 }
 
-FILTER_NAMES = {
-    'F378': 'J0378', 'F395': 'J0395', 'F410': 'J0410', 'F430': 'J0430',
-    'F515': 'J0515', 'F660': 'J0660', 'F861': 'J0861', 
-    'U': 'uJAVA', 'G': 'gSDSS', 'R': 'rSDSS', 'I': 'iSDSS', 'Z': 'zSDSS',
+BANDS = [FILTER_NAMES_FITS[x] for x in __filters_table__['filter']]
+
+# EFF is the same as the pivot
+CENTRAL_WAVE = {FILTER_NAMES_FITS[row['filter']]: row['pivot_wave'] for row in __filters_table__}
+
+METADATA_NAMES = {
+    'filter': 'FILTER',
+    'central_wave': 'CENTWAVE',
+    'delta_wave': 'DELTWAVE',
+    'trapz_wave': 'TRAPWAVE',
+    'trapz_width': 'TRAPWIDTH',
+    'mean_wave': 'MEANWAVE',
+    'mean_width': 'MEANWIDTH',
+    'mean_1_wave': 'MEAN1WAVE',
+    'mean_1_width': 'MEAN1WIDTH',
+    'pivot_wave': 'PIVOTWAVE',
+    'alambda_av': 'ALAMBDAAV',
+}
+
+EXPTIMES = {
+    'F378': 660, 'F395': 354, 'F410': 177, 'F430': 171,  
+    'F515': 183, 'F660': 870, 'F861': 240,
+    'U': 681, 'G': 99, 'R': 120, 'I': 138, 'Z': 168,
 }
 
 SPLUS_DEFAULT_SEXTRACTOR_CONFIG = {
