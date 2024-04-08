@@ -22,6 +22,8 @@ The S-Cubes repository includes the scubes python package which allows the users
 their own codes. It also includes the data files to calibrate stamps with iDR4 zero-points 
 correction and SExtractor to identify stars along the stamp (optionally).
 
+**Online Documentation:** `<https://elacerda.github.io/s-cubes/ep.html>`__
+
 .. _require:
 
 Requirements
@@ -66,7 +68,7 @@ This package includes various entry-point command-line scripts for
 different tasks. They are: ``scubes``, ``scubesml``, ``get_lupton_RGB``,
 ``sex_mask_stars``, ``sex_mask_stars_cube`` and ``mltoheader``. 
 In order to obtain a detailed description and the script usage run them 
-with **–help** argument.
+with **–help** argument. 
 
 .. _example:
 
