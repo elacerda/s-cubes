@@ -22,7 +22,7 @@ The S-Cubes repository includes the scubes python package which allows the users
 their own codes. It also includes the data files to calibrate stamps with iDR4 zero-points 
 correction and SExtractor to identify stars along the stamp (optionally).
 
-**Online Documentation:** `<https://elacerda.github.io/s-cubes/ep.html>`__
+**Online Documentation:** `<https://elacerda.github.io/s-cubes/>`__
 
 .. _require:
 
