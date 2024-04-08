@@ -433,3 +433,6 @@ def ml2header():
     '''
     parser = create_parser(args_dict=MLTOHEADER_ARGS, program_description=MLTOHEADER_DESC)
     args = ml2header_argparse(parser.parse_args(args=sys.argv[1:]))
+    
+    # update masterlist information
+    ml2header_updheader(args.cube, args.ml)
