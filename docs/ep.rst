@@ -5,11 +5,11 @@ Entry-point console scripts
 
 The scubes package includes various entry-point command-line scripts for 
 different tasks. They are: :ref:`epscubes`, :ref:`epscubesml`, :ref:`epgetluptonrgb`,
-:ref:`epsexmaskstars`, :ref:`epsexmaskstarscube`, :ref:`epml2header` and :ref:`epfilters`. 
-Scripts with the ``ml`` (master list) identificator are optimized to work with 
-information from with a list of objects used as input. The *cube* suffix will identify
-scripts which work with a cube produced by :ref:`epscubes` or :ref:`epscubesml` 
-as input.
+:ref:`epsexmaskstars`, :ref:`epsexmaskstarscube`, :ref:`epml2header` and 
+:ref:`epfilters`. Scripts with the ``ml`` (master list) identificator are optimized 
+to work with information from with a list of objects used as input. The *cube* 
+suffix will identify scripts which work with a cube produced by :ref:`epscubes` 
+or :ref:`epscubesml` as input.
 
 All scripts include the ``--help`` option for more information.
 
@@ -174,7 +174,7 @@ original cube.
 .. _epfilters:
 
 ``scubes_filters``
---------------
+------------------
 .. literalinclude:: ../src/scubes/entry_points.py
     :language: python
     :linenos:
