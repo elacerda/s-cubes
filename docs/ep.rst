@@ -65,8 +65,9 @@ information from a *masterlist*.
 
 *Masterlist* is a csv text file in which one could gather information of a list 
 of objects to create cubes. The file must contain 11 columns with the following 
-header and informations. Some informations are not used by the program, but the 
-columns are required (marked with a **\***) in order to the code work.:
+header and informations. Some informations are not used by the program, but all 
+the columns are required in order to the code work. the columns marked with a **\***
+contain information used by the program:
 
 #. **\*** ``SNAME``: A nickname for the object 
 #. ``NAME``: The name of the object
