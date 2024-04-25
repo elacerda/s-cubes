@@ -1,19 +1,7 @@
 S-Cubes
 =======
-.. image:: https://img.shields.io/github/v/tag/elacerda/s-cubes?include_prereleases&label=version
-   :target: https://github.com/elacerda/s-cubes
-   :alt: GitHub Tag
 
-.. image:: https://img.shields.io/github/actions/workflow/status/elacerda/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?link=https%3A%2F%2Fgithub.com%2Felacerda%2Fs-cubes%2Fblob%2Fmain%2F.github%2Fworkflows%2Fdocs_deploy.yml
-   :alt: GitHub Actions Workflow Status
-
-.. image:: https://img.shields.io/github/license/elacerda/s-cubes
-   :target: https://github.com/elacerda/s-cubes/blob/main/LICENSE.txt
-   :alt: GitHub License
-   
-.. image:: https://img.shields.io/website?url=https%3A%2F%2Felacerda.github.io%2Fs-cubes%2F
-   :target: https://elacerda.github.io/s-cubes/index.html
-   :alt: Website
+|version| |workflow| |license| |docs|
 
 S-Cubes is a python package designed to make galaxy cubes (X, Y, Lambda) with S-PLUS data. 
 The S-Cubes repository includes the scubes python package which allows the users to create 
@@ -108,3 +96,19 @@ License
 This code is distributed under the `GNU GENERAL PUBLIC LICENSE
 v3.0 <LICENSE>`__. Please refer to the ``LICENSE.txt`` file in the
 repository for more details.
+
+.. |version| image:: https://img.shields.io/github/v/tag/elacerda/s-cubes?include_prereleases&label=version
+   :alt: GitHub Tag
+   :target: https://github.com/elacerda/s-cubes
+
+.. |workflow| image:: https://img.shields.io/github/actions/workflow/status/elacerda/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?label=gh-pages
+   :target: https://github.com/elacerda/s-cubes/blob/main/.github/workflows/docs_deploy.yml 
+   :alt: GitHub Actions Workflow Status
+
+.. |license| image:: https://img.shields.io/github/license/elacerda/s-cubes
+   :alt: GitHub License
+   :target: https://github.com/elacerda/s-cubes/blob/main/LICENSE.txt
+   
+.. |docs| image:: https://img.shields.io/website?url=https%3A%2F%2Felacerda.github.io%2Fs-cubes%2F
+   :alt: Website
+   :target: https://elacerda.github.io/s-cubes/index.html
