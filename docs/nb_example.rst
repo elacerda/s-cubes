@@ -1,4 +1,4 @@
-.. code:: ipython3
+.. code-block:: python
 
     %matplotlib widget
 
@@ -30,10 +30,9 @@ SExtractor executable path using the option *-x*.
 
 The call to the entry-point script ``scubes`` to this example would be:
 
-.. code:: ipython3
+.. code-block:: shell
 
     !scubes -frR -w . -U guest -P guest99 -l 500 -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312
-
 
 .. parsed-literal::
 
@@ -58,7 +57,7 @@ the method ``lRGB_image()`` to create Lupton RGB images.
 
 Below an example of the ``scubes.utilities.read_scube()`` usage:
 
-.. code:: ipython3
+.. code-block:: python
 
     from os.path import join
     from scubes.utilities.readscube import read_scube
@@ -68,12 +67,9 @@ Below an example of the ``scubes.utilities.read_scube()`` usage:
     
     scube = read_scube(filename)
 
-.. code:: ipython3
+.. code-block:: python
 
     scube.primary_header
-
-
-
 
 .. parsed-literal::
 
@@ -89,14 +85,9 @@ Below an example of the ``scubes.utilities.read_scube()`` usage:
     RA      =   159.26041666666666                                                  
     DEC     =  -27.565555555555555                                                  
 
-
-
-.. code:: ipython3
+.. code-block:: python
 
     scube.data_header
-
-
-
 
 .. parsed-literal::
 
@@ -207,17 +198,10 @@ Below an example of the ``scubes.utilities.read_scube()`` usage:
     CRVAL3  =                  0.0 / Coordinate value at reference point            
     EXTNAME = 'DATA    '           / Name of the extension                          
     BUNIT   = 'erg / (Angstrom s cm2)' / Physical units of the array values         
-                                                                                    
-                                                                                    
-
-
-
-.. code:: ipython3
+                                                                                  
+.. code-block:: python
 
     scube.filters
-
-
-
 
 .. parsed-literal::
 
@@ -236,12 +220,9 @@ Below an example of the ``scubes.utilities.read_scube()`` usage:
 
 
 
-.. code:: ipython3
+.. code-block:: python
 
     scube.metadata
-
-
-
 
 .. parsed-literal::
 
@@ -261,20 +242,15 @@ Below an example of the ``scubes.utilities.read_scube()`` usage:
 
 
 
-.. code:: ipython3
+.. code-block:: python
 
     scube.weimask__yx.sum()
-
-
-
 
 .. parsed-literal::
 
     0
 
-
-
-.. code:: ipython3
+.. code-block:: python
 
     xi, xf = 0, -1
     yi, yf = 0, -1
@@ -284,7 +260,7 @@ Below an example of the ``scubes.utilities.read_scube()`` usage:
 Images plot
 -----------
 
-.. code:: ipython3
+.. code-block:: python
 
     import numpy as np
     import matplotlib.pyplot as plt
@@ -357,7 +333,7 @@ The ``scubes.utilities.read_scube.lRGB_image`` is a helper to
 using the **SCUBE** instantiated by ``scubes.utilities.read_scube``
 class.
 
-.. code:: ipython3
+.. code-block:: python
 
     from matplotlib.gridspec import GridSpec
     
@@ -447,7 +423,7 @@ class.
 
 
 
-.. code:: ipython3
+.. code-block:: python
 
     # Contour plot example
     image__yx = scube.mag__lyx[scube.filters.index('rSDSS'), yslice, xslice]
@@ -488,7 +464,7 @@ or using a recent **SCUBE** created (``sex_mask_stars_cube`` script).
 Here an example for the ``sex_mask_stars_cube`` use, with a example
 plot.
 
-.. code:: ipython3
+.. code-block:: shell
 
     !sex_mask_stars_cube -U guest -P guest99 -N -F -x source_extractor NGC3312/NGC3312_cube.fits
 
@@ -509,13 +485,13 @@ plot.
     [2024-05-08T14:39:45.410066] - sex_mask_stars_cube: Saving mask to NGC3312_sexmask.fits
 
 
-.. code:: ipython3
+.. code-block:: python
 
     from astropy.io import fits
     
     mask = fits.getdata('NGC3312_sexmask.fits', 'MASK')
 
-.. code:: ipython3
+.. code-block:: python
 
     f = plt.figure()
     ax = f.gca()
