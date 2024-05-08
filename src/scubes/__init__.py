@@ -1,9 +1,9 @@
+import os
+
 from astropy.io import ascii
 from importlib.metadata import version, metadata
 
 from . import data
-
-import os
 
 scubes_meta = metadata('s-cubes')
 __author__ = scubes_meta['Author-email']

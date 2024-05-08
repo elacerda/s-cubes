@@ -1,7 +1,9 @@
+from os.path import join
 from astropy.io import ascii
 from .utilities.sextractor import SEX_TOPHAT_FILTER, SEX_DEFAULT_STARNNW
 
-from . import __filters_table__
+from . import __filters_table__, data
+
 
 # This dictionary links the original filter names to the ones recorded on the 
 # original S-PLUS image fits
@@ -13,10 +15,36 @@ FILTER_NAMES_FITS = {
 
 FILTER_NAMES = {v: k for k, v in FILTER_NAMES_FITS.items()}
 
+FILTER_TRANSMITTANCE = {}
+for v in FILTER_NAMES.values():
+    FILTER_TRANSMITTANCE[v] = ascii.read(join(data.__path__[0], f'{v}.csv'))
+    FILTER_TRANSMITTANCE[v]['wavelength'] *= 10
+    FILTER_TRANSMITTANCE[v]['transmittance'] *= 100
+
 FILTER_NAMES_ZP_TABLE = {
-    'F378': 'J0378', 'F395': 'J0395', 'F410': 'J0410', 'F430': 'J0430',
-    'F515': 'J0515', 'F660': 'J0660', 'F861': 'J0861', 
+    'F378': 'J0378', 
+    'F395': 'J0395', 
+    'F410': 'J0410', 
+    'F430': 'J0430',
+    'F515': 'J0515', 
+    'F660': 'J0660', 
+    'F861': 'J0861', 
     'U': 'u', 'G': 'g', 'R': 'r', 'I': 'i', 'Z': 'z',
+}
+
+FILTER_COLORS = {
+    'F378': 'darkviolet',
+    'F395': 'navy',
+    'F410': 'b',
+    'F430': 'dodgerblue',
+    'F515': 'lime',
+    'F660': 'y',
+    'F861': 'orangered',
+    'U': 'indigo',
+    'G': 'turquoise',
+    'R': 'limegreen',
+    'I': 'darkorange',
+    'Z': 'darkred',
 }
 
 BANDS = [FILTER_NAMES_FITS[x] for x in __filters_table__['filter']]
