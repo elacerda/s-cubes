@@ -700,6 +700,8 @@ class SCubes:
         prim_hdu.header['SIZE'] = (ctrl.size, 'Side of the stamp')
         for _k in ['X0TILE', 'Y0TILE']:
             prim_hdu.header[_k] = cube_h[_k]
+        prim_hdu.header['RA'] = ctrl.ra
+        prim_hdu.header['DEC'] = ctrl.dec
         flam_hdu = fits.ImageHDU(self.flam__byx, cube_h)
         flam_hdu.header['EXTNAME'] = ('DATA', 'Name of the extension')
         hdu_list = [prim_hdu, flam_hdu]

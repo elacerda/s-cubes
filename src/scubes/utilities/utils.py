@@ -283,8 +283,8 @@ def sex_mask_stars_cube_argsparse(args):
     args.ra, args.dec = convert_coord_to_degrees(h['RA'], h['DEC'])
     args.size = int(h['SIZE'])
     args.bands = BANDS
-    args.tile = h['FIELD']
-    args.galaxy = h['SNAME']
+    args.tile = h['TILE']
+    args.galaxy = h['GALAXY']
 
     return args
 
@@ -413,8 +413,11 @@ def ml2header_updheader(cube_filename, ml_table):
             desc = None
             if '__' in col:
                 col, _, desc = col.split('_')
+            if col == 'FIELD':
+                col = 'TILE'
+            if col == 'SNAME':
+                col = 'GALAXY'
             hdu.header.set(col, value=v, comment=desc)
-
 
 def ml2header():
     '''
