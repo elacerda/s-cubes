@@ -26,6 +26,7 @@ S-Cubes homepage
    gstart
    makecube
    ep
+   nb_example
 
 .. toctree::
    :maxdepth: 3
