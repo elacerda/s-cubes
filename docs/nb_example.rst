@@ -21,10 +21,11 @@ The stamps are made centered at coordinates RA *10h37m02.5s* and DEC
 
 The resultant files will be created at directory *workdir*.
 
-The program also uses SExtractor in order to create a spatial mask of
+The program also could use SExtractor in order to create a spatial mask of
 stars, attempting to remove the areas enclosed by the brightest ones
-along the FOV (*-M* optional argument). Do not forget to include the
-SExtractor executable path using the option *-x*.
+along the FOV (*-M* optional argument). To use this option, do not forget 
+to include the SExtractor executable path using the option *-x*. An example
+of this usage is at the end of this document.
 
 The call to the entry-point script ``scubes`` to this example would be:
 
