@@ -355,7 +355,7 @@ transmittance curves are calculated by ``splus-filters`` package:
 
 -  https://github.com/splus-collab/splus_filters
 
-The ``scubes.utilities.read_scube.lRGB_image`` is a helper to
+The ``scubes.utilities.read_scube.lRGB_image`` is a wrapper to
 ``astropy.visualization.make_lupton_rgb()`` that creates RGB images
 using the **SCUBE** instantiated by ``scubes.utilities.read_scube``
 class.
