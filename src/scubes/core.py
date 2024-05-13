@@ -634,7 +634,7 @@ class SCubes:
         '''
         Remove downloaded stamp, detection image, and Lupton RGB image files.
         '''        
-        print_level('Removing downloaded data"')
+        print_level('Removing downloaded data')
         ctrl = self.control
         for f, wf in zip(self.images, self.wimages):
             print_level(f'removing file {f}', 1, ctrl.verbose)
