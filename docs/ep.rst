@@ -64,28 +64,20 @@ The usage of this script is detailed in :ref:`How to create a cube`.
 information from a *masterlist*. 
 
 *Masterlist* is a csv text file in which one could gather information of a list 
-of objects to create cubes. The file must contain 11 columns with the following 
-header and informations. Some informations are not used by the program, but all 
-the columns are required in order to the code work. the columns marked with a **\***
-contain information used by the program:
+of objects to create cubes. The file must contain at least 5 columns named with 
+the following header and information:
 
 #. **\*** ``SNAME``: A nickname for the object 
-#. ``NAME``: The name of the object
 #. **\*** ``FIELD``: S-PLUS Field (TILE) in which the program will search for the coordinates 
 #. **\*** ``RA__deg``: Right-ascencion in degrees 
 #. **\*** ``DEC__deg``: Declination in degrees 
-#. ``TYPE``: Morphological type of the object
-#. ``VELOCITY__kms``: Velocity of the object (in km/s)
-#. ``REDSHIFT``: Redshift of the object
-#. ``DISTANCE__Mpc``: Distance of the object in Mpc
-#. ``EBV__mag``: E(B-V) in magnitudes
 #. **\*** ``R50__pix``: R50 of the object in pixels 
 
 Masterlist file content example::
 
-    SNAME,NAME,FIELD,RA__deg,DEC__deg,TYPE,VELOCITY__kms,REDSHIFT,DISTANCE__Mpc,EBV__mag,R50__pix
-    S00001,NGC1344,SPLUS-s24s34,52.08196,-31.06817,G,1241.0,0.00414,18.364103654698095,0.0158,53.65902
-    S00002,ESO418-G008,SPLUS-s24s35,52.87771,-30.21333,G,1195.0,0.003987,17.683362136194148,0.0134,25.898617
+    SNAME,FIELD,RA__deg,DEC__deg,R50__pix
+    S00001,SPLUS-s24s34,52.08196,-31.06817,53.65902
+    S00002,SPLUS-s24s35,52.87771,-30.21333,25.898617
     (...)
 
 .. warning::
