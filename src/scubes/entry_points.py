@@ -266,4 +266,4 @@ def scubes_filters():
 
     __filters_table__.round(decimals=args.decimals)
 
-    print(__filters_table__)
+    __filters_table__.pprint_all()
