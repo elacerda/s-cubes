@@ -12,20 +12,161 @@ Creating a cube
 
 This example will create a **500x500** pixels cube with the 12-bands
 images from **S-PLUS TILE HYDRA-0045** for the *NGC3312* galaxy. The
-fluxes and errors are calculated based on the calibration of the zero
-points of **S-PLUS iDR4** (*data package included*), but they are **not
-corrected for Galactic extinction**.
+stamps are made from a cropped 500x500 pixels area located at **S-PLUS
+TILE** mentioned before, centered at coordinates RA *10h37m02.5s* and
+DEC *-27d33’56"*.
 
-The stamps are made centered at coordinates RA *10h37m02.5s* and DEC
-*-27d33’56"*.
-
+The ``scubes`` entry-point script will download the 12-band stamps and
+calculate the fluxes and errors of each image. The images are zero-point
+calibrated based on the **S-PLUS iDR4** (*scubes package includes zp
+data*) values, but they are **not corrected for Galactic extinction**.
 The resultant files will be created at directory *workdir*.
 
-The program also could use SExtractor in order to create a spatial mask of
-stars, attempting to remove the areas enclosed by the brightest ones
-along the FOV (*-M* optional argument). To use this option, do not forget 
-to include the SExtractor executable path using the option *-x*. An example
-of this usage is at the end of this document.
+S-PLUS filters information included:
+
+.. code-block:: ipython3
+
+    !scubes_filters --decimals 2
+
+
+.. parsed-literal::
+
+    [0;31mfilter central_wave delta_wave trapz_wave trapz_width mean_wave mean_width mean_1_wave mean_1_width pivot_wave alambda_av[0m
+    [0;31m------ ------------ ---------- ---------- ----------- --------- ---------- ----------- ------------ ---------- ----------[0m
+     uJAVA      3576.59     324.89    3542.14      322.83   3542.14     322.83     3541.97       322.48    3533.28       1.61
+     J0378      3770.67     150.99    3774.01      135.96   3774.01     135.96     3773.98       135.75    3773.16       1.52
+     J0395      3940.67      102.8    3941.09      100.78   3941.09     100.78     3941.07       100.66     3940.7       1.46
+     J0410      4094.08     200.31    4096.24      193.35   4096.24     193.35     4096.21       193.12    4094.93        1.4
+     J0430      4292.02     200.16    4293.38      195.07   4293.38     195.07     4293.34       194.82    4292.11       1.33
+     gSDSS      4774.03    1505.46     4821.1     1312.44    4821.1    1312.44     4821.07      1312.17    4758.49        1.2
+     J0515      5132.82     207.06    5134.22      203.61   5134.22     203.61      5134.2       203.48    5133.13        1.1
+     rSDSS      6274.74    1436.69    6295.69     1274.09   6295.69    1274.09     6295.67      1273.72    6251.83       0.86
+     J0660      6613.99     147.28    6614.32      146.67   6614.32     146.67      6614.3       146.52    6613.88        0.8
+     iSDSS       7702.5    1506.85    7709.96      1438.1   7709.96     1438.1     7709.81      1437.21    7670.61       0.65
+     J0861      8611.48     409.69    8609.86      401.91   8609.87     401.91     8609.84       401.53    8607.25       0.54
+     zSDSS       8881.7     1270.5    8985.81     1308.49   8985.81    1308.49     8986.54       1307.7    8941.48       0.51
+
+
+The program also could use SExtractor in order to create a spatial mask
+of stars, attempting to remove the areas enclosed by the brightest ones
+along the FOV (*-M* optional argument). To use this option, do not
+forget to include the SExtractor executable path using the option *-x*.
+An example of this usage is at the end of this document.
+
+``scubes`` entry-point script help and usage:
+
+.. code-block:: ipython3
+
+    !scubes --help
+
+
+.. parsed-literal::
+
+    usage: scubes [-h] [-r] [-c] [-f] [-b BANDS [BANDS ...]] [-l SIZE] [-N]
+                  [-w WORK_DIR] [-o OUTPUT_DIR] [-x SEXTRACTOR] [-p CLASS_STAR]
+                  [-v] [-D] [-S SATUR_LEVEL] [-Z ZPCORR_DIR] [-z ZP_TABLE]
+                  [-B BACK_SIZE] [-T DETECT_THRESH] [-U USERNAME] [-P PASSWORD]
+                  [-M] [-I] [-F] [-R] [--version]
+                  SPLUS_TILE RA DEC GALAXY_NAME
+    
+    ┌─┐   ┌─┐┬ ┬┌┐ ┌─┐┌─┐  | Create S-PLUS galaxies data cubes, a.k.a. S-CUBES. 
+    └─┐───│  │ │├┴┐├┤ └─┐  | S-CUBES is an organized FITS file with data, errors, 
+    └─┘   └─┘└─┘└─┘└─┘└─┘  | mask and metadata about some galaxy present on any 
+    ---------------------- + S-PLUS observed tile. Any problem contact:
+    
+       Eduardo Alberto Duarte Lacerda <dhubax@gmail.com>, Fabio Herpich <fabiorafaelh@gmail.com>
+    
+    Parsing the RA and DEC inputs to astropy.coordinates.SkyCoord():
+    
+        RA=03h28m19.59s                 RA(parsed)=03h28m19.59s
+        DEC=-31d04m05.26392275s         DEC(parsed)=-31d04m05.26392275s
+        astropy.coordinates.SkyCoord() object:
+        <SkyCoord (ICRS): (ra, dec) in deg
+            (52.081625, -31.06812887)>
+    
+        RA=03:28:19.59                  RA(parsed)=03:28:19.59°
+        DEC=-31:04:05.26392275          DEC(parsed)=-31:04:05.26392275°
+        astropy.coordinates.SkyCoord() object:
+        <SkyCoord (ICRS): (ra, dec) in deg
+            (3.47210833, -31.06812887)>
+    
+        RA=03d28'19.59"                 RA(parsed)=03d28'19.59"
+        DEC=-31d04'05.26392275"         DEC(parsed)=-31d04'05.26392275"
+        astropy.coordinates.SkyCoord() object:
+        <SkyCoord (ICRS): (ra, dec) in deg
+            (3.47210833, -31.06812887)>
+    
+    positional arguments:
+      SPLUS_TILE                  Name of the S-PLUS tile
+      RA                          Galaxy's right ascension
+      DEC                         Galaxy's declination
+      GALAXY_NAME                 Galaxy's name
+    
+    options:
+      -h, --help                  show this help message and exit
+      -r, --redo                  Enable redo mode to overwrite final cubes.
+                                  Default value is False
+      -c, --clean                 Clean intermediate files after processing.
+                                  Default value is False
+      -f, --force                 Force overwrite of existing files. Default value
+                                  is False
+      -b BANDS [BANDS ...], --bands BANDS [BANDS ...]
+                                  List of S-PLUS bands (space separated). Default
+                                  value is ['U', 'F378', 'F395', 'F410', 'F430',
+                                  'G', 'F515', 'R', 'F660', 'I', 'F861', 'Z']
+      -l SIZE, --size SIZE        Size of the cube in pixels. If size is a odd
+                                  number, the program will choose the closest even
+                                  integer. Default value is 500
+      -N, --no_interact           Run only the automatic stars mask (a.k.a. do not
+                                  check final mask) Default value is False
+      -w WORK_DIR, --work_dir WORK_DIR
+                                  Working directory. Default value is /storage/hdd
+                                  /backup/dhubax/dev/astro/splus/s-cubes/workdir
+      -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                                  Output directory. Default value is /storage/hdd/
+                                  backup/dhubax/dev/astro/splus/s-cubes/workdir
+      -x SEXTRACTOR, --sextractor SEXTRACTOR
+                                  Path to SExtractor executable. Default value is
+                                  sex
+      -p CLASS_STAR, --class_star CLASS_STAR
+                                  SExtractor CLASS_STAR parameter for star/galaxy
+                                  separation. Default value is 0.25
+      -v, --verbose               Verbosity level.
+      -D, --debug                 Enable debug mode. Default value is False
+      -S SATUR_LEVEL, --satur_level SATUR_LEVEL
+                                  Saturation level for the png images. Default
+                                  value is 1600.0
+      -Z ZPCORR_DIR, --zpcorr_dir ZPCORR_DIR
+                                  Zero-point correction directory. Default value
+                                  is /home/lacerda/.local/lib/python3.10/site-
+                                  packages/scubes/data/zpcorr_iDR4
+      -z ZP_TABLE, --zp_table ZP_TABLE
+                                  Zero-point table. Default value is
+                                  /home/lacerda/.local/lib/python3.10/site-
+                                  packages/scubes/data/iDR4_zero-points.csv
+      -B BACK_SIZE, --back_size BACK_SIZE
+                                  Background mesh size for SExtractor. Default
+                                  value is 64
+      -T DETECT_THRESH, --detect_thresh DETECT_THRESH
+                                  Detection threshold for SExtractor. Default
+                                  value is 1.1
+      -U USERNAME, --username USERNAME
+                                  S-PLUS Cloud username.
+      -P PASSWORD, --password PASSWORD
+                                  S-PLUS Cloud password.
+      -M, --mask_stars            Run SExtractor to auto-identify stars on stamp.
+                                  Default value is False
+      -I, --det_img               Downloads detection image for the stamp. Needed
+                                  if --mask_stars is active. Default value is
+                                  False
+      -F, --estimate_fwhm         Runs SExtractor two times estimating the
+                                  SEEING_FWHM of the detection image. Default
+                                  value is False
+      -R, --remove_downloaded_data
+                                  Remove the downloaded data from splusdata at the
+                                  end of the run. Default value is False
+      --version                   show program's version number and exit
+
 
 The call to the entry-point script ``scubes`` to this example would be:
 
@@ -36,15 +177,15 @@ The call to the entry-point script ``scubes`` to this example would be:
 
 .. parsed-literal::
 
-    NGC3312 @ HYDRA-0045 - downloading: 100%|███████| 12/12 [00:29<00:00,  2.42s/it]
+    NGC3312 @ HYDRA-0045 - downloading: 100%|███████| 12/12 [00:30<00:00,  2.51s/it]
     [0;33mWARNING[0m: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
-    [2024-05-08T16:26:33.324352] - scubes: Reading ZPs table: /home/lacerda/.local/lib/python3.10/site-packages/scubes/data/iDR4_zero-points.csv
-    [2024-05-08T16:26:33.327430] - scubes: Getting ZP corrections for the S-PLUS bands...
-    [2024-05-08T16:26:33.331436] - scubes: Calibrating stamps...
+    [2024-05-14T17:41:19.819458] - scubes: Reading ZPs table: /home/lacerda/.local/lib/python3.10/site-packages/scubes/data/iDR4_zero-points.csv
+    [2024-05-14T17:41:19.822331] - scubes: Getting ZP corrections for the S-PLUS bands...
+    [2024-05-14T17:41:19.826462] - scubes: Calibrating stamps...
     /home/lacerda/.local/lib/python3.10/site-packages/scubes/core.py:523: RuntimeWarning: cdelt will be ignored since cd is present
       nw.wcs.cdelt[:2] = w.wcs.cdelt
-    [2024-05-08T16:26:34.136932] - scubes: Cube successfully created!
-    [2024-05-08T16:26:34.136951] - scubes: Removing downloaded data"
+    [2024-05-14T17:41:20.603451] - scubes: Cube successfully created!
+    [2024-05-14T17:41:20.603470] - scubes: Removing downloaded data
 
 
 How to read a cube
@@ -525,7 +666,7 @@ class.
 
 .. parsed-literal::
 
-    <matplotlib.colorbar.Colorbar at 0x7fe8978f7f70>
+    <matplotlib.colorbar.Colorbar at 0x7c45417271f0>
 
 
 
@@ -552,28 +693,28 @@ or using a recent **SCUBE** created (``sex_mask_stars_cube`` script).
 Here an example for the ``sex_mask_stars_cube`` use, with a example
 plot.
 
-.. code-block:: shell
+.. code-block:: ipython3
 
     !sex_mask_stars_cube -U guest -P guest99 -N -F -x source_extractor NGC3312/NGC3312_cube.fits
 
 
 .. parsed-literal::
 
-    [2024-05-08T16:26:38.726684] - sex_mask_stars_cube: NGC3312 @ HYDRA-0045 - downloading detection image
-    [2024-05-08T16:26:50.739576] - sex_mask_stars_cube: Calculating mask...
-    [2024-05-08T16:26:50.739591] - sex_mask_stars_cube: Running SExtractor to get photometry...
+    [2024-05-14T17:41:24.890863] - sex_mask_stars_cube: NGC3312 @ HYDRA-0045 - downloading detection image
+    [2024-05-14T17:41:36.913821] - sex_mask_stars_cube: Calculating mask...
+    [2024-05-14T17:41:36.913836] - sex_mask_stars_cube: Running SExtractor to get photometry...
     Ouch, SExtractor complains :
     b''
     Output catalog ./NGC3312_detection.cat.txt already exists, I will overwrite it
     Ouch, SExtractor complains :
     b''
     [0;33mWARNING[0m: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
-    [2024-05-08T16:26:51.384584] - sex_mask_stars_cube: Saving fig to ./NGC3312_HYDRA-0045_500x500_maskMosaic.png
+    [2024-05-14T17:41:37.603530] - sex_mask_stars_cube: Saving fig to ./NGC3312_HYDRA-0045_500x500_maskMosaic.png
     [0;33mWARNING[0m: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
-    [2024-05-08T16:26:51.866267] - sex_mask_stars_cube: Saving mask to NGC3312_sexmask.fits
+    [2024-05-14T17:41:38.068745] - sex_mask_stars_cube: Saving mask to NGC3312_sexmask.fits
 
 
-.. code-block:: ipython3
+.. code-block:: python
 
     from astropy.io import fits
     
@@ -594,7 +735,7 @@ plot.
 
 .. parsed-literal::
 
-    <matplotlib.colorbar.Colorbar at 0x7fe8977d3a30>
+    <matplotlib.colorbar.Colorbar at 0x7c45417fbd90>
 
 
 
