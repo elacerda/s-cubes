@@ -1,12 +1,22 @@
 import sys
 import numpy as np
+from os.path import isfile
 from astropy.io import fits
+from argparse import Namespace
 from copy import deepcopy as copy
 from astropy.visualization import make_lupton_rgb
 
 from .io import print_level
-from ..constants import METADATA_NAMES
+from ..constants import METADATA_NAMES, BANDS
 
+class tupperware_none(Namespace):
+    def __init__(self):
+        pass
+
+    def __getattr__(self, attr):
+        r = self.__dict__.get(attr, None)
+        return r
+    
 class read_scube:
     def __init__(self, filename):
         self.filename = filename
@@ -99,6 +109,53 @@ class read_scube:
         #################        
         return RGB__yx
 
+    def source_extractor(self, 
+                         sextractor, username, password, 
+                         class_star=0.25, satur_level=1600, back_size=64, 
+                         detect_thresh=1.1, estimate_fwhm=False,
+                         force=False, verbose=0):
+        from ..headers import get_author
+        from ..mask_stars import maskStars
+        from .splusdata import connect_splus_cloud, detection_image_hdul
+        from .utils import _get_lupton_RGB, sex_mask_stars_cube_argsparse
+
+        args = tupperware_none()
+        args.sextractor = sextractor
+        args.verbose = verbose
+        args.class_star = class_star
+        args.back_size = back_size
+        args.detect_thresh = detect_thresh
+        args.estimate_fwhm = estimate_fwhm
+        args.satur_level = satur_level
+        args.force = force
+        args.no_interact = True
+        args.username = username
+        args.password = password
+        args.cube_path = self.filename
+        args = sex_mask_stars_cube_argsparse(args)
+
+        conn = connect_splus_cloud(username, password)
+        detection_image = f'{self.galaxy}_detection.fits'
+
+        if not isfile(detection_image) or force:
+            print_level(f'{self.galaxy} @ {self.tile} - downloading detection image')
+            kw = dict(ra=self.ra, dec=self.dec, size=self.size, bands=BANDS, option=self.tile)
+            hdul = detection_image_hdul(conn, **kw)
+
+            author = get_author(hdul[1].header)
+
+            # ADD AUTHOR TO HEADER IF AUTHOR IS UNKNOWN
+            if author == 'unknown':
+                author = 'scubes'
+                hdul[1].header.set('AUTHOR', value=author, comment='Who ran the software')
+            # SAVE DETECTION FITS
+            hdul.writeto(detection_image, overwrite=force)
+        else:
+            print_level('Detection file exists.')
+
+        _ = maskStars(args=args, detection_image=detection_image, lupton_rgb=_get_lupton_RGB(conn, args, save_img=False), output_dir='.')
+        self.mask_stars_hdul = _.hdul
+        
     @property
     def weimask__lyx(self):
         return np.broadcast_to(self.weimask__yx, (len(self.filters), self.size, self.size))
@@ -143,6 +200,14 @@ class read_scube:
     def x0tile(self):
         return self.primary_header.get('X0TILE', None)
     
+    @property
+    def ra(self):
+        return self.primary_header.get('RA', None)
+    
+    @property
+    def dec(self):
+        return self.primary_header.get('DEC', None)
+
     @property
     def y0tile(self):
         return self._hdulist[0].header['Y0TILE']

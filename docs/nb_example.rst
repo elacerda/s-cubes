@@ -19,7 +19,6 @@ DEC *-27d33’56"*.
 .. figure:: HYDRA-0045_NGC3312-stamp.png
    :alt: NGC3312 crop at HYDRA-0045 S-PLUS tile
 
-   NGC3312 crop at HYDRA-0045 S-PLUS tile
 
 The ``scubes`` entry-point script will download the 12-band stamps and
 calculate the fluxes and errors of each image. The images are zero-point
