@@ -720,33 +720,13 @@ using the instantiated object ``scube``:
 .. parsed-literal::
 
     [2024-05-15T15:57:10.411711] - : NGC3312 @ HYDRA-0045 - downloading detection image
-
-
-.. parsed-literal::
-
     Ouch, SExtractor complains :
     b''
-
-
-.. parsed-literal::
-
     [2024-05-15T15:57:23.440169] - : Calculating mask...
     [2024-05-15T15:57:23.440213] - : Running SExtractor to get photometry...
-
-
-.. parsed-literal::
-
     WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
-
-
-.. parsed-literal::
-
     [2024-05-15T15:57:23.930471] - : Saving fig to ./NGC3312_HYDRA-0045_500x500_maskMosaic.png
     [2024-05-15T15:57:24.370243] - : Saving mask to NGC3312_sexmask.fits
-
-
-.. parsed-literal::
-
     WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
 
 
