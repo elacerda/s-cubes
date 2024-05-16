@@ -176,7 +176,7 @@ The call to the entry-point script ``scubes`` to this example would be:
 
 .. code-block:: ipython3
 
-    !scubes -frR -w . -U guest -P guest99 -l 500 -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312
+    !scubes -frR -w . -U YOURUSER -P YOURPASS -l 500 -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312
 
 
 .. parsed-literal::
@@ -714,7 +714,7 @@ using the instantiated object ``scube``:
 
 .. code-block:: ipython3
 
-    scube.source_extractor(sextractor='source-extractor', username='guest', password='guest99')
+    scube.source_extractor(sextractor='source-extractor', username=YOURUSER, password=YOURPASS)
 
 
 .. parsed-literal::
@@ -782,7 +782,7 @@ Now, the same example but using the ``sex_mask_stars_cube`` script:
 
 .. code-block:: ipython3
 
-    !sex_mask_stars_cube -U guest -P guest99 -N -F -x source_extractor NGC3312/NGC3312_cube.fits
+    !sex_mask_stars_cube -U YOURUSER -P YOURPASS -N -F -x source_extractor NGC3312/NGC3312_cube.fits
 
 
 .. parsed-literal::
