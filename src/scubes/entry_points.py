@@ -148,7 +148,7 @@ SCUBESML_ARGS = {
     'clean': ['c', dict(action='store_true', default=False, help='Clean intermediate files after processing.')],
     'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files.')],
     'bands': ['b', dict(default=BANDS, nargs='+', help='List of S-PLUS bands (space separated).')],
-    'size_multiplicator': ['S', dict(default=10, type=int, help='Factor to multiply the R50__pix value of the masterlist to create the galaxy size. If size is a odd number, the program will choose the closest even integer.')],
+    'size_multiplicator': ['S', dict(default=10, type=float, help='Factor to multiply the SIZE__pix value of the masterlist to create the galaxy size. If size is a odd number, the program will choose the closest even integer.')],
     'work_dir': ['w', dict(default=getcwd(), help='Working directory.')],
     'output_dir': ['o', dict(default=getcwd(), help='Output directory.')],
     'verbose': ['v', dict(action='count', default=0, help='Verbosity level.')],
@@ -198,7 +198,7 @@ def scubesml_argparse(args):
     args.tile = mlcut['FIELD'][0]
     args.ra = mlcut['RA__deg'][0]
     args.dec = mlcut['DEC__deg'][0]
-    args.size = round(args.size_multiplicator*float(mlcut['R50__pix'])/2)*2
+    args.size = round(args.size_multiplicator*float(mlcut['SIZE__pix'])/2)*2
 
     return args
 

@@ -67,15 +67,15 @@ information from a *masterlist*.
 of objects to create cubes. The file must contain at least 5 columns named with 
 the following header and information:
 
-#. **\*** ``SNAME``: A nickname for the object 
-#. **\*** ``FIELD``: S-PLUS Field (TILE) in which the program will search for the coordinates 
-#. **\*** ``RA__deg``: Right-ascencion in degrees 
-#. **\*** ``DEC__deg``: Declination in degrees 
-#. **\*** ``R50__pix``: R50 of the object in pixels 
+#. ``SNAME``: A nickname for the object 
+#. ``FIELD``: S-PLUS Field (TILE) in which the program will search for the coordinates 
+#. ``RA__deg``: Right-ascencion in degrees 
+#. ``DEC__deg``: Declination in degrees 
+#. ``SIZE__pix``: SIZE of the object in pixels 
 
 Masterlist file content example::
 
-    SNAME,FIELD,RA__deg,DEC__deg,R50__pix
+    SNAME,FIELD,RA__deg,DEC__deg,SIZE__pix
     S00001,SPLUS-s24s34,52.08196,-31.06817,53.65902
     S00002,SPLUS-s24s35,52.87771,-30.21333,25.898617
     (...)

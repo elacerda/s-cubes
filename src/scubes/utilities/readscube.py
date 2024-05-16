@@ -94,9 +94,9 @@ class read_scube:
         B = copy(self.flux__lyx[i_b, :, :].filled(np.nan)).sum(axis=0)
         # percentiles
         pmin, pmax = pminmax
-        Rmin, Rmax = np.nanpercentile(R, pminmax[0]), np.nanpercentile(R, pminmax[1])
-        Gmin, Gmax = np.nanpercentile(G, pminmax[0]), np.nanpercentile(G, pminmax[1])
-        Bmin, Bmax = np.nanpercentile(B, pminmax[0]), np.nanpercentile(B, pminmax[1])
+        Rmin, Rmax = np.nanpercentile(R, pmin), np.nanpercentile(R, pmax)
+        Gmin, Gmax = np.nanpercentile(G, pmin), np.nanpercentile(G, pmax)
+        Bmin, Bmax = np.nanpercentile(B, pmin), np.nanpercentile(B, pmax)
         # R, G and B images
         R = im_max*(R - Rmin)/(Rmax - Rmin)
         G = im_max*(G - Gmin)/(Gmax - Gmin)
