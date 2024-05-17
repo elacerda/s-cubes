@@ -697,7 +697,7 @@ class SCubes:
         prim_hdu = fits.PrimaryHDU()
         prim_hdu.header['TILE'] = ctrl.tile
         prim_hdu.header['GALAXY'] = self.galaxy.name
-        prim_hdu.header['SIZE'] = (ctrl.size, 'Side of the stamp')
+        prim_hdu.header['SIZE'] = (ctrl.size, 'Side of the stamp in pixels')
         for _k in ['X0TILE', 'Y0TILE']:
             prim_hdu.header[_k] = cube_h[_k]
         prim_hdu.header['RA'] = ctrl.ra

@@ -413,10 +413,11 @@ def ml2header_updheader(cube_filename, ml_table):
             desc = None
             if '__' in col:
                 col, _, desc = col.split('_')
-            if col == 'FIELD':
-                col = 'TILE'
-            if col == 'SNAME':
-                col = 'GALAXY'
+            if col == 'SIZE':
+                col = 'SIZE_ML'
+                desc = 'SIZE masterlist'
+            if col == 'FIELD' or col == 'SNAME':
+                continue
             hdu.header.set(col, value=v, comment=desc)
 
 def ml2header():
