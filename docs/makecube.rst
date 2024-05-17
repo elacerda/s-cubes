@@ -32,6 +32,8 @@ See the script help for more options:
 
     scubes --help
     
+For a complete example with plots see :ref:`jupyter`.
+
 .. toctree::
     :maxdepth: 2
     :glob:

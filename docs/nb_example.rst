@@ -3,6 +3,7 @@
 Jupyter Notebook example
 ========================
 
+:download:`Download this notebook <nb_example.tar.bz2>`.
 
 .. toctree::
     :maxdepth: 2
@@ -80,25 +81,15 @@ An example of this usage is at the end of this document.
     
        Eduardo Alberto Duarte Lacerda <dhubax@gmail.com>, Fabio Herpich <fabiorafaelh@gmail.com>
     
-    Parsing the RA and DEC inputs to astropy.coordinates.SkyCoord():
-    
-        RA=03h28m19.59s                 RA(parsed)=03h28m19.59s
-        DEC=-31d04m05.26392275s         DEC(parsed)=-31d04m05.26392275s
-        astropy.coordinates.SkyCoord() object:
-        <SkyCoord (ICRS): (ra, dec) in deg
-            (52.081625, -31.06812887)>
-    
-        RA=03:28:19.59                  RA(parsed)=03:28:19.59°
-        DEC=-31:04:05.26392275          DEC(parsed)=-31:04:05.26392275°
-        astropy.coordinates.SkyCoord() object:
-        <SkyCoord (ICRS): (ra, dec) in deg
-            (3.47210833, -31.06812887)>
-    
-        RA=03d28'19.59"                 RA(parsed)=03d28'19.59"
-        DEC=-31d04'05.26392275"         DEC(parsed)=-31d04'05.26392275"
-        astropy.coordinates.SkyCoord() object:
-        <SkyCoord (ICRS): (ra, dec) in deg
-            (3.47210833, -31.06812887)>
+    The input values of RA and DEC will be converted to degrees using the 
+    scubes.utilities.io.convert_coord_to_degrees(). All scripts with RA 
+    and DEC inputs parse angles in two different units:
+
+    - **hourangle**: using *hms* divisors; Ex: *10h37m2.5s*
+    - **degrees**: using *:* or *dms*  divisors; Ex: *10:37:2.5* or *10d37m2.5s*
+
+    Note that *10h37m2.5s* is a totally different angle from *10:37:2.5* 
+    (*159.26 deg* and *10.62 deg* respectively).
     
     positional arguments:
       SPLUS_TILE                  Name of the S-PLUS tile

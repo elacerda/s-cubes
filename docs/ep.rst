@@ -39,7 +39,7 @@ Note that *10h37m2.5s* is a totally different angle from *10:37:2.5*
 .. literalinclude:: ../src/scubes/entry_points.py
     :language: python
     :linenos:
-    :lines: 114-134
+    :lines: 104-124
 
 ``scubes`` is the main script of **S-Cubes**. It calibrates the zero-points, 
 calculates the fluxes and uncertainties for the 12-band images cropped from 
@@ -58,7 +58,7 @@ The usage of this script is detailed in :ref:`How to create a cube`.
 .. literalinclude:: ../src/scubes/entry_points.py
     :language: python
     :linenos:
-    :lines: 205-231
+    :lines: 195-221
 
 ``scubesml`` is the same as :ref:`epscubes` but gathering the needed input 
 information from a *masterlist*. 
@@ -171,7 +171,7 @@ original cube.
 .. literalinclude:: ../src/scubes/entry_points.py
     :language: python
     :linenos:
-    :lines: 247-269
+    :lines: 237-259
 
 This script prints the S-PLUS filters information table formatted with the 
 required number of decimals.

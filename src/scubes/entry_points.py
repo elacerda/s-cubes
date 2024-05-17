@@ -22,25 +22,15 @@ SCUBES_PROG_DESC = f'''
 
    {__author__}
 
-Parsing the RA and DEC inputs to astropy.coordinates.SkyCoord():
+The input values of RA and DEC will be converted to degrees using the 
+scubes.utilities.io.convert_coord_to_degrees(). All scripts with RA 
+and DEC inputs parse angles in two different units:
 
-    RA=03h28m19.59s                 RA(parsed)=03h28m19.59s
-    DEC=-31d04m05.26392275s         DEC(parsed)=-31d04m05.26392275s
-    astropy.coordinates.SkyCoord() object:
-    <SkyCoord (ICRS): (ra, dec) in deg
-        (52.081625, -31.06812887)>
+- **hourangle**: using *hms* divisors; Ex: *10h37m2.5s*
+- **degrees**: using *:* or *dms*  divisors; Ex: *10:37:2.5* or *10d37m2.5s*
 
-    RA=03:28:19.59                  RA(parsed)=03:28:19.59°
-    DEC=-31:04:05.26392275          DEC(parsed)=-31:04:05.26392275°
-    astropy.coordinates.SkyCoord() object:
-    <SkyCoord (ICRS): (ra, dec) in deg
-        (3.47210833, -31.06812887)>
-
-    RA=03d28'19.59"                 RA(parsed)=03d28'19.59"
-    DEC=-31d04'05.26392275"         DEC(parsed)=-31d04'05.26392275"
-    astropy.coordinates.SkyCoord() object:
-    <SkyCoord (ICRS): (ra, dec) in deg
-        (3.47210833, -31.06812887)>
+Note that *10h37m2.5s* is a totally different angle from *10:37:2.5* 
+(*159.26 deg* and *10.62 deg* respectively).
 
 '''
 
