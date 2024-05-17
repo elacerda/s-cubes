@@ -153,7 +153,7 @@ SCUBESML_ARGS = {
     #'tile': ['pos', dict(metavar='SPLUS_TILE', help='Name of the S-PLUS tile')],
     #'ra': ['pos', dict(metavar='RA', help="Galaxy's right ascension")],
     #'dec': ['pos', dict(metavar='DEC', help="Galaxy's declination")],
-    'galaxy': ['pos', dict(metavar='GALAXY_NAME', help="Galaxy's name")],
+    'galaxy': ['pos', dict(metavar='GALAXY_SNAME', help="Galaxy's masterlist nickname")],
     'masterlist': ['pos', dict(metavar='MASTERLIST', help='Path to masterlist file')]
 }
 
