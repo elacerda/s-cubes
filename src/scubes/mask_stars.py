@@ -4,6 +4,7 @@ from astropy.wcs import WCS
 from astropy.io import fits
 from .control import control
 from os.path import join, isfile
+from copy import deepcopy as copy
 from matplotlib import pyplot as plt
 from .headers import get_key, get_author
 from .constants import SPLUS_DEFAULT_SEXTRACTOR_CONFIG, SPLUS_DEFAULT_SEXTRACTOR_PARAMS
@@ -198,6 +199,7 @@ class maskStars:
         mask_filename = self.detection_image.replace('detection', 'sexmask')
         
         hdul = fits.open(self.detection_image)
+        self.detection_image_hdul = copy(hdul)
         h = hdul[1].header
 
         input_config = SPLUS_DEFAULT_SEXTRACTOR_CONFIG
@@ -225,3 +227,4 @@ class maskStars:
 
         self.filename = mask_filename
         self.hdul = mhdul
+        
