@@ -383,8 +383,8 @@ by Fabio Herpich.
 
 .. parsed-literal::
 
-    [0;31mfilter central_wave delta_wave trapz_wave trapz_width mean_wave mean_width mean_1_wave mean_1_width pivot_wave alambda_av[0m
-    [0;31m------ ------------ ---------- ---------- ----------- --------- ---------- ----------- ------------ ---------- ----------[0m
+    filter central_wave delta_wave trapz_wave trapz_width mean_wave mean_width mean_1_wave mean_1_width pivot_wave alambda_av
+    ------ ------------ ---------- ---------- ----------- --------- ---------- ----------- ------------ ---------- ----------
      uJAVA      3576.59     324.89    3542.14      322.83   3542.14     322.83     3541.97       322.48    3533.28       1.61
      J0378      3770.67     150.99    3774.01      135.96   3774.01     135.96     3773.98       135.75    3773.16       1.52
      J0395      3940.67      102.8    3941.09      100.78   3941.09     100.78     3941.07       100.66     3940.7       1.46
