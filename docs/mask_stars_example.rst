@@ -115,9 +115,9 @@ of the detection is created. Here we show an example using
     Output catalog ./NGC3312_detection.cat.txt already exists, I will overwrite it
     Ouch, SExtractor complains :
     b''
-    [0;33mWARNING[0m: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
+    WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
     [2024-05-26T16:23:26.604564] - sex_mask_stars: Saving fig to ./NGC3312_HYDRA-0045_500x500_maskMosaic.png
-    [0;33mWARNING[0m: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
+    WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
     [2024-05-26T16:23:27.159480] - sex_mask_stars: Saving mask to NGC3312_sexmask.fits
 
 
@@ -225,9 +225,9 @@ First an example using ``sex_mask_stars_cube`` script:
     Output catalog ./NGC3312_detection.cat.txt already exists, I will overwrite it
     Ouch, SExtractor complains :
     b''
-    [0;33mWARNING[0m: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
+    WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
     [2024-05-26T16:23:32.943334] - sex_mask_stars_cube: Saving fig to ./NGC3312_HYDRA-0045_500x500_maskMosaic.png
-    [0;33mWARNING[0m: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
+    WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
     [2024-05-26T16:23:33.523069] - sex_mask_stars_cube: Saving mask to NGC3312_sexmask.fits
 
 

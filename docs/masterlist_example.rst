@@ -24,9 +24,7 @@ columns named with the following header and information:
 4. ``DEC__deg``: Declination in degrees
 5. ``SIZE__pix``: SIZE of the object in pixels
 
-*Masterlist* file content example::
-
-::
+*Masterlist* file content example:
 
    SNAME,FIELD,RA__deg,DEC__deg,SIZE__pix
    S00001,SPLUS-s24s34,52.08196,-31.06817,53.65902
@@ -146,8 +144,8 @@ run ``scubes`` for each object, just use ``scubesml`` script as:
 .. parsed-literal::
 
     ESO419-G013 @ SPLUS-s24s39 - downloading: 100%|█| 12/12 [00:27<00:00,  2.29s/it]
-    [0;33mWARNING[0m: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-09-26' from MJD-OBS'. [astropy.wcs.wcs]
-    [0;33mWARNING[0m: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-10-13' from MJD-OBS'. [astropy.wcs.wcs]
+    WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-09-26' from MJD-OBS'. [astropy.wcs.wcs]
+    WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-10-13' from MJD-OBS'. [astropy.wcs.wcs]
     [2024-05-26T21:34:22.521107] - scubesml: Reading ZPs table: /home/lacerda/.local/lib/python3.10/site-packages/scubes/data/iDR4_zero-points.csv
     [2024-05-26T21:34:22.524050] - scubesml: Getting ZP corrections for the S-PLUS bands...
     [2024-05-26T21:34:22.528228] - scubesml: Calibrating stamps...
