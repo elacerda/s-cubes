@@ -18,6 +18,9 @@ S-Cubes homepage
    :target: https://github.com/elacerda/s-cubes/blob/main/LICENSE.txt
    :alt: GitHub License
 
+.. figure:: images/scubes3d.png
+   :align: left
+
 .. toctree::
    :maxdepth: 2
    :glob:
@@ -26,7 +29,15 @@ S-Cubes homepage
    gstart
    makecube
    ep
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+   :caption: Running examples
+   
    nb_example
+   mask_stars_example
+   masterlist_example
 
 .. toctree::
    :maxdepth: 3
