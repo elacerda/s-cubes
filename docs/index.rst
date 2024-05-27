@@ -40,7 +40,7 @@ S-Cubes homepage
    masterlist_example
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :glob:
    :caption: Package
 
