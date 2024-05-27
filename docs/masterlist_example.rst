@@ -161,7 +161,7 @@ Header information
 At this point, we can see that the *Masterlist* information is stored at
 the header:
 
-.. code-block:: ipython3
+.. code-block:: python
 
     from scubes.utilities.readscube import read_scube
     
