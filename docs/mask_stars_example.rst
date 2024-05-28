@@ -39,7 +39,7 @@ metadata files (2d segmentation fits, catalogs and logs). Also, a image
 of the detection is created. Here we show an example using
 ``sex_mask_stars`` script without interaction:
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     !sex_mask_stars --help
 
@@ -99,7 +99,7 @@ of the detection is created. Here we show an example using
                                   Galaxy's name
 
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     !sex_mask_stars -N -F -x source_extractor -U YOURUSER -P YOURPASS -l 500 -g NGC3312 -- HYDRA-0045 10h37m02.5s -27d33\'56\"
 
@@ -121,13 +121,13 @@ of the detection is created. Here we show an example using
     [2024-05-26T16:23:27.159480] - sex_mask_stars: Saving mask to NGC3312_sexmask.fits
 
 
-.. code:: ipython3
+.. code-block:: python
 
     import numpy as np
     from astropy.io import fits
     import matplotlib.pyplot as plt
 
-.. code:: ipython3
+.. code-block:: python
 
     sexmask = fits.open('NGC3312_sexmask.fits')
     sexmask.info()
@@ -141,7 +141,7 @@ of the detection is created. Here we show an example using
       1  MASK          1 ImageHDU        28   (500, 500)   int64   
 
 
-.. code:: ipython3
+.. code-block:: python
 
     dimage = fits.open('NGC3312_detection.fits')
     dimage.info()
@@ -157,7 +157,7 @@ of the detection is created. Here we show an example using
 
 The *MASK* hdu header carries the WCS information:
 
-.. code:: ipython3
+.. code-block:: python
 
     from astropy.wcs import WCS
     
@@ -173,7 +173,7 @@ The *MASK* hdu header carries the WCS information:
 Plot mask
 ---------
 
-.. code:: ipython3
+.. code-block:: python
 
     mask__yx = sexmask['MASK'].data
     dimage__yx = dimage['IMAGE'].data
@@ -209,7 +209,7 @@ which allows the user to interact with the mask creation and the
 
 First an example using ``sex_mask_stars_cube`` script:
 
-.. code:: ipython3
+.. code-block:: ipython3
 
     !sex_mask_stars_cube -U YOURUSER -P YOURPASS -N -F -x source_extractor NGC3312/NGC3312_cube.fits
 
@@ -235,7 +235,7 @@ The same files created before, are now created again with this script.
 Now, an example using ``scubes.utilities.readscube.read_cube()`` class
 and the method ``source_extractor``
 
-.. code:: ipython3
+.. code-block:: python
 
     from scubes.utilities.readscube import read_scube
     
@@ -283,7 +283,7 @@ and the method ``source_extractor``
 Using this option, the user can found the **MASK FITS** loaded at the
 ``scube`` object:
 
-.. code:: ipython3
+.. code-block:: python
 
     scube.mask_stars_hdul.info()
 
@@ -296,7 +296,7 @@ Using this option, the user can found the **MASK FITS** loaded at the
       1  MASK          1 ImageHDU        28   (500, 500)   int64   
 
 
-.. code:: ipython3
+.. code-block:: python
 
     scube.detection_image_hdul.info()
 
@@ -309,7 +309,7 @@ Using this option, the user can found the **MASK FITS** loaded at the
       1  IMAGE         1 ImageHDU        51   (500, 500)   float32   
 
 
-.. code:: ipython3
+.. code-block:: python
 
     sexmask_wcs = WCS(scube.mask_stars_hdul['MASK'].header)
     dimage_wcs = WCS(scube.detection_image_hdul['IMAGE'].header)
