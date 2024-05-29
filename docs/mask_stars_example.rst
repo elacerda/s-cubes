@@ -249,34 +249,14 @@ and the method ``source_extractor``
 .. parsed-literal::
 
     [2024-05-26T16:23:34.976732] - : Detection file exists.
-
-
-.. parsed-literal::
-
     Output catalog ./NGC3312_detection.cat.txt already exists, I will overwrite it
     Ouch, SExtractor complains :
     b''
-
-
-.. parsed-literal::
-
     [2024-05-26T16:23:37.055966] - : Calculating mask...
     [2024-05-26T16:23:37.056009] - : Running SExtractor to get photometry...
-
-
-.. parsed-literal::
-
     WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
-
-
-.. parsed-literal::
-
     [2024-05-26T16:23:37.451302] - : Saving fig to ./NGC3312_HYDRA-0045_500x500_maskMosaic.png
     [2024-05-26T16:23:37.972078] - : Saving mask to NGC3312_sexmask.fits
-
-
-.. parsed-literal::
-
     WARNING: FITSFixedWarning: 'datfix' made the change 'Set DATE-OBS to '2017-02-19' from MJD-OBS'. [astropy.wcs.wcs]
 
 
