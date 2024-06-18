@@ -19,6 +19,24 @@ class tupperware_none(Namespace):
         r = self.__dict__.get(attr, None)
         return r
 
+# create filters indexes list
+def _parse_filters_tuple(f_tup, filters):
+    if isinstance(f_tup, list):
+        f_tup = tuple(f_tup)
+    i_f = []
+    if isinstance(f_tup, tuple):
+        for f in f_tup:
+            if isinstance(f, str):
+                i_f.append(filters.index(f))
+            else:
+                i_f.append(f)
+    else:
+        if isinstance(f_tup, str):
+            i_f.append(filters.index(f_tup))
+        else:
+            i_f.append(f_tup)
+    return i_f
+
 def get_distance(x, y, x0, y0, pa=0.0, ba=1.0):
     '''
     Return an image (:class:`numpy.ndarray`)
@@ -135,7 +153,6 @@ class read_scube:
         self.emag__lyx = (2.5*np.ma.log10(np.exp(1)))*self.eflux__lyx/self.flux__lyx
 
     def _init(self):
-        self._init_fov_mask()
         self._init_wcs()
         self._init_centre()
         self._mag_values()
@@ -154,27 +171,10 @@ class read_scube:
         '''
         make RGB
         '''
-        # create filters indexes list
-        def _parse_filters(f_tup):
-            if isinstance(f_tup, list):
-                f_tup = tuple(f_tup)
-            i_f = []
-            if isinstance(f_tup, tuple):
-                for f in f_tup:
-                    if isinstance(f, str):
-                        i_f.append(self.filters.index(f))
-                    else:
-                        i_f.append(f)
-            else:
-                if isinstance(f_tup, str):
-                    i_f.append(self.filters.index(f_tup))
-                else:
-                    i_f.append(f_tup)
-            return i_f
-        
         # check filters
         if len(rgb) != 3:
             return None
+
         # check factors
         if isinstance(rgb_f, tuple) or isinstance(rgb_f, list):
             N = len(rgb_f)
@@ -187,34 +187,30 @@ class read_scube:
                     return None
         else:
             rgb_f = (rgb_f, rgb_f, rgb_f)
+
         #################
         ### RGB image ###
         #################
         # get filters index(es)
-        i_r = _parse_filters(rgb[0])
-        i_g = _parse_filters(rgb[1])
-        i_b = _parse_filters(rgb[2])
-        # get filters fluxes
-        R = copy(self.flux__lyx[i_r, :, :].filled(np.nan)).sum(axis=0)
-        G = copy(self.flux__lyx[i_g, :, :].filled(np.nan)).sum(axis=0)
-        B = copy(self.flux__lyx[i_b, :, :].filled(np.nan)).sum(axis=0)
-        # percentiles
         pmin, pmax = pminmax
-        Rmin, Rmax = np.nanpercentile(R, pmin), np.nanpercentile(R, pmax)
-        Gmin, Gmax = np.nanpercentile(G, pmin), np.nanpercentile(G, pmax)
-        Bmin, Bmax = np.nanpercentile(B, pmin), np.nanpercentile(B, pmax)
-        # R, G and B images
-        R = im_max*(R - Rmin)/(Rmax - Rmin)
-        G = im_max*(G - Gmin)/(Gmax - Gmin)
-        B = im_max*(B - Bmin)/(Bmax - Bmin)
+        RGB = []
+        for _c in rgb:
+            # get filters fluxes
+            i_c = _parse_filters_tuple(_c, self.filters)
+            C = copy(self.flux__lyx[i_c, :, :]).sum(axis=0)
+            # percentiles
+            Cmin, Cmax = np.nanpercentile(C, pmin), np.nanpercentile(C, pmax)
+            # calc color intensities
+            RGB.append(im_max*(C - Cmin)/(Cmax - Cmin))
+        R, G, B = RGB
         # filters factors
         fR, fG, fB = rgb_f
         # make RGB image
-        RGB__yx = make_lupton_rgb(fR*R, fG*G, fB*B, Q=Q, minimum=minimum, stretch=stretch)
+        RGB__yxc = make_lupton_rgb(fR*R, fG*G, fB*B, Q=Q, minimum=minimum, stretch=stretch)
         #################
         #################        
-        return RGB__yx
-
+        return RGB__yxc
+    
     def source_extractor(self, 
                          sextractor, username, password, 
                          class_star=0.25, satur_level=1600, back_size=64, 
@@ -265,11 +261,11 @@ class read_scube:
         self.mask_stars_hdul = _.hdul
         self.detection_image_hdul = _.detection_image_hdul
 
-    def _init_fov_mask(self):
+    def mask_optimal(self):
         f = self._hdulist['DATA'].data
         ef = self._hdulist['ERRORS'].data
         wei = self.weimask__lyx
-        self._fov_mask = np.bitwise_or(wei>0, f<=0, ~(np.isfinite(ef)))
+        return np.bitwise_or(wei>0, f<=0, ~(np.isfinite(ef)))
 
     @property
     def weimask__lyx(self):
@@ -337,8 +333,8 @@ class read_scube:
 
     @property 
     def flux__lyx(self):
-        return np.ma.masked_array(self._hdulist['DATA'].data, mask=self._fov_mask, copy=True)
+        return self._hdulist['DATA'].data
 
     @property 
     def eflux__lyx(self):
-        return np.ma.masked_array(self._hdulist['ERRORS'].data, mask=self._fov_mask, copy=True)
+        return self._hdulist['ERRORS'].data
