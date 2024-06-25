@@ -149,8 +149,8 @@ class read_scube:
     def _mag_values(self):
         a = 1/(2.997925e18*3631.0e-23*self.pixscale**2)
         x = a*(self.flux__lyx*self.pivot_wave[:, np.newaxis, np.newaxis]**2)
-        self.mag__lyx = -2.5*np.ma.log10(x)
-        self.emag__lyx = (2.5*np.ma.log10(np.exp(1)))*self.eflux__lyx/self.flux__lyx
+        self.mag_arcsec2__lyx = -2.5*np.log10(x)
+        self.emag_arcsec2__lyx = (2.5*np.log10(np.exp(1)))*self.eflux__lyx/self.flux__lyx
 
     def _init(self):
         self._init_wcs()
@@ -338,3 +338,13 @@ class read_scube:
     @property 
     def eflux__lyx(self):
         return self._hdulist['ERRORS'].data
+
+    @property
+    def mag__lyx(self):
+        return self.mag_arcsec2__lyx
+
+    @property
+    def emag__lyx(self):
+        return self.emag_arcsec2__lyx
+
+    
