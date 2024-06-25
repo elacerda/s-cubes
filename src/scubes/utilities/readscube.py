@@ -261,6 +261,41 @@ class read_scube:
         self.mask_stars_hdul = _.hdul
         self.detection_image_hdul = _.detection_image_hdul
 
+    def get_iso_sky(self, isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5, clip_neg=False):
+        from scipy.ndimage import median_filter
+
+        # Look for the sky at rSDSS image
+        sky_mask__yx = ~((self.mag__lyx[self.filters.index('rSDSS')] <= isophotal_limit) & (stars_mask == 0))
+        # from: https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.median_filter.html
+        # size gives the shape that is taken from the input array, 
+        # at every element position, to define the input to the filter 
+        # function
+        sky_pixels__yx = median_filter(sky_mask__yx, size=isophotal_medsize) | (stars_mask == 1)
+        
+        # clipping sky fluxes for outliers
+        sky_flux__lyx = np.ma.zeros_like(self.flux__lyx)
+        for _filt in self.filters:
+            i_filt = self.filters.index(_filt)
+            flux_filt__yx = self.flux__lyx[i_filt]
+            sky_flux__yx = np.ma.masked_array(flux_filt__yx, mask=~sky_pixels__yx)
+            for _iter in range(n_iter):
+                _med = np.ma.median(sky_flux__yx)
+                _sig = np.ma.std(sky_flux__yx)
+                outliers = (sky_flux__yx - _med) > (n_sigma*_sig)
+                if clip_neg:
+                    outliers = np.ma.abs(sky_flux__yx - _med) > (n_sigma*_sig)
+                sky_flux__yx[outliers] = np.ma.masked
+            sky_flux__lyx[i_filt] = sky_flux__yx
+
+        sky = {}
+        sky['flux__lyx'] = sky_flux__lyx
+        sky['mask__yx'] = (np.ma.getmask(sky_flux__lyx).sum(axis=0) == 0)
+        sky['mean__l'] = np.ma.mean(sky_flux__lyx, axis=(1, 2))
+        sky['median__l'] = np.ma.median(sky_flux__lyx, axis=(1, 2))
+        sky['std__l'] = np.ma.std(sky_flux__lyx, axis=(1, 2))
+
+        return sky
+
     def mask_optimal(self):
         f = self._hdulist['DATA'].data
         ef = self._hdulist['ERRORS'].data
