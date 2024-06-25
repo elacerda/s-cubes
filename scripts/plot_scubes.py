@@ -170,7 +170,7 @@ class scube_plots:
         
         # data
         flux__l = scube.flux__lyx[:, i_y0, i_x0]
-        eflux__l = scube.eflux__lyx[:, i_y0, i_x0]lRGB_image
+        eflux__l = scube.eflux__lyx[:, i_y0, i_x0]
         bands__l = scube.pivot_wave
         
         # plot
