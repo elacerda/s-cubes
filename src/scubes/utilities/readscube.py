@@ -373,6 +373,10 @@ class read_scube:
     @property 
     def eflux__lyx(self):
         return self._hdulist['ERRORS'].data
+    
+    @property
+    def SN__lyx(self):
+        return self.flux__lyx/self.eflux__lyx
 
     @property
     def mag__lyx(self):

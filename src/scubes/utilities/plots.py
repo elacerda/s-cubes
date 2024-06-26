@@ -22,10 +22,9 @@ class scube_plots:
         
         output_filename = f'{self.SNAME}_imgs_mag.png' if output_filename is None else output_filename
 
-        filters_names = scube.metadata['FILTER']
         f__byx = scube.mag__lyx
         ef__byx = scube.emag__lyx   
-        nb = len(filters_names)
+        nb = len(scube.filters)
         
         nrows = 2
         ncols = int(nb/nrows)
@@ -42,7 +41,7 @@ class scube_plots:
 
                 vmin, vmax = 16, 25
                 ax = ax_arr[ir*2, ic]
-                ax.set_title(filters_names[k])
+                ax.set_title(scube.filters[k])
                 im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax)
                 plt.colorbar(im, ax=ax)
                 ax.xaxis.set_major_locator(ticker.NullLocator())
@@ -50,7 +49,7 @@ class scube_plots:
 
                 vmin, vmax = 0, 0.5
                 ax = ax_arr[ir*2 + 1, ic]
-                ax.set_title(f'err {filters_names[k]}')
+                ax.set_title(f'err {scube.filters[k]}')
                 im = ax.imshow(eimg, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax)
                 plt.colorbar(im, ax=ax)
                 ax.xaxis.set_major_locator(ticker.NullLocator())
@@ -66,10 +65,9 @@ class scube_plots:
         
         output_filename = f'{self.SNAME}_imgs_flux.png' if output_filename is None else output_filename
 
-        filters_names = scube.metadata['FILTER']
         f__byx = np.ma.log10(scube.flux__lyx) + 18
         ef__byx = np.ma.log10(scube.eflux__lyx) + 18
-        nb = len(filters_names)
+        nb = len(scube.filters)
 
         nrows = 2
         ncols = int(nb/nrows)
@@ -87,7 +85,7 @@ class scube_plots:
                 vmin, vmax = np.percentile(img.compressed(), [5, 95])
                 vmin, vmax = -1, 1
                 ax = ax_arr[ir*2, ic]
-                ax.set_title(filters_names[k])
+                ax.set_title(scube.filters[k])
                 im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax)
                 plt.colorbar(im, ax=ax)
                 ax.xaxis.set_major_locator(ticker.NullLocator())
@@ -96,7 +94,7 @@ class scube_plots:
                 vmin, vmax = np.percentile(eimg.compressed(), [5, 95])
                 vmin, vmax = -1, 1
                 ax = ax_arr[ir*2 + 1, ic]
-                ax.set_title(f'err {filters_names[k]}')
+                ax.set_title(f'err {scube.filters[k]}')
                 im = ax.imshow(eimg, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax)
                 plt.colorbar(im, ax=ax)
                 ax.xaxis.set_major_locator(ticker.NullLocator())
@@ -161,14 +159,14 @@ class scube_plots:
         f.savefig(output_filename, bbox_inches='tight')
         plt.close(f)
 
-    def LRGB_centspec_filters_plot(self, output_filename=None, rgb=None):
+    def LRGB_filters_plot(self, output_filename=None, rgb=None, i_x0=None, i_y0=None):
         scube = self.scube
         
-        output_filename = f'{self.SNAME}_LRGB_centspec.png' if output_filename is None else output_filename
+        i_x0 = scube.i_x0 if i_x0 is None else i_x0
+        i_y0 = scube.i_y0 if i_y0 is None else i_y0
+        
+        output_filename = f'{self.SNAME}_LRGB_{i_x0}_{i_y0}_spec.png' if output_filename is None else output_filename
 
-        # central coords
-        i_x0, i_y0 = scube.i_x0, scube.i_y0
-        spec_pix_y, spec_pix_x = i_y0, i_x0
         rgb = ['iSDSS', 'rSDSS', 'gSDSS'] if rgb is None else rgb
         
         # data
@@ -205,7 +203,7 @@ class scube_plots:
         axf.legend(loc=(0.82, 1.15), frameon=False)
         
         # spectrum 
-        ax.set_title(f'{self.SNAME} @ {scube.tile} ({spec_pix_x},{spec_pix_y})')
+        ax.set_title(f'{self.SNAME} @ {scube.tile} ({i_x0},{i_y0})')
         ax.plot(bands__l, flux__l, ':', c='k')
         ax.scatter(bands__l, flux__l, c=self.filter_colors, s=0.5)
         ax.errorbar(x=bands__l,y=flux__l, yerr=eflux__l, c='k', lw=1, fmt='|')
@@ -219,6 +217,60 @@ class scube_plots:
 
         f.savefig(output_filename, bbox_inches='tight')
         plt.close(f)
+
+    def LRGB_centspec_filters_plot(self, output_filename=None, rgb=None):
+        self.LRGB_filters_plot(
+            output_filename=f'{self.SNAME}_LRGB_centspec.png' if output_filename is None else output_filename, 
+            rgb=rgb, i_x0=self.scube.i_x0, i_y0=self.scube.i_y0
+        )
+
+    def SN_filters_plot(self, output_filename=None, SN_range=None, selection__yx=None, bins=50):
+        scube = self.scube
+        
+        output_filename = f'{self.SNAME}_SN_filters.png' if output_filename is None else output_filename
+        SN_range = [0, 10] if SN_range is None else SN_range
+    
+        flux = splots.scube.flux__lyx
+        eflux = splots.scube.eflux__lyx
+        wei = splots.scube.weimask__lyx
+        mask__lyx = (wei > 0) | ~(np.isfinite(flux)) | ~(np.isfinite(eflux)) | (flux == 0)
+        
+        f, ax_arr = plt.subplots(2, 6)
+        f.set_size_inches(10, 4)
+        f.subplots_adjust(left=0.01, right=0.95, bottom=0.05, top=0.90, hspace=0.2, wspace=0.2)
+        f.suptitle(self.SNAME)
+        i_col, i_row = 0, 0
+        nmax = 0
+        for i, filt in enumerate(scube.filters):
+            mask__yx = mask__lyx[i]
+            SN__yx = np.ma.masked_array(scube.SN__lyx[i], mask=mask__yx)
+            ax = ax_arr[i_row, i_col]
+            ax.set_title(filt)
+            n, xe, patches = ax.hist(
+                SN__yx.compressed(), bins=bins, range=SN_range, histtype='step', 
+                label=f'{mask__yx.sum()} pixels', color=self.filter_colors[i], 
+                lw=0.5 if 'J0' in filt else 1.5, density=True,
+            )
+            nmax = n.max() if n.max() > nmax else nmax
+            ax.legend(fontsize=6, frameon=False)
+            # last row of axis with xlabels
+            if i_row:
+                ax.set_xlabel('S/N')
+            else:
+                # no xticks in second row
+                ax.set_xticks([])
+            # yticks only on first axis
+            if i_col:
+                ax.set_yticks([])
+            # axis selection
+            i_col += 1
+            if i_col > 5:
+                i_col = 0
+                i_row += 1
+        for ax in f.axes:
+            ax.set_ylim(0, 1.125*nmax)
+        f.savefig(output_filename, bbox_inches='tight')
+        plt.close(f)        
 
     def contour_plot(self, output_filename=None, contour_levels=None):
         scube = self.scube
