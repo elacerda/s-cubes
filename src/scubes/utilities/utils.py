@@ -412,7 +412,7 @@ def ml2header_updheader(cube_filename, ml_table):
             v = mlcut[col][0]
             desc = None
             if '__' in col:
-                col, _, desc = col.split('_')
+                col, desc = col.split('__')
             if col == 'SIZE':
                 col = 'SIZE_ML'
                 desc = 'SIZE masterlist'
