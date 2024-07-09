@@ -784,7 +784,7 @@ distance masks, such as create integrated spectra. An example:
     
     max_dist = 50  # pixels
     mask__yx = scube.pixel_distance__yx > max_dist
-    __lyx = (scube.n_filters, scube.ny, scube.nx)
+    __lyx = (scube.n_filters, scube.n_y, scube.n_x)
     mask__lyx = np.broadcast_to(mask__yx, __lyx)
     integrated_flux__lyx = np.ma.masked_array(scube.flux__lyx, mask=mask__lyx, copy=True)
     

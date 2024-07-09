@@ -158,10 +158,6 @@ class read_scube:
         self._mag_values()
         self.pa, self.ba = 0, 1
         self.pixel_distance__yx = get_image_distance(self.weimask__yx.shape, x0=self.i_x0, y0=self.i_y0, pa=self.pa, ba=self.ba)
-        self.n_filters = len(self.filters)
-        self.nx = self.data_header['NAXIS1']
-        self.ny = self.data_header['NAXIS2']
-        self.n_filters = self.data_header['NAXIS3']
 
     def lRGB_image(
         self, rgb=('rSDSS', 'gSDSS', 'iSDSS'), rgb_f=(1, 1, 1), 
@@ -375,6 +371,18 @@ class read_scube:
         return self._hdulist['ERRORS'].data
     
     @property
+    def n_x(self):
+        return self.data_header.get('NAXIS1', None)
+    
+    @property
+    def n_y(self):
+        return self.data_header.get('NAXIS2', None)
+    
+    @property
+    def n_filters(self):
+        return self.data_header['NAXIS3']
+    
+    @property
     def SN__lyx(self):
         return self.flux__lyx/self.eflux__lyx
 
@@ -385,5 +393,3 @@ class read_scube:
     @property
     def emag__lyx(self):
         return self.emag_arcsec2__lyx
-
-    
