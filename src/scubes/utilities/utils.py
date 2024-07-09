@@ -441,3 +441,121 @@ def ml2header():
     
     # update masterlist information
     ml2header_updheader(args.cube, args.ml)
+
+#############################################################################
+#############################################################################
+#############################################################################
+
+SPLOTS_DESC = f'''
+{SPLUS_MOTD_TOP} | scube_plots entry-point script:
+{SPLUS_MOTD_MID} | Creates a set of images from a 
+{SPLUS_MOTD_BOT} | SCUBE fits file.
+{SPLUS_MOTD_SEP} + 
+
+   {__author__}
+
+'''
+SPLOTS_ARGS = {
+    'show': ['S', dict(action='store_true', default=False, help='Show plots during execution')],
+    
+    'cube': ['pos', dict(metavar='CUBE', help="Path to a Galaxy's S-CUBES fits.")], 
+}
+
+def splots():
+    '''
+    Entry-point function to generate plots from a SCUBE.
+
+    Returns
+    -------
+    None
+    '''
+    from .plots import scube_plots
+
+    parser = create_parser(args_dict=SPLOTS_ARGS, program_description=SPLOTS_DESC)
+    args = parser.parse_args(args=sys.argv[1:])
+
+    splots = scube_plots(filename=args.cube, block=args.show)
+
+    ofile = f'{splots.galaxy}_imgs_mag.png'
+    splots.images_mag_plot(output_filename=ofile)
+
+    ofile = f'{splots.galaxy}_imgs_flux.png'
+    splots.images_flux_plot(output_filename=ofile)
+
+    kwargs = dict(isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5,clip_neg=False)
+    sky = splots.get_iso_sky(**kwargs)
+    ofile = f'{splots.galaxy}_imgs_skyflux_iso25med10.png'
+    splots.images_skyflux_plot(sky=sky, output_filename=ofile)
+
+    kwargs = dict(isophotal_limit=24, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5,clip_neg=False)
+    sky = splots.get_iso_sky(**kwargs)
+    ofile = f'{splots.galaxy}_imgs_skyflux_iso24med10.png'
+    splots.images_skyflux_plot(sky=sky, output_filename=ofile)
+
+    ofile = f'{splots.galaxy}_imgs_3Dflux.png'
+    splots.images_3D_plot(output_filename=ofile)
+
+    kw_rgb = dict(
+        rgb=['iSDSS', 'rSDSS', 'gSDSS'], 
+        rgb_f=[1, 1, 1], 
+        pminmax=[5, 95], 
+        Q=10, 
+        stretch=5, 
+        im_max=1, 
+        minimum=(0, 0, 0)
+    )
+    ofile = f'{splots.galaxy}_RGB_irg.png'
+    kw_rgb['title'] = 'R=I G=R B=G'
+    splots.RGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = ['iSDSS', 'rSDSS', (0, 1, 2, 3, 4)]
+    kw_rgb['title'] = 'R=I G=R B=U,J0378,395,410,430'
+    ofile = f'{splots.galaxy}_RGB_ir0to4.png'
+    splots.RGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = ['iSDSS', 'rSDSS', 'gSDSS']
+    kw_rgb['rgb_f'] = [1, 1, 2]
+    kw_rgb['title'] = r'R=I G=R B=$2\times$G'
+    ofile = f'{splots.galaxy}_RG2B_irg.png'
+    splots.RGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb = dict(
+        rgb=[(7, 9, 11), 5, (0, 1, 2, 3, 4)],
+        rgb_f=[1, 1, 1],
+        pminmax=[1.5, 98.5],
+        Q=3,
+        stretch=130,
+        im_max=180,
+        minimum=(15, 15, 15),
+    )
+    kw_rgb['title'] = 'R=R,I,Z G=G B=U,J0378,395,410,430'
+    ofile = f'{splots.galaxy}_RGB_riz_g_0to4.png'
+    splots.RGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = ['zSDSS', 'gSDSS', 'uJAVA']
+    kw_rgb['title'] = 'R=Z G=G B=U'
+    ofile = f'{splots.galaxy}_RGB_zgu.png'
+    splots.RGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = [9, (2, 3, 4),  (0, 1)]
+    kw_rgb['title'] = 'R=I G=J0395,410,430 B=U,J0378'
+    ofile = f'{splots.galaxy}_RGB_i_2to4_01.png'
+    splots.RGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = [8, 5,  (0, 1, 2, 3, 4)]
+    kw_rgb['title'] = 'R=J0660 G=G B=U,J0378,395,410,430'
+    ofile = f'{splots.galaxy}_RGB_i_2to4_01.png'
+    splots.RGB_plot(output_filename=ofile, **kw_rgb)
+
+    ofile = f'{splots.galaxy}_LRGB_centspec.png'
+    splots.LRGB_centspec_filters_plot(output_filename=ofile, rgb=['iSDSS', 'rSDSS', 'gSDSS'])
+
+    ofile = f'{splots.galaxy}_SN_filters.png'
+    splots.SN_filters_plot(output_filename=ofile, SN_range=[0, 10], valid_mask__yx=None, bins=50)
+
+    contour_levels = [21, 23, 24]
+    ofile = f'{splots.galaxy}_contours_mag_21_23_24.png'
+    splots.contour_plot(output_filename=ofile, contour_levels=contour_levels)
+
+    ofile = f'{splots.galaxy}_intarea_rad50pix_spec.png'
+    splots.int_area_spec_plot(output_filename=ofile, pa_deg=0, ba=1, R_pix=50)    
