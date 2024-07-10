@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import median_filter
 
 def get_iso_sky(refmag__yx, flux__lyx, isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5, clip_neg=False):
-    sky_mask__yx = ~(refmag__yx <= isophotal_limit) & (stars_mask == 0)
+    sky_mask__yx = ~((refmag__yx <= isophotal_limit) & (stars_mask == 0))
     # from: https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.median_filter.html
     # size gives the shape that is taken from the input array, 
     # at every element position, to define the input to the filter 
