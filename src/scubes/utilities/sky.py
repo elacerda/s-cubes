@@ -11,7 +11,7 @@ def get_iso_sky(refmag__yx, flux__lyx, isophotal_limit=25, isophotal_medsize=10,
     
     # clipping sky fluxes for outliers
     sky_flux__lyx = np.ma.zeros_like(flux__lyx)
-    nl, ny, nx = sky_flux__lyx.shape
+    nl = sky_flux__lyx.shape[0]
 
     for i in range(nl):
         flux_filt__yx = flux__lyx[i]
@@ -35,4 +35,3 @@ def get_iso_sky(refmag__yx, flux__lyx, isophotal_limit=25, isophotal_medsize=10,
     sky['std__l'] = np.ma.std(sky_flux__lyx, axis=(1, 2))
 
     return sky
-
