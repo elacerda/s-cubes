@@ -497,7 +497,7 @@ def splots():
     splots.sky_spec_plot(sky, output_filename=ofile)
     
     kwargs['isophotal_limit'] = 24
-    sky = splots.get_iso_sky(**kwargs)
+    sky = splots.scube.get_iso_sky(**kwargs)
     ofile = f'{splots.scube.galaxy}_imgs_skyflux_iso24med10.png'
     splots.images_skyflux_plot(sky=sky, output_filename=ofile)
 

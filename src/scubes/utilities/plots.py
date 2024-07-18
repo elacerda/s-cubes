@@ -48,7 +48,7 @@ class scube_plots():
                 vmin, vmax = 16, 25
                 ax = ax_arr[ir*2, ic]
                 ax.set_title(self.scube.filters[k])
-                im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax)
+                im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax, interpolation='nearest')
                 plt.colorbar(im, ax=ax)
                 ax.xaxis.set_major_locator(ticker.NullLocator())
                 ax.yaxis.set_major_locator(ticker.NullLocator())
@@ -56,7 +56,7 @@ class scube_plots():
                 vmin, vmax = 0, 0.5
                 ax = ax_arr[ir*2 + 1, ic]
                 ax.set_title(f'err {self.scube.filters[k]}')
-                im = ax.imshow(eimg, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax)
+                im = ax.imshow(eimg, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax, interpolation='nearest')
                 plt.colorbar(im, ax=ax)
                 ax.xaxis.set_major_locator(ticker.NullLocator())
                 ax.yaxis.set_major_locator(ticker.NullLocator())
@@ -91,7 +91,7 @@ class scube_plots():
                 vmin, vmax = -1, 1
                 ax = ax_arr[ir*2, ic]
                 ax.set_title(self.scube.filters[k])
-                im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax)
+                im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax, interpolation='nearest')
                 plt.colorbar(im, ax=ax)
                 ax.xaxis.set_major_locator(ticker.NullLocator())
                 ax.yaxis.set_major_locator(ticker.NullLocator())
@@ -100,7 +100,7 @@ class scube_plots():
                 vmin, vmax = -1, 1
                 ax = ax_arr[ir*2 + 1, ic]
                 ax.set_title(f'err {self.scube.filters[k]}')
-                im = ax.imshow(eimg, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax)
+                im = ax.imshow(eimg, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax, interpolation='nearest')
                 plt.colorbar(im, ax=ax)
                 ax.xaxis.set_major_locator(ticker.NullLocator())
                 ax.yaxis.set_major_locator(ticker.NullLocator())
@@ -128,7 +128,7 @@ class scube_plots():
                 img = np.ma.masked_array(f__byx[k], mask=~sky_pixels__yx, copy=True)
                 ax = ax_arr[ir, ic]
                 ax.set_title(self.scube.filters[k], fontsize=10, c=self.filter_colors[k])
-                im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=0, vmax=1e-18)
+                im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=0, vmax=1e-18, interpolation='nearest')
                 plt.colorbar(im, ax=ax)
                 ax.xaxis.set_major_locator(ticker.NullLocator())
                 ax.yaxis.set_major_locator(ticker.NullLocator())
@@ -261,7 +261,7 @@ class scube_plots():
     
         flux = self.scube.flux__lyx
         eflux = self.scube.eflux__lyx
-        wei = self.weimask__lyx
+        wei = self.scube.weimask__lyx
         mask__lyx = (wei > 0) | ~(np.isfinite(flux)) | ~(np.isfinite(eflux)) | (flux == 0)
         valid_mask__yx = np.ones(flux.shape[-2:], dtype='bool') if valid_mask__yx is None else valid_mask__yx
         
@@ -319,7 +319,7 @@ class scube_plots():
         
         f, ax = plt.subplots()
         f.set_size_inches(3, 3)
-        im = ax.imshow(image__yx, cmap='Spectral_r', origin='lower', vmin=16, vmax=25)
+        im = ax.imshow(image__yx, cmap='Spectral_r', origin='lower', vmin=16, vmax=25, interpolation='nearest')
         ax.contour(image__yx, levels=contour_levels, colors=['k', 'gray', 'lightgray'])
         plt.colorbar(im, ax=ax)
         f.savefig(output_filename, bbox_inches='tight')
@@ -339,7 +339,7 @@ class scube_plots():
                 pa=pa_rad.value, ba=ba
             )
         else:
-            elliptical_pixel_distance__yx = self.pixel_distance__yx
+            elliptical_pixel_distance__yx = self.scube.pixel_distance__yx
 
         mask__yx = elliptical_pixel_distance__yx > R_pix
         __lyx = (self.scube.n_filters, self.scube.n_y, self.scube.n_x)
@@ -358,8 +358,8 @@ class scube_plots():
         axmask = f.add_subplot(gs[0])
         i_r = self.scube.filters.index('rSDSS')
         img__yx = np.ma.masked_array(self.scube.mag__lyx[i_r], mask=mask__yx, copy=True)
-        axmask.imshow(img__yx, origin='lower', cmap='Spectral_r', vmin=16, vmax=25)
-        axmask.imshow(self.scube.mag__lyx[i_r], origin='lower', cmap='Spectral_r', alpha=0.2, vmin=16, vmax=25)
+        axmask.imshow(img__yx, origin='lower', cmap='Spectral_r', vmin=16, vmax=25, interpolation='nearest')
+        axmask.imshow(self.scube.mag__lyx[i_r], origin='lower', cmap='Spectral_r', alpha=0.2, vmin=16, vmax=25, interpolation='nearest')
         ax.plot(bands__l, flux__l, '-', c='lightgray')
         ax.errorbar(x=bands__l,y=flux__l, yerr=eflux__l, c='k', lw=1, fmt='|')
         ax.scatter(bands__l, flux__l, c=self.filter_colors, s=20, label='')
@@ -391,7 +391,7 @@ class scube_plots():
         i_r = self.scube.filters.index('rSDSS')
         img__yx = np.ma.masked_array(self.scube.mag__lyx[i_r], mask=~mask__yx, copy=True)
         
-        im = axmask.imshow(img__yx, origin='lower', cmap='Spectral_r', vmin=25)
+        im = axmask.imshow(img__yx, origin='lower', cmap='Spectral_r', vmin=25, interpolation='nearest')
         plt.colorbar(im, ax=axmask)
 
         ax.plot(bands__l, sky_mean_flux__l, '-', c='gray', label='mean')
