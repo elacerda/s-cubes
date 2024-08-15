@@ -177,7 +177,7 @@ class scube_plots():
         rgb__yxc = self.scube.lRGB_image(**_kw_rgb)
 
         f, ax = plt.subplots()
-        f.set_size_inches(4, 4)
+        f.set_size_inches(3, 3)
         ax.imshow(rgb__yxc, origin='lower')
         ax.set_title(_kw_rgb['rgb'] if title is None else title, fontsize=8)
         f.savefig(output_filename, bbox_inches='tight', dpi=300)
@@ -343,7 +343,7 @@ class scube_plots():
         ax.axvline(x=5007, ls='--', c='k')
         ax.axvline(x=6563, ls='--', c='k')
         ax.set_xlabel(r'$\lambda_{\rm pivot}\ [\AA]$', fontsize=10)
-        ax.set_ylabel(r'$\log$ flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
+        ax.set_ylabel(r'flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
         ax.set_title('sky spectrum')
         
         f.savefig(output_filename, bbox_inches='tight', dpi=300)
@@ -351,21 +351,30 @@ class scube_plots():
             plt.show(block=True)
         plt.close(f)
 
-    def rings_spec_plot(self, output_filename=None, pa=0, ba=1, rad_scale=1, mode='mean'):
+    def rings_spec_plot(self, output_filename=None, pa=0, ba=1, theta=None, rad_scale=1, mode='mean', sky_mask=None, rad_mask=None):
         output_filename = f'{self.scube.galaxy}_rings_spec.png' if output_filename is None else output_filename
         from matplotlib.patches import Ellipse
-
         center = np.array([self.scube.x0, self.scube.y0])
-        theta = self.scube.pa*180/np.pi
+        theta = pa*180/np.pi if theta is None else theta
 
         i_r = self.scube.filters.index('rSDSS')
         w = self.scube.pivot_wave[i_r]
         p = self.scube.pixscale
         
-        bins = np.arange(0, int(5*self.scube.size/20), 10)
+        rmax = int(5*self.scube.primary_header['SIZE_ML'])
+        bins = np.arange(0, rmax, 10)
 
-        colors = plt.colormaps['Spectral'](bins)
-        flux__lr = radial_profile(prop=self.scube.flux__lyx, x0=self.scube.x0, y0=self.scube.y0, pa=pa, ba=ba, rad_scale=rad_scale, bin_r=bins, mask=None, mode=mode)
+        colors = plt.colormaps['Spectral'](bins/rmax)
+        
+        flux__lr = radial_profile(
+            prop=self.scube.flux__lyx, 
+            x0=self.scube.x0, y0=self.scube.y0, 
+            pa=pa, ba=ba, 
+            rad_scale=rad_scale, 
+            bin_r=bins, 
+            mask=rad_mask, 
+            mode=mode,
+        )
 
         f = plt.figure()
         f.set_size_inches(6*self.aur, 4)
@@ -373,17 +382,21 @@ class scube_plots():
         gs = GridSpec(nrows=4, ncols=2, hspace=0, wspace=0.05, figure=f)
         ax = f.add_subplot(gs[:, 1])
         aximg = f.add_subplot(gs[:, 0])
-        img__yx = np.ma.masked_array(self.scube.mag__lyx[i_r], copy=True)
-        aximg.imshow(img__yx, origin='lower', cmap='Grays', vmin=16, vmax=25, interpolation='nearest')
+        x = np.log10(self.scube.flux__lyx[i_r]) + 18
+        mask__yx = x<np.log10(fmagr(25, w, p))+18
+        if sky_mask is not None:
+            mask__yx = sky_mask
+        img__yx = np.ma.masked_array(x, mask=mask__yx, copy=True)
+        aximg.imshow(img__yx.filled(-0.55), origin='lower', cmap='Greys_r', vmin=-0.5, vmax=1.5, interpolation='nearest')
 
         for i, color in enumerate(colors[1:]):
             bin = bins[i + 1]
             ax.plot(self.scube.pivot_wave, flux__lr[:, i], 'o-', c=color, label=bin)
-            height = 2*bin*self.scube.ba
+            height = 2*bin*ba
             width = 2*bin
-            e = Ellipse(center, height=height, width=width, angle=theta, fill=False, color=color, lw=1, ls='-')
+            e = Ellipse(center, height=height, width=width, angle=theta, fill=False, color=color, lw=1, ls='dotted')
             aximg.add_artist(e)
-        ax.set_title('rings with 10 pixels')
+        ax.set_title(r'rings with <10pix> up to 5 R$_{50}$')
         ax.axhline(y=fmagr(23, w, p), ls='--', c='k', lw=0.4)
         ax.axhline(y=fmagr(24, w, p), ls='--', c='k', lw=0.4)
         ax.axhline(y=fmagr(25, w, p), ls='--', c='k', lw=0.4)
@@ -392,7 +405,7 @@ class scube_plots():
         ax.axvline(x=6563, ls='--', c='k')
         ax.set_ylim(1e-20)
         ax.set_yscale('log')
-        ax.set_ylabel(r'$\log$ flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
+        ax.set_ylabel(r'flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
         ax.set_xlabel(r'$\lambda_{\rm pivot}\ [\AA]$', fontsize=10)
         f.savefig(output_filename, bbox_inches='tight', dpi=300)
         if self.block:

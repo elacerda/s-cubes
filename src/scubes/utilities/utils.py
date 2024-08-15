@@ -493,9 +493,6 @@ def splots():
     ofile = f'{splots.scube.galaxy}_imgs_SN.png'
     splots.images_SN_plot(output_filename=ofile, cmap='magma')
 
-    ofile = f'{splots.scube.galaxy}_LRGB_centspec.png'
-    splots.LRGB_centspec_plot(output_filename=ofile)
-
     #######################################
     ################# SKY #################
     #######################################
@@ -515,60 +512,63 @@ def splots():
     #######################################
     ################# RGBs ################
     #######################################
-    kw_rgb = dict(
-        rgb=[9, 7, 5],
-        rgb_f=[1, 1, 1],
-        pminmax=[1.5, 98.5],
-        Q=3,
-        stretch=130,
-        im_max=180,
-        minimum=(15, 15, 15),
-    )
+    rgblist = [
+        [9, 7, 5],
+        [8, 7, 5],
+        [8, 9, 0],
+        [11, 5, 0],
+        [9, [3, 4, 5], [0, 1, 2]],
+        [8, 9, 5],
+        [8, 5, [0, 1, 2, 3, 4]]
+    ] 
+    titlelist = [
+        '(i, r, g)',
+        '(J0660, r, g)',
+        '(J0660, i, u)',
+        '(z, g, u)',
+        '(i, J0410+J0430+g, u+J0378+J0395)',
+        '(J0660, i, g)',
+        '(J0660, g, u+J0378+J0395+J0410+J0430)'
+    ]
+    for rgb, title, in zip(rgblist, titlelist):
+        s = [ str(x).replace(',','').replace(' ', '').replace('[','').replace(']','') for x in rgb]
+        kw = dict(
+            rgb=rgb,
+            rgb_f=[1, 1, 1],
+            pminmax=[1.5, 98.5],
+            Q=3,
+            stretch=130,
+            im_max=180,
+            minimum=(15, 15, 15),
+            title=title       
+        )
+        splots.LRGB_plot(output_filename=f'{splots.scube.galaxy}_RGB_{s[0]}-{s[1]}-{s[2]}.png', **kw)
 
-    kw_rgb['title'] = '(i, r, g)'
-    ofile = f'{splots.scube.galaxy}_RGB_9-7-5.png'
-    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
+    ofile = f'{splots.scube.galaxy}_LRGB_centspec.png'
+    splots.LRGB_centspec_plot(output_filename=ofile)
 
-    kw_rgb['rgb'] = [8, 7, 5]
-    kw_rgb['title'] = '(J0660, r, g)'
-    ofile = f'{splots.scube.galaxy}_RGB_8-7-5.png'
-    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = [8, 9, 0]
-    kw_rgb['title'] = '(J0660, i, u)'
-    ofile = f'{splots.scube.galaxy}_RGB_8-9-0.png'
-    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = [11, 5, 0]
-    kw_rgb['title'] = '(z, g, u)'
-    ofile = f'{splots.scube.galaxy}_RGB_11-5-0.png'
-    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = [9, (3, 4, 5), (0, 1, 2)]
-    kw_rgb['title'] = '(i, J0410+J0430+g, u+J0378+J0395)'
-    ofile = f'{splots.scube.galaxy}_RGB_9-345-012.png'
-    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = [8, 9, 5]
-    kw_rgb['title'] = '(J0660, i, g)'
-    ofile = f'{splots.scube.galaxy}_RGB_8-9-5.png'
-    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = [8, 5, (0, 1, 2, 3, 4)]
-    kw_rgb['title'] = '(J0660, g, u+J0378+J0395+J0410+J0430)'
-    ofile = f'{splots.scube.galaxy}_RGB_8-5-01234.png'
-    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
-
+    #######################################
+    ################# SPEC ################
+    #######################################
     ofile = f'{splots.scube.galaxy}_rings_spec.png'
+    #pa = 1 - splots.scube.primary_header['HIERARCH ELLIPTICITY']
+    #ba = splots.scube.primary_header['B_IMAGE']/splots.scube.primary_header['A_IMAGE']
+    #theta = splots.scube.primary_header['HIERARCH THETA_IMAGE']
+    pa = 0
+    ba = 1
+    theta = None
     splots.rings_spec_plot(
         output_filename=ofile, 
-        pa=splots.scube.pa,
-        ba=splots.scube.ba,
+        pa=pa,
+        ba=ba,
+        theta=theta,
         rad_scale=1,
-        mode='mean'
+        mode='mean',
+        sky_mask=sky['mask__yx'],
+        rad_mask=None,
     )
 
-'''
+    '''
     ofile = f'{splots.scube.galaxy}_imgs_eflux.png'
     splots.images_eflux_plot(output_filename=ofile, cmap='magma')
 
@@ -581,4 +581,4 @@ def splots():
 
     ofile = f'{splots.scube.galaxy}_intarea_rad50pix_spec.png'
     splots.int_area_spec_plot(output_filename=ofile, pa_deg=0, ba=1, R_pix=50)    
-'''
+    '''
