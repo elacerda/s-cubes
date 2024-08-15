@@ -158,7 +158,7 @@ class read_scube:
         self._init_centre()
         self._mag_values()
         self.pa, self.ba = 0, 1
-        self.pixel_distance__yx = get_image_distance(self.weimask__yx.shape, x0=self.i_x0, y0=self.i_y0, pa=self.pa, ba=self.ba)
+        self.pixel_distance__yx = get_image_distance(self.weimask__yx.shape, x0=self.x0, y0=self.y0, pa=self.pa, ba=self.ba)
 
     def lRGB_image(
         self, rgb=('rSDSS', 'gSDSS', 'iSDSS'), rgb_f=(1, 1, 1), 
