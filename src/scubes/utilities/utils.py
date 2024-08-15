@@ -475,11 +475,105 @@ def splots():
 
     splots = scube_plots(filename=args.cube, block=args.show)
 
+    #######################################
+    ################# IMGs ################
+    #######################################
+    ofile = f'{splots.scube.galaxy}_imgs_3Dflux.png'
+    splots.images_3D_plot(output_filename=None, FOV=140)
+
+    ofile = f'{splots.scube.galaxy}_imgs_mag.png'
+    splots.images_mag_plot(output_filename=ofile, cmap='magma_r')
+
+    ofile = f'{splots.scube.galaxy}_imgs_emag.png'
+    splots.images_emag_plot(output_filename=ofile, cmap='magma_r')
+
+    ofile = f'{splots.scube.galaxy}_imgs_flux.png'
+    splots.images_flux_plot(output_filename=ofile, cmap='magma')
+
+    ofile = f'{splots.scube.galaxy}_imgs_eflux.png'
+    splots.images_eflux_plot(output_filename=ofile, cmap='magma')
+
+    ofile = f'{splots.scube.galaxy}_imgs_SN.png'
+    splots.images_SN_plot(output_filename=ofile, cmap='magma')
+
+    ofile = f'{splots.scube.galaxy}_LRGB_centspec.png'
+    splots.LRGB_centspec_plot(output_filename=ofile)
+
+    #######################################
+    ################# SKY #################
+    #######################################
+    sky = splots.scube.get_iso_sky(
+        isophotal_limit=25, 
+        isophotal_medsize=10, 
+        stars_mask=None, 
+        n_sigma=3, 
+        n_iter=5,
+        clip_neg=False,
+    )
+    il = sky['isophotal_limit']
+    im = sky['isophotal_medsize']
+    ofile = f'{splots.scube.galaxy}_sky_spec_iso{il}med{im}.png'
+    splots.sky_spec_plot(sky, output_filename=ofile)
+
+    #######################################
+    ################# RGBs ################
+    #######################################
+    kw_rgb = dict(
+        rgb=[9, 7, 5],
+        rgb_f=[1, 1, 1],
+        pminmax=[1.5, 98.5],
+        Q=3,
+        stretch=130,
+        im_max=180,
+        minimum=(15, 15, 15),
+    )
+
+    kw_rgb['title'] = '(i, r, g)'
+    ofile = f'{splots.scube.galaxy}_RGB_9-7-5.png'
+    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = [8, 7, 5]
+    kw_rgb['title'] = '(J0660, r, g)'
+    ofile = f'{splots.scube.galaxy}_RGB_8-7-5.png'
+    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = [8, 9, 0]
+    kw_rgb['title'] = '(J0660, i, u)'
+    ofile = f'{splots.scube.galaxy}_RGB_8-9-0.png'
+    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = [11, 5, 0]
+    kw_rgb['title'] = '(z, g, u)'
+    ofile = f'{splots.scube.galaxy}_RGB_11-5-0.png'
+    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = [9, (3, 4, 5), (0, 1, 2)]
+    kw_rgb['title'] = '(i, J0410+J0430+g, u+J0378+J0395)'
+    ofile = f'{splots.scube.galaxy}_RGB_9-345-012.png'
+    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = [8, 9, 5]
+    kw_rgb['title'] = '(J0660, i, g)'
+    ofile = f'{splots.scube.galaxy}_RGB_8-9-5.png'
+    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
+
+    kw_rgb['rgb'] = [8, 5, (0, 1, 2, 3, 4)]
+    kw_rgb['title'] = '(J0660, g, u+J0378+J0395+J0410+J0430)'
+    ofile = f'{splots.scube.galaxy}_RGB_8-5-01234.png'
+    splots.LRGB_plot(output_filename=ofile, **kw_rgb)
+
+'''
     ofile = f'{splots.scube.galaxy}_imgs_mag.png'
     splots.images_mag_plot(output_filename=ofile)
 
+    ofile = f'{splots.scube.galaxy}_imgs_emag.png'
+    splots.images_emag_plot(output_filename=ofile)
+
     ofile = f'{splots.scube.galaxy}_imgs_flux.png'
     splots.images_flux_plot(output_filename=ofile)
+
+    ofile = f'{splots.scube.galaxy}_imgs_eflux.png'
+    splots.images_eflux_plot(output_filename=ofile)
 
     kwargs = dict(
         isophotal_limit=25, 
@@ -571,3 +665,4 @@ def splots():
 
     ofile = f'{splots.scube.galaxy}_intarea_rad50pix_spec.png'
     splots.int_area_spec_plot(output_filename=ofile, pa_deg=0, ba=1, R_pix=50)    
+'''

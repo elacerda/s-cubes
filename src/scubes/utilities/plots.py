@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 import astropy.units as u
 from astropy.wcs import WCS
@@ -12,6 +11,13 @@ from .readscube import read_scube
 from .readscube import get_image_distance
 from ..constants import FILTER_NAMES_FITS, FILTER_COLORS, FILTER_TRANSMITTANCE
 
+def crop3D(filename):
+    img = plt.imread(filename)
+    h, w, _ = img.shape
+    crop_h_top = int(0.8*h)
+    crop_h_bot = int(0.3*h)
+    plt.imsave(filename, img[crop_h_bot:crop_h_top, :, :])
+
 class scube_plots():
     '''
     TODO
@@ -20,124 +26,106 @@ class scube_plots():
         self.readscube(filename)
         self.block = block
         self.filter_colors = np.array([FILTER_COLORS[FILTER_NAMES_FITS[k]] for k in self.scube.filters])
+        self.aur = 0.5*(1 + 5**0.5)
 
     def readscube(self, filename):
         self.scube_filename = filename
         self.scube = read_scube(filename)
 
-    def images_mag_plot(self, output_filename=None):  
-        output_filename = f'{self.scube.galaxy}_imgs_mag.png' if output_filename is None else output_filename
-
-        mag__lyx = self.scube.mag__lyx
-        emag__lyx = self.scube.emag__lyx   
-        nb = len(self.scube.filters)
-        
-        nrows = 2
-        ncols = int(nb/nrows)
-
-        f, ax_arr = plt.subplots(2*nrows, ncols)
-        f.set_size_inches(12, 6)
-        f.subplots_adjust(left=0.01, right=0.95, bottom=0.05, top=0.90, hspace=0.22, wspace=0.13)
-
+    def images_plot(self, img__lyx, mask__yx=None, suptitle=None, output_filename=None, cmap='Spectral_r', vminmax=None):
+        nl = len(self.scube.filters)
+        nrows = 3
+        ncols = 4
+        if vminmax is None:
+            vmin, vmax = np.inf, -np.inf
+            for i in range(nl):
+                img = img__lyx[i]
+                if mask__yx is not None:
+                    img = np.ma.masked_array(img, mask=mask__yx, copy=True)
+                _vmin, _vmax = np.percentile(img[~np.isnan(img)], [2, 98])
+                vmin = _vmin if _vmin < vmin else vmin
+                vmax = _vmax if _vmax > vmax else vmax
+        else:
+            vmin, vmax = vminmax
+        f, ax_arr = plt.subplots(nrows, ncols)
+        f.set_size_inches(4, 4)
         k = 0
         for ir in range(nrows):
             for ic in range(ncols):
-                img = mag__lyx[k]
-                eimg = emag__lyx[k]
-
-                vmin, vmax = 16, 25
-                ax = ax_arr[ir*2, ic]
-                ax.set_title(self.scube.filters[k])
-                im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax, interpolation='nearest')
-                plt.colorbar(im, ax=ax)
+                img = img__lyx[k]
+                if mask__yx is not None:
+                    img = np.ma.masked_array(img, mask=mask__yx, copy=True)
+                ax = ax_arr[ir, ic]
+                ax.set_title(self.scube.filters[k], fontsize=10)
+                im = ax.imshow(img, origin='lower', cmap=cmap, vmin=vmin, vmax=vmax, interpolation='nearest')
                 ax.xaxis.set_major_locator(ticker.NullLocator())
-                ax.yaxis.set_major_locator(ticker.NullLocator())
-
-                vmin, vmax = 0, 0.5
-                ax = ax_arr[ir*2 + 1, ic]
-                ax.set_title(f'err {self.scube.filters[k]}')
-                im = ax.imshow(eimg, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax, interpolation='nearest')
-                plt.colorbar(im, ax=ax)
-                ax.xaxis.set_major_locator(ticker.NullLocator())
-                ax.yaxis.set_major_locator(ticker.NullLocator())
-                
+                ax.yaxis.set_major_locator(ticker.NullLocator())       
                 k += 1
-        f.suptitle(r'mag/arcsec/pix$^2$')
-        f.savefig(output_filename, bbox_inches='tight')
-        plt.show(block=self.block)
+        left, bottom, width, height = 0.08, 0.05, 0.98, 0.03
+        cb_ax = f.add_axes([left, bottom, width, height])
+        f.colorbar(im, cax=cb_ax, location='bottom')
+        f.subplots_adjust(left=0.05, right=1.05, bottom=0.1, top=0.9) #, hspace=0.2, wspace=0.15)
+        if suptitle is not None:
+            f.suptitle(suptitle, fontsize=10)
+        f.savefig(output_filename, bbox_inches='tight', dpi=300)
+        if self.block:
+            plt.show(block=True)
         plt.close(f)
 
-    def images_flux_plot(self, output_filename=None):   
-        output_filename = f'{self.scube.galaxy}_imgs_flux.png' if output_filename is None else output_filename
+    def images_mag_plot(self, output_filename=None, cmap='Spectral'):
+        self.images_plot(
+            img__lyx=self.scube.mag__lyx, 
+            suptitle=r'AB-mag/arcsec$^2$',
+            output_filename=f'{self.scube.galaxy}_imgs_mag.png' if output_filename is None else output_filename,
+            cmap=cmap, vminmax=[16, 25],
+        )
 
-        f__byx = np.ma.log10(self.scube.flux__lyx) + 18
-        ef__byx = np.ma.log10(self.scube.eflux__lyx) + 18
-        nb = len(self.scube.filters)
+    def images_emag_plot(self, output_filename=None, cmap='Spectral'):
+        self.images_plot(
+            img__lyx=self.scube.emag__lyx, 
+            suptitle=r'AB-mag/arcsec$^2$',
+            output_filename=f'{self.scube.galaxy}_imgs_emag.png' if output_filename is None else output_filename,
+            cmap=cmap, vminmax=[0.05, 1],
+        )
 
-        nrows = 2
-        ncols = int(nb/nrows)
-        
-        f, ax_arr = plt.subplots(2*nrows, ncols)
-        f.set_size_inches(12, 6)
-        f.subplots_adjust(left=0.01, right=0.95, bottom=0.05, top=0.90, hspace=0.22, wspace=0.13)
+    def images_flux_plot(self, output_filename=None, cmap='Spectral_r'):
+        self.images_plot(
+            img__lyx=np.ma.log10(self.scube.flux__lyx) + 18,
+            suptitle=r'$\log_{10}$ 10$^{18}$erg/s/$\AA$/cm$^2$',
+            output_filename=f'{self.scube.galaxy}_imgs_flux.png' if output_filename is None else output_filename,
+            cmap=cmap, vminmax=[-1, 2.5],
+        )
 
-        k = 0
-        for ir in range(nrows):
-            for ic in range(ncols):
-                img = f__byx[k]
-                eimg = ef__byx[k]
+    def images_eflux_plot(self, output_filename=None, cmap='Spectral_r'):
+        self.images_plot(
+            img__lyx=np.ma.log10(self.scube.eflux__lyx) + 18,
+            suptitle=r'$\log_{10}$ 10$^{18}$erg/s/$\AA$/cm$^2$',
+            output_filename=f'{self.scube.galaxy}_imgs_eflux.png' if output_filename is None else output_filename,
+            cmap=cmap, vminmax=[-0.5, 0.5],
+        )
 
-                vmin, vmax = np.percentile(img.compressed(), [5, 95])
-                vmin, vmax = -1, 1
-                ax = ax_arr[ir*2, ic]
-                ax.set_title(self.scube.filters[k])
-                im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax, interpolation='nearest')
-                plt.colorbar(im, ax=ax)
-                ax.xaxis.set_major_locator(ticker.NullLocator())
-                ax.yaxis.set_major_locator(ticker.NullLocator())
+    def images_SN_plot(self, output_filename=None, cmap='Spectral_r'):
+        SN__lyx = self.scube.SN__lyx
 
-                vmin, vmax = np.percentile(eimg.compressed(), [5, 95])
-                vmin, vmax = -1, 1
-                ax = ax_arr[ir*2 + 1, ic]
-                ax.set_title(f'err {self.scube.filters[k]}')
-                im = ax.imshow(eimg, origin='lower', cmap='Spectral', vmin=vmin, vmax=vmax, interpolation='nearest')
-                plt.colorbar(im, ax=ax)
-                ax.xaxis.set_major_locator(ticker.NullLocator())
-                ax.yaxis.set_major_locator(ticker.NullLocator())
+        self.images_plot(
+            img__lyx=np.log10(SN__lyx),
+            suptitle=r'$\log$ Signal-to-noise',
+            output_filename=f'{self.scube.galaxy}_imgs_SN.png' if output_filename is None else output_filename,
+            cmap=cmap, vminmax=[0, 1],
+        )
 
-                k += 1
-        f.suptitle(r'$\log_{10}$ 10$^{18}$erg/s/$\AA$/cm$^2$')
-        f.savefig(output_filename, bbox_inches='tight')
-        plt.show(block=self.block)
-        plt.close(f)
-
-    def images_skyflux_plot(self, sky, output_filename=None): 
-        output_filename = f'{self.scube.galaxy}_imgs_skyflux.png' if output_filename is None else output_filename
-
-        f__byx = sky['flux__lyx']
+    def images_skyflux_plot(self, sky, output_filename=None, cmap='Spectral_r'):
+        f__byx = np.log10(sky['flux__lyx'])+18
         sky_pixels__yx = sky['mask__yx']
 
-        nrows, ncols = 2, 6
+        self.images_plot(
+            img__lyx=f__byx,
+            mask__yx=~sky_pixels__yx,
+            suptitle=r'sky flux [erg/s/$\AA$/cm$^2$]',
+            output_filename=f'{self.scube.galaxy}_imgs_skyflux.png' if output_filename is None else output_filename,
+            cmap=cmap,
+        )
 
-        f, ax_arr = plt.subplots(nrows, ncols)
-        f.set_size_inches(12, 3)
-        f.subplots_adjust(left=0.05, right=0.90, bottom=0.05, top=0.80, hspace=0.26, wspace=0.05)
-        k = 0
-        for ir in range(nrows):
-            for ic in range(ncols):
-                img = np.ma.masked_array(f__byx[k], mask=~sky_pixels__yx, copy=True)
-                ax = ax_arr[ir, ic]
-                ax.set_title(self.scube.filters[k], fontsize=10, c=self.filter_colors[k])
-                im = ax.imshow(img, origin='lower', cmap='Spectral', vmin=0, vmax=1e-18, interpolation='nearest')
-                plt.colorbar(im, ax=ax)
-                ax.xaxis.set_major_locator(ticker.NullLocator())
-                ax.yaxis.set_major_locator(ticker.NullLocator())
-                k += 1
-        f.suptitle(r'sky flux [erg/s/$\AA$/cm$^2$]')        
-        f.savefig(output_filename, bbox_inches='tight')
-        plt.show(block=self.block)
-        plt.close(f)
-        
     def images_3D_plot(self, output_filename=None, FOV=140):
         output_filename = f'{self.scube.galaxy}_imgs_3Dflux.png' if output_filename is None else output_filename
 
@@ -149,6 +137,7 @@ class scube_plots():
         
         f = plt.figure()
         ax = f.add_subplot(projection='3d')
+
         for i, _w in enumerate(self.scube.pivot_wave):
             sc = ax.scatter(xx, yy, c=np.ma.log10(self.scube.flux__lyx[i]) + 18, 
                             zs=_w, s=1, edgecolor='none', vmin=-1, vmax=0.5, cmap='Spectral_r')
@@ -161,11 +150,13 @@ class scube_plots():
         ax.set_yticks([])
         for spine in ax.spines.values():
             spine.set_visible(False)
-        f.savefig(output_filename, bbox_inches='tight')
-        plt.show(block=self.block)
+        f.savefig(output_filename, bbox_inches='tight', dpi=300)
+        crop3D(output_filename)
+        if self.block:
+            plt.show(block=True)
         plt.close(f)
-
-    def RGB_plot(self, output_filename=None, **kw_rgb):
+       
+    def LRGB_plot(self, output_filename=None, **kw_rgb):
         title = kw_rgb.pop('title', None)
         output_filename = f'{self.scube.galaxy}_RGBs.png' if output_filename is None else output_filename
 
@@ -184,20 +175,21 @@ class scube_plots():
         rgb__yxc = self.scube.lRGB_image(**_kw_rgb)
 
         f, ax = plt.subplots()
-        f.set_size_inches(3, 3)
+        f.set_size_inches(4, 4)
         ax.imshow(rgb__yxc, origin='lower')
-        ax.set_title(_kw_rgb['rgb'] if title is None else title)
-        f.savefig(output_filename, bbox_inches='tight')
-        plt.show(block=self.block)
+        ax.set_title(_kw_rgb['rgb'] if title is None else title, fontsize=8)
+        f.savefig(output_filename, bbox_inches='tight', dpi=300)
+        if self.block:
+            plt.show(block=True)
         plt.close(f)
 
-    def LRGB_spec_plot(self, output_filename=None, rgb=None, i_x0=None, i_y0=None):
+    def LRGB_spec_plot(self, output_filename=None, i_x0=None, i_y0=None):
         i_x0 = self.scube.i_x0 if i_x0 is None else i_x0
         i_y0 = self.scube.i_y0 if i_y0 is None else i_y0
         
         output_filename = f'{self.scube.galaxy}_LRGB_{i_x0}_{i_y0}_spec.png' if output_filename is None else output_filename
 
-        rgb = ['iSDSS', 'rSDSS', 'gSDSS'] if rgb is None else rgb
+        rgb = ['iSDSS', 'rSDSS', 'gSDSS']
         
         # data
         flux__l = self.scube.flux__lyx[:, i_y0, i_x0]
@@ -208,8 +200,8 @@ class scube_plots():
         nrows = 4
         ncols = 2
         f = plt.figure()
-        f.set_size_inches(12, 3)
-        f.subplots_adjust(left=0, right=0.9)
+        f.set_size_inches(6*self.aur, 4)
+        f.subplots_adjust(left=0.05, right=1.05, bottom=0.1, top=0.9)
         gs = GridSpec(nrows=nrows, ncols=ncols, hspace=0, wspace=0.03, figure=f)
         ax = f.add_subplot(gs[0:nrows - 1, 1])
         axf = f.add_subplot(gs[-1, 1])
@@ -221,7 +213,7 @@ class scube_plots():
             pminmax=[5, 95], Q=10, stretch=5, im_max=1, minimum=(0, 0, 0)
         )
         axrgb.imshow(rgb__yxb, origin='lower')
-        axrgb.set_title(rgb)
+        axrgb.set_title('R=i G=r B=g')
         
         # filters transmittance
         axf.sharex(ax)
@@ -230,7 +222,7 @@ class scube_plots():
             x = FILTER_TRANSMITTANCE[k]['wavelength']
             y = FILTER_TRANSMITTANCE[k]['transmittance']
             axf.plot(x, y, c=self.filter_colors[i], lw=1, ls=lt, label=k)
-        axf.legend(loc=(0.82, 1.15), frameon=False)
+        axf.legend(loc=(0.83, 1), frameon=False, fontsize=9)
         
         # spectrum 
         ax.set_title(f'{self.scube.galaxy} @ {self.scube.tile} ({i_x0},{i_y0})')
@@ -239,20 +231,24 @@ class scube_plots():
         ax.errorbar(x=bands__l,y=flux__l, yerr=eflux__l, c='k', lw=1, fmt='|')
         ax.plot(bands__l, flux__l, '-', c='lightgray')
         ax.scatter(bands__l, flux__l, c=self.filter_colors)
+        ax.axvline(x=3727, ls='--', c='k')
+        ax.axvline(x=5007, ls='--', c='k')
+        ax.axvline(x=6563, ls='--', c='k')
         
         ax.set_xlabel(r'$\lambda_{\rm pivot}\ [\AA]$', fontsize=10)
         ax.set_ylabel(r'flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
         axf.set_xlabel(r'$\lambda\ [\AA]$', fontsize=10)
         axf.set_ylabel(r'${\rm R}_\lambda\ [\%]$', fontsize=10)
 
-        f.savefig(output_filename, bbox_inches='tight')
-        plt.show(block=self.block)
+        f.savefig(output_filename, bbox_inches='tight', dpi=300)
+        if self.block:
+            plt.show(block=True)
         plt.close(f)
 
-    def LRGB_centspec_plot(self, output_filename=None, rgb=None):
+    def LRGB_centspec_plot(self, output_filename=None):
         self.LRGB_spec_plot(
             output_filename=f'{self.scube.galaxy}_LRGB_centspec.png' if output_filename is None else output_filename, 
-            rgb=rgb, i_x0=self.scube.i_x0, i_y0=self.scube.i_y0
+            i_x0=self.scube.i_x0, i_y0=self.scube.i_y0
         )
 
     def SN_filters_plot(self, output_filename=None, SN_range=None, valid_mask__yx=None, bins=50):
@@ -307,7 +303,8 @@ class scube_plots():
         for ax in f.axes:
             ax.set_ylim(0, 1.125*nmax)
         f.savefig(output_filename, bbox_inches='tight')
-        plt.show(block=self.block)
+        if self.block:
+            plt.show(block=True)
         plt.close(f)        
 
     def contour_plot(self, output_filename=None, contour_levels=None):
@@ -323,7 +320,8 @@ class scube_plots():
         ax.contour(image__yx, levels=contour_levels, colors=['k', 'gray', 'lightgray'])
         plt.colorbar(im, ax=ax)
         f.savefig(output_filename, bbox_inches='tight')
-        plt.show(block=self.block)
+        if self.block:
+            plt.show(block=True)
         plt.close(f)
 
     def int_area_spec_plot(self, output_filename=None, pa_deg=0, ba=1, R_pix=50):
@@ -367,7 +365,8 @@ class scube_plots():
         ax.set_ylabel(r'flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
         ax.set_title('int. area. spectrum')
         f.savefig(output_filename, bbox_inches='tight')
-        plt.show(block=self.block)
+        if self.block:
+            plt.show(block=True)
         plt.close(f)
 
     def sky_spec_plot(self, sky, output_filename=None):
@@ -377,38 +376,44 @@ class scube_plots():
         sky_median_flux__l = sky['median__l']
         sky_std_flux__l = sky['std__l']
         mask__yx = sky['mask__yx']
+        sky_flux__lyx = sky['flux__lyx']
         bands__l = self.scube.pivot_wave
-        nl = bands__l.size
+        nl, ny, nx = sky_flux__lyx.shape
 
         f = plt.figure()
-        f.set_size_inches(12, 3)
-        f.subplots_adjust(left=0, right=0.9)
-        
-        gs = GridSpec(nrows=1, ncols=3, wspace=0.2, figure=f)
-        ax = f.add_subplot(gs[1:])
-        axmask = f.add_subplot(gs[0])
+        f.set_size_inches(6*self.aur, 4)
+        f.subplots_adjust(left=0.05, right=1.05, bottom=0.1, top=0.9)
+        gs = GridSpec(nrows=4, ncols=2, hspace=0, wspace=0.1, figure=f)
+        ax = f.add_subplot(gs[:, 1])
+        axmask = f.add_subplot(gs[:, 0])
 
         i_r = self.scube.filters.index('rSDSS')
-        img__yx = np.ma.masked_array(self.scube.mag__lyx[i_r], mask=~mask__yx, copy=True)
-        
-        im = axmask.imshow(img__yx, origin='lower', cmap='Spectral_r', vmin=25, interpolation='nearest')
+        img__yx = np.ma.masked_array(np.log10(self.scube.flux__lyx[i_r]) + 18, mask=~mask__yx, copy=True)
+        img__yx = img__yx.filled(0).astype('bool')
+
+        im = axmask.imshow(img__yx.astype('int'), origin='lower', cmap='Grays', interpolation='nearest')
         plt.colorbar(im, ax=axmask)
 
         ax.plot(bands__l, sky_mean_flux__l, '-', c='gray', label='mean')
         ax.plot(bands__l, sky_median_flux__l, '-', c='cyan', label='median')
+        y11, y12, y13, y14 = np.percentile(sky_flux__lyx, [5, 16, 84, 95], axis=(1, 2))
+        ax.fill_between(bands__l, y1=y11.data, y2=y14.data, fc='lightgray')
+        ax.fill_between(bands__l, y1=y12.data, y2=y13.data, fc='gray', alpha=0.3)
         ax.axhline(y=0, color='k', lw=0.5, ls='--')
         ax.errorbar(x=bands__l,y=sky_mean_flux__l, yerr=sky_std_flux__l, c='k', lw=1, fmt='|')
         ax.scatter(bands__l, sky_mean_flux__l, c=self.filter_colors, s=20, label='')
+        ax.axvline(x=3727, ls='--', c='k')
+        ax.axvline(x=5007, ls='--', c='k')
+        ax.axvline(x=6563, ls='--', c='k')
 
         ax.set_xlabel(r'$\lambda_{\rm pivot}\ [\AA]$', fontsize=10)
         ax.set_ylabel(r'flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
         ax.set_title('sky spectrum')
         
-        f.savefig(output_filename, bbox_inches='tight')
-        
-        plt.show(block=self.block)
+        f.savefig(output_filename, bbox_inches='tight', dpi=300)
+        if self.block:
+            plt.show(block=True)
         plt.close(f)
-
 
 def plot_mask(detection_image, lupton_rgb, masked_ddata, resulting_mask, sewregions, daoregions=None, save_fig=False, prefix_filename=None, fig=None):
     '''
