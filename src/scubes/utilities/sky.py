@@ -28,6 +28,8 @@ def get_iso_sky(refmag__yx, flux__lyx, isophotal_limit=25, isophotal_medsize=10,
         sky_flux__lyx[i] = sky_flux__yx
 
     sky = {}
+    sky['isophotal_limit'] = isophotal_limit
+    sky['isophotal_medsize'] = isophotal_medsize
     sky['flux__lyx'] = sky_flux__lyx
     sky['mask__yx'] = (np.ma.getmask(sky_flux__lyx).sum(axis=0) == 0)
     sky['mean__l'] = np.ma.mean(sky_flux__lyx, axis=(1, 2))
