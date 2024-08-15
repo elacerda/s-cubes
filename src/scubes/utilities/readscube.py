@@ -125,6 +125,120 @@ def get_image_distance(shape, x0, y0, pa=0.0, ba=1.0):
     y, x = np.indices(shape)
     return get_distance(x, y, x0, y0, pa, ba)
 
+def radial_profile(prop, bin_r, x0, y0, pa=0.0, ba=1.0, rad_scale=1.0, mask=None, mode='mean', return_npts=False):
+    '''
+    Calculate the radial profile of an N-D image.
+
+    Parameters
+    ----------
+    prop : array
+        Image of property to calculate the radial profile.
+
+    bin_r : array
+        Semimajor axis bin boundaries in units of ``rad_scale``.
+
+    x0 : float
+        X coordinate of the origin.
+
+    y0 : float
+        Y coordinate of the origin.
+
+    pa : float, optional
+        Position angle in radians, counter-clockwise relative
+        to the positive X axis.
+
+    ba : float, optional
+        Ellipticity, defined as the ratio between the semiminor
+        axis and the semimajor axis (:math:`b/a`).
+
+    rad_scale : float, optional
+        Scale of the bins, in pixels. Defaults to 1.0.
+
+    mask : array, optional
+        Mask containing the pixels to use in the radial profile.
+        Must be bidimensional and have the same shape as the last
+        two dimensions of ``prop``. Default: no mask.
+
+    mode : string, optional
+        One of:
+            * ``'mean'``: Compute the mean inside the radial bins (default).
+            * ``'median'``: Compute the median inside the radial bins.
+            * ``'sum'``: Compute the sum inside the radial bins.
+            * ``'var'``: Compute the variance inside the radial bins.
+            * ``'std'``: Compute the standard deviation inside the radial bins.
+
+    return_npts : bool, optional
+        If set to ``True``, also return the number of points inside
+        each bin. Defaults to ``False``.
+
+
+    Returns
+    -------
+    radProf : [masked] array
+        Array containing the radial profile as the last dimension.
+        Note that ``radProf.shape[-1] == (len(bin_r) - 1)``
+        If ``prop`` is a masked aray, this and ``npts`` will be
+        a masked array as well.
+
+    npts : [masked] array, optional
+        The number of points inside each bin, only if ``return_npts``
+        is set to ``True``.
+
+
+    See also
+    --------
+    :func:`get_image_distance`
+    '''
+    def red(func, x, fill_value):
+        if x.size == 0: return fill_value, fill_value
+        if x.ndim == 1: return func(x), len(x)
+        return func(x, axis=-1), x.shape[-1]
+
+    imshape = prop.shape[-2:]
+    nbins = len(bin_r) - 1
+    new_shape = prop.shape[:-2] + (nbins,)
+    r__yx = get_image_distance(imshape, x0, y0, pa, ba) / rad_scale
+    if mask is None:
+        mask = np.ones(imshape, dtype=bool)
+    if mode == 'mean':
+        reduce_func = np.mean
+    elif mode == 'median':
+        reduce_func = np.median
+    elif mode == 'sum':
+        reduce_func = np.sum
+    elif mode == 'var':
+        reduce_func = np.var
+    elif mode == 'std':
+        reduce_func = np.std
+    else:
+        raise ValueError('Invalid mode: %s' % mode)
+
+    if isinstance(prop, np.ma.MaskedArray):
+        n_bad = prop.mask.astype('int')
+        max_bad = 1.0
+        while n_bad.ndim > 2:
+            max_bad *= n_bad.shape[0]
+            n_bad = n_bad.sum(axis=0)
+        mask = mask & (n_bad / max_bad < 0.5)
+        prop_profile = np.ma.masked_all(new_shape)
+        npts = np.ma.masked_all((nbins,))
+        prop_profile.fill_value = prop.fill_value
+        reduce_fill_value = np.ma.masked
+    else:
+        prop_profile = np.empty(new_shape)
+        npts = np.empty((nbins,))
+        reduce_fill_value = np.nan
+    if mask.any():
+        dist_flat = r__yx[mask]
+        dist_idx = np.digitize(dist_flat, bin_r)
+        prop_flat = prop[...,mask]
+        for i in range(0, nbins):
+            prop_profile[..., i], npts[i] = red(reduce_func, prop_flat[..., dist_idx == i+1], reduce_fill_value)
+
+    if return_npts:
+        return prop_profile, npts
+    return prop_profile
+
 class read_scube:
     def __init__(self, filename):
         self.filename = filename
