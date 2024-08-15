@@ -362,20 +362,21 @@ class scube_plots():
         p = self.scube.pixscale
         
         rmax = int(5*self.scube.primary_header['SIZE_ML'])
-        bins = np.arange(0, rmax, 10)
-
-        colors = plt.colormaps['Spectral'](bins/rmax)
+        step = 10
+        bins__r = np.arange(0, rmax + step, step)
+        bins_center__r = 0.5*(bins__r[:-1] + bins__r[1:])
+    
+        colors = plt.colormaps['Spectral'](bins__r/(rmax + step))
         
         flux__lr = radial_profile(
             prop=self.scube.flux__lyx, 
             x0=self.scube.x0, y0=self.scube.y0, 
-            pa=pa, ba=ba, 
-            rad_scale=rad_scale, 
-            bin_r=bins, 
-            mask=rad_mask, 
+            pa=pa, ba=ba,
+            rad_scale=rad_scale,
+            bin_r=bins__r,
+            mask=rad_mask,
             mode=mode,
         )
-
         f = plt.figure()
         f.set_size_inches(6*self.aur, 4)
         f.subplots_adjust(left=0.05, right=1.05, bottom=0.1, top=0.9)
@@ -383,17 +384,15 @@ class scube_plots():
         ax = f.add_subplot(gs[:, 1])
         aximg = f.add_subplot(gs[:, 0])
         x = np.log10(self.scube.flux__lyx[i_r]) + 18
-        mask__yx = x<np.log10(fmagr(25, w, p))+18
+        mask__yx = x < (np.log10(fmagr(25, w, p)) + 18)
         if sky_mask is not None:
             mask__yx = sky_mask
         img__yx = np.ma.masked_array(x, mask=mask__yx, copy=True)
         aximg.imshow(img__yx.filled(-0.55), origin='lower', cmap='Greys_r', vmin=-0.5, vmax=1.5, interpolation='nearest')
-
         for i, color in enumerate(colors[1:]):
-            bin = bins[i + 1]
-            ax.plot(self.scube.pivot_wave, flux__lr[:, i], 'o-', c=color, label=bin)
-            height = 2*bin*ba
-            width = 2*bin
+            ax.plot(self.scube.pivot_wave, flux__lr[:, i], 'o-', c=color)
+            height = 2*bins_center__r[i]*ba
+            width = 2*bins_center__r[i]
             e = Ellipse(center, height=height, width=width, angle=theta, fill=False, color=color, lw=1, ls='dotted')
             aximg.add_artist(e)
         ax.set_title(r'rings with <10pix> up to 5 R$_{50}$')
