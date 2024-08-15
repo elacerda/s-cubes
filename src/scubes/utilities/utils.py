@@ -490,9 +490,6 @@ def splots():
     ofile = f'{splots.scube.galaxy}_imgs_flux.png'
     splots.images_flux_plot(output_filename=ofile, cmap='magma')
 
-    ofile = f'{splots.scube.galaxy}_imgs_eflux.png'
-    splots.images_eflux_plot(output_filename=ofile, cmap='magma')
-
     ofile = f'{splots.scube.galaxy}_imgs_SN.png'
     splots.images_SN_plot(output_filename=ofile, cmap='magma')
 
@@ -562,99 +559,18 @@ def splots():
     ofile = f'{splots.scube.galaxy}_RGB_8-5-01234.png'
     splots.LRGB_plot(output_filename=ofile, **kw_rgb)
 
+    ofile = f'{splots.scube.galaxy}_rings_spec.png'
+    splots.rings_spec_plot(
+        output_filename=ofile, 
+        pa=splots.scube.pa,
+        ba=splots.scube.ba,
+        rad_scale=1,
+        mode='mean'
+    )
+
 '''
-    ofile = f'{splots.scube.galaxy}_imgs_mag.png'
-    splots.images_mag_plot(output_filename=ofile)
-
-    ofile = f'{splots.scube.galaxy}_imgs_emag.png'
-    splots.images_emag_plot(output_filename=ofile)
-
-    ofile = f'{splots.scube.galaxy}_imgs_flux.png'
-    splots.images_flux_plot(output_filename=ofile)
-
     ofile = f'{splots.scube.galaxy}_imgs_eflux.png'
-    splots.images_eflux_plot(output_filename=ofile)
-
-    kwargs = dict(
-        isophotal_limit=25, 
-        isophotal_medsize=10, 
-        stars_mask=None, 
-        n_sigma=3, 
-        n_iter=5,
-        clip_neg=False
-    )
-    sky = splots.scube.get_iso_sky(**kwargs)
-    ofile = f'{splots.scube.galaxy}_imgs_skyflux_iso25med10.png'
-    splots.images_skyflux_plot(sky=sky, output_filename=ofile)
-
-    ofile = f'{splots.scube.galaxy}_sky_spec.png'
-    splots.sky_spec_plot(sky, output_filename=ofile)
-    
-    kwargs['isophotal_limit'] = 24
-    sky = splots.scube.get_iso_sky(**kwargs)
-    ofile = f'{splots.scube.galaxy}_imgs_skyflux_iso24med10.png'
-    splots.images_skyflux_plot(sky=sky, output_filename=ofile)
-
-    ofile = f'{splots.scube.galaxy}_sky_spec_iso24med10.png'
-    splots.sky_spec_plot(sky, output_filename=ofile)
-
-    ofile = f'{splots.scube.galaxy}_imgs_3Dflux.png'
-    splots.images_3D_plot(output_filename=ofile)
-
-    kw_rgb = dict(
-        rgb=['iSDSS', 'rSDSS', 'gSDSS'], 
-        rgb_f=[1, 1, 1], 
-        pminmax=[5, 95], 
-        Q=10, 
-        stretch=5, 
-        im_max=1, 
-        minimum=(0, 0, 0)
-    )
-    ofile = f'{splots.scube.galaxy}_RGB_irg.png'
-    kw_rgb['title'] = 'R=I G=R B=G'
-    splots.RGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = ['iSDSS', 'rSDSS', (0, 1, 2, 3, 4)]
-    kw_rgb['title'] = 'R=I G=R B=U,J0378,395,410,430'
-    ofile = f'{splots.scube.galaxy}_RGB_ir0to4.png'
-    splots.RGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = ['iSDSS', 'rSDSS', 'gSDSS']
-    kw_rgb['rgb_f'] = [1, 1, 2]
-    kw_rgb['title'] = r'R=I G=R B=$2\times$G'
-    ofile = f'{splots.scube.galaxy}_RG2B_irg.png'
-    splots.RGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb = dict(
-        rgb=[(7, 9, 11), 5, (0, 1, 2, 3, 4)],
-        rgb_f=[1, 1, 1],
-        pminmax=[1.5, 98.5],
-        Q=3,
-        stretch=130,
-        im_max=180,
-        minimum=(15, 15, 15),
-    )
-    kw_rgb['title'] = 'R=R,I,Z G=G B=U,J0378,395,410,430'
-    ofile = f'{splots.scube.galaxy}_RGB_riz_g_0to4.png'
-    splots.RGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = ['zSDSS', 'gSDSS', 'uJAVA']
-    kw_rgb['title'] = 'R=Z G=G B=U'
-    ofile = f'{splots.scube.galaxy}_RGB_zgu.png'
-    splots.RGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = [9, (2, 3, 4),  (0, 1)]
-    kw_rgb['title'] = 'R=I G=J0395,410,430 B=U,J0378'
-    ofile = f'{splots.scube.galaxy}_RGB_i_2to4_01.png'
-    splots.RGB_plot(output_filename=ofile, **kw_rgb)
-
-    kw_rgb['rgb'] = [8, 5,  (0, 1, 2, 3, 4)]
-    kw_rgb['title'] = 'R=J0660 G=G B=U,J0378,395,410,430'
-    ofile = f'{splots.scube.galaxy}_RGB_i_2to4_01.png'
-    splots.RGB_plot(output_filename=ofile, **kw_rgb)
-
-    ofile = f'{splots.scube.galaxy}_LRGB_centspec.png'
-    splots.LRGB_centspec_plot(output_filename=ofile, rgb=['iSDSS', 'rSDSS', 'gSDSS'])
+    splots.images_eflux_plot(output_filename=ofile, cmap='magma')
 
     ofile = f'{splots.scube.galaxy}_SN_filters.png'
     splots.SN_filters_plot(output_filename=ofile, SN_range=[0, 10], valid_mask__yx=None, bins=50)

@@ -8,8 +8,10 @@ from matplotlib.gridspec import GridSpec
 
 from .io import print_level
 from .readscube import read_scube
-from .readscube import get_image_distance
+from .readscube import get_image_distance, radial_profile
 from ..constants import FILTER_NAMES_FITS, FILTER_COLORS, FILTER_TRANSMITTANCE
+
+fmagr = lambda x, w, p: 10**(-0.4*x)/(w**2)*(p**2)*(2.997925e18*3631.0e-23)
 
 def crop3D(filename):
     img = plt.imread(filename)
@@ -202,7 +204,7 @@ class scube_plots():
         f = plt.figure()
         f.set_size_inches(6*self.aur, 4)
         f.subplots_adjust(left=0.05, right=1.05, bottom=0.1, top=0.9)
-        gs = GridSpec(nrows=nrows, ncols=ncols, hspace=0, wspace=0.03, figure=f)
+        gs = GridSpec(nrows=nrows, ncols=ncols, hspace=0, wspace=0.05, figure=f)
         ax = f.add_subplot(gs[0:nrows - 1, 1])
         axf = f.add_subplot(gs[-1, 1])
         axrgb = f.add_subplot(gs[:, 0])
@@ -307,6 +309,96 @@ class scube_plots():
             plt.show(block=True)
         plt.close(f)        
 
+    def sky_spec_plot(self, sky, output_filename=None):
+        output_filename = f'{self.scube.galaxy}_sky_spec.png' if output_filename is None else output_filename
+
+        sky_mean_flux__l = sky['mean__l']
+        sky_median_flux__l = sky['median__l']
+        sky_std_flux__l = sky['std__l']
+        mask__yx = sky['mask__yx']
+        sky_flux__lyx = sky['flux__lyx']
+        bands__l = self.scube.pivot_wave
+        nl, ny, nx = sky_flux__lyx.shape
+
+        f = plt.figure()
+        f.set_size_inches(6*self.aur, 4)
+        f.subplots_adjust(left=0.05, right=1.05, bottom=0.1, top=0.9)
+        gs = GridSpec(nrows=4, ncols=2, hspace=0, wspace=0.05, figure=f)
+        ax = f.add_subplot(gs[:, 1])
+        axmask = f.add_subplot(gs[:, 0])
+
+        i_r = self.scube.filters.index('rSDSS')
+        img__yx = np.ma.masked_array(np.log10(self.scube.flux__lyx[i_r]) + 18, mask=~mask__yx, copy=True)
+        img__yx = img__yx.filled(0).astype('bool')
+        axmask.imshow(img__yx.astype('int'), origin='lower', cmap='Grays', interpolation='nearest')
+        ax.plot(bands__l, sky_mean_flux__l, '-', c='gray', label='mean')
+        ax.plot(bands__l, sky_median_flux__l, '-', c='cyan', label='median')
+        y11, y12, y13, y14 = np.percentile(sky_flux__lyx, [5, 16, 84, 95], axis=(1, 2))
+        ax.fill_between(bands__l, y1=y11.data, y2=y14.data, fc='lightgray')
+        ax.fill_between(bands__l, y1=y12.data, y2=y13.data, fc='gray', alpha=0.3)
+        ax.axhline(y=0, color='k', lw=0.5, ls='--')
+        ax.errorbar(x=bands__l,y=sky_mean_flux__l, yerr=sky_std_flux__l, c='k', lw=1, fmt='|')
+        ax.scatter(bands__l, sky_mean_flux__l, c=self.filter_colors, s=20, label='')
+        ax.axvline(x=3727, ls='--', c='k')
+        ax.axvline(x=5007, ls='--', c='k')
+        ax.axvline(x=6563, ls='--', c='k')
+        ax.set_xlabel(r'$\lambda_{\rm pivot}\ [\AA]$', fontsize=10)
+        ax.set_ylabel(r'$\log$ flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
+        ax.set_title('sky spectrum')
+        
+        f.savefig(output_filename, bbox_inches='tight', dpi=300)
+        if self.block:
+            plt.show(block=True)
+        plt.close(f)
+
+    def rings_spec_plot(self, output_filename=None, pa=0, ba=1, rad_scale=1, mode='mean'):
+        output_filename = f'{self.scube.galaxy}_rings_spec.png' if output_filename is None else output_filename
+        from matplotlib.patches import Ellipse
+
+        center = np.array([self.scube.x0, self.scube.y0])
+        theta = self.scube.pa*180/np.pi
+
+        i_r = self.scube.filters.index('rSDSS')
+        w = self.scube.pivot_wave[i_r]
+        p = self.scube.pixscale
+        
+        bins = np.arange(0, int(5*self.scube.size/20), 10)
+
+        colors = plt.colormaps['Spectral'](bins)
+        flux__lr = radial_profile(prop=self.scube.flux__lyx, x0=self.scube.x0, y0=self.scube.y0, pa=pa, ba=ba, rad_scale=rad_scale, bin_r=bins, mask=None, mode=mode)
+
+        f = plt.figure()
+        f.set_size_inches(6*self.aur, 4)
+        f.subplots_adjust(left=0.05, right=1.05, bottom=0.1, top=0.9)
+        gs = GridSpec(nrows=4, ncols=2, hspace=0, wspace=0.05, figure=f)
+        ax = f.add_subplot(gs[:, 1])
+        aximg = f.add_subplot(gs[:, 0])
+        img__yx = np.ma.masked_array(self.scube.mag__lyx[i_r], copy=True)
+        aximg.imshow(img__yx, origin='lower', cmap='Grays', vmin=16, vmax=25, interpolation='nearest')
+
+        for i, color in enumerate(colors[1:]):
+            bin = bins[i + 1]
+            ax.plot(self.scube.pivot_wave, flux__lr[:, i], 'o-', c=color, label=bin)
+            height = 2*bin*self.scube.ba
+            width = 2*bin
+            e = Ellipse(center, height=height, width=width, angle=theta, fill=False, color=color, lw=1, ls='-')
+            aximg.add_artist(e)
+        ax.set_title('rings with 10 pixels')
+        ax.axhline(y=fmagr(23, w, p), ls='--', c='k', lw=0.4)
+        ax.axhline(y=fmagr(24, w, p), ls='--', c='k', lw=0.4)
+        ax.axhline(y=fmagr(25, w, p), ls='--', c='k', lw=0.4)
+        ax.axvline(x=3727, ls='--', c='k')
+        ax.axvline(x=5007, ls='--', c='k')
+        ax.axvline(x=6563, ls='--', c='k')
+        ax.set_ylim(1e-20)
+        ax.set_yscale('log')
+        ax.set_ylabel(r'$\log$ flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
+        ax.set_xlabel(r'$\lambda_{\rm pivot}\ [\AA]$', fontsize=10)
+        f.savefig(output_filename, bbox_inches='tight', dpi=300)
+        if self.block:
+            plt.show(block=True)
+        plt.close(f)
+
     def contour_plot(self, output_filename=None, contour_levels=None):
         output_filename = f'{self.scube.galaxy}_contours.png' if output_filename is None else output_filename
         contour_levels = [21, 23, 24] if contour_levels is None else contour_levels
@@ -365,52 +457,6 @@ class scube_plots():
         ax.set_ylabel(r'flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
         ax.set_title('int. area. spectrum')
         f.savefig(output_filename, bbox_inches='tight')
-        if self.block:
-            plt.show(block=True)
-        plt.close(f)
-
-    def sky_spec_plot(self, sky, output_filename=None):
-        output_filename = f'{self.scube.galaxy}_sky_spec.png' if output_filename is None else output_filename
-
-        sky_mean_flux__l = sky['mean__l']
-        sky_median_flux__l = sky['median__l']
-        sky_std_flux__l = sky['std__l']
-        mask__yx = sky['mask__yx']
-        sky_flux__lyx = sky['flux__lyx']
-        bands__l = self.scube.pivot_wave
-        nl, ny, nx = sky_flux__lyx.shape
-
-        f = plt.figure()
-        f.set_size_inches(6*self.aur, 4)
-        f.subplots_adjust(left=0.05, right=1.05, bottom=0.1, top=0.9)
-        gs = GridSpec(nrows=4, ncols=2, hspace=0, wspace=0.1, figure=f)
-        ax = f.add_subplot(gs[:, 1])
-        axmask = f.add_subplot(gs[:, 0])
-
-        i_r = self.scube.filters.index('rSDSS')
-        img__yx = np.ma.masked_array(np.log10(self.scube.flux__lyx[i_r]) + 18, mask=~mask__yx, copy=True)
-        img__yx = img__yx.filled(0).astype('bool')
-
-        im = axmask.imshow(img__yx.astype('int'), origin='lower', cmap='Grays', interpolation='nearest')
-        plt.colorbar(im, ax=axmask)
-
-        ax.plot(bands__l, sky_mean_flux__l, '-', c='gray', label='mean')
-        ax.plot(bands__l, sky_median_flux__l, '-', c='cyan', label='median')
-        y11, y12, y13, y14 = np.percentile(sky_flux__lyx, [5, 16, 84, 95], axis=(1, 2))
-        ax.fill_between(bands__l, y1=y11.data, y2=y14.data, fc='lightgray')
-        ax.fill_between(bands__l, y1=y12.data, y2=y13.data, fc='gray', alpha=0.3)
-        ax.axhline(y=0, color='k', lw=0.5, ls='--')
-        ax.errorbar(x=bands__l,y=sky_mean_flux__l, yerr=sky_std_flux__l, c='k', lw=1, fmt='|')
-        ax.scatter(bands__l, sky_mean_flux__l, c=self.filter_colors, s=20, label='')
-        ax.axvline(x=3727, ls='--', c='k')
-        ax.axvline(x=5007, ls='--', c='k')
-        ax.axvline(x=6563, ls='--', c='k')
-
-        ax.set_xlabel(r'$\lambda_{\rm pivot}\ [\AA]$', fontsize=10)
-        ax.set_ylabel(r'flux $[{\rm erg}\ \AA^{-1}{\rm s}^{-1}{\rm cm}^{-2}]$', fontsize=10)
-        ax.set_title('sky spectrum')
-        
-        f.savefig(output_filename, bbox_inches='tight', dpi=300)
         if self.block:
             plt.show(block=True)
         plt.close(f)
