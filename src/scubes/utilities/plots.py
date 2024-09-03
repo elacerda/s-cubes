@@ -13,12 +13,17 @@ from ..constants import FILTER_NAMES_FITS, FILTER_COLORS, FILTER_TRANSMITTANCE
 
 fmagr = lambda x, w, p: 10**(-0.4*x)/(w**2)*(p**2)*(2.997925e18*3631.0e-23)
 
-def crop3D(filename):
+def crop3D(filename, hfrac_crop=None, wfrac_crop=None, output_filename=None):
     img = plt.imread(filename)
     h, w, _ = img.shape
-    crop_h_top = int(0.8*h)
-    crop_h_bot = int(0.3*h)
-    plt.imsave(filename, img[crop_h_bot:crop_h_top, :, :])
+    hfrac_crop = [0, 1] if hfrac_crop is None else hfrac_crop
+    wfrac_crop = [0, 1] if wfrac_crop is None else wfrac_crop
+    h = [int(hfrac_crop[0]*h), int(hfrac_crop[1]*h - 1)] 
+    w = [int(wfrac_crop[0]*w), int(wfrac_crop[1]*w - 1)] 
+    crop_img = img[h[0]:h[1], w[00]:w[1], :]
+    if output_filename is not None:
+        plt.imsave(output_filename, crop_img)
+    return crop_img
 
 class scube_plots():
     '''
@@ -153,7 +158,7 @@ class scube_plots():
         for spine in ax.spines.values():
             spine.set_visible(False)
         f.savefig(output_filename, bbox_inches='tight', dpi=300)
-        crop3D(output_filename)
+        crop3D(output_filename, hfrac_crop=[0.3, 0.8], wfrac_crop=None, output_filename=output_filename)
         if self.block:
             plt.show(block=True)
         plt.close(f)
@@ -330,7 +335,7 @@ class scube_plots():
         i_r = self.scube.filters.index('rSDSS')
         img__yx = np.ma.masked_array(np.log10(self.scube.flux__lyx[i_r]) + 18, mask=~mask__yx, copy=True)
         img__yx = img__yx.filled(0).astype('bool')
-        axmask.imshow(img__yx.astype('int'), origin='lower', cmap='Grays', interpolation='nearest')
+        axmask.imshow(img__yx.astype('int'), origin='lower', cmap='Greys', interpolation='nearest')
         ax.plot(bands__l, sky_mean_flux__l, '-', c='gray', label='mean')
         ax.plot(bands__l, sky_median_flux__l, '-', c='cyan', label='median')
         y11, y12, y13, y14 = np.percentile(sky_flux__lyx, [5, 16, 84, 95], axis=(1, 2))
