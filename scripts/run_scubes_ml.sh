@@ -25,13 +25,6 @@ then
     workdir=$workdir_usr
 fi
 imgsdir=${workdir}/images
-echo $username
-echo $password
-echo $size_multiplicator
-echo $mlfile
-echo $workdir
-echo $imgsdir
-exit 1
 
 mkdir -p ${imgsdir}
 
