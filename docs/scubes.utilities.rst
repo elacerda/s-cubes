@@ -41,6 +41,14 @@ scubes.utilities.sextractor module
    :undoc-members:
    :show-inheritance:
 
+scubes.utilities.sky module
+-----------------------------
+
+.. automodule:: scubes.utilities.sky
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scubes.utilities.splusdata module
 ---------------------------------
 
