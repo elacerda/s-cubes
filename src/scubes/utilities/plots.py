@@ -407,6 +407,8 @@ class scube_plots():
 
         **kw_rgb : dict, optional
             Additional keyword arguments for controlling the LRGB image creation.
+            See ``scubes.utilities.readscube.read_scubes.lRGB_image`` for help on 
+            the arguments.
         '''        
         title = kw_rgb.pop('title', None)
         output_filename = f'{self.scube.galaxy}_RGBs.png' if output_filename is None else output_filename
@@ -650,7 +652,7 @@ class scube_plots():
             plt.show(block=True)
         plt.close(f)
 
-    def rings_spec_plot(self, output_filename=None, pa=0, ba=1, theta=None, rad_scale=1, mode='mean', sky_mask=None, rad_mask=None):
+    def rings_spec_plot(self, output_filename=None, pa=0, ba=1, theta=None, object_HLR=10, rad_scale=1, mode='mean', sky_mask=None, rad_mask=None):
         '''
         Plots the spectrum of concentric rings from the center of the object.
 
@@ -667,6 +669,10 @@ class scube_plots():
 
         theta : float, optional
             Ellipse rotation angle in degrees (default is None).
+
+        object_HLR : float, optional
+            Determines the object size to create the radial bins. The function
+            will create 10 pixels bins up to ``5*object_HLR``. (default is 10)
 
         rad_scale : float, optional
             Scaling factor for radial distances (default is 1).
@@ -689,7 +695,7 @@ class scube_plots():
         w = self.scube.pivot_wave[i_r]
         p = self.scube.pixscale
         
-        rmax = int(5*self.scube.primary_header['SIZE_ML'])
+        rmax = int(5*self.scube.primary_header.get('SIZE_ML', object_HLR))
         step = 10
         bins__r = np.arange(0, rmax + step, step)
         bins_center__r = 0.5*(bins__r[:-1] + bins__r[1:])
