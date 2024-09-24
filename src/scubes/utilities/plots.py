@@ -14,6 +14,36 @@ from ..constants import FILTER_NAMES_FITS, FILTER_COLORS, FILTER_TRANSMITTANCE
 fmagr = lambda x, w, p: 10**(-0.4*x)/(w**2)*(p**2)*(2.997925e18*3631.0e-23)
 
 def crop3D(filename, hfrac_crop=None, wfrac_crop=None, output_filename=None):
+    '''
+    Crops a 3D image by specified height and width fractions.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the image file to be cropped.
+    
+    hfrac_crop : list of float, optional
+        List containing two values that define the fractional crop limits for height, 
+        where 0 is the start and 1 is the end (default is [0, 1] which means no cropping in height).
+    
+    wfrac_crop : list of float, optional
+        List containing two values that define the fractional crop limits for width,
+        where 0 is the start and 1 is the end (default is [0, 1] which means no cropping in width).
+    
+    output_filename : str, optional
+        Path to save the cropped image. If None, the image is not saved (default is None).
+
+    Returns
+    -------
+    np.ndarray
+        The cropped image array.
+
+    Notes
+    -----
+    - The function reads the image, crops it according to the fractional limits specified for height and width,
+      and returns the cropped image. If output_filename is provided, the cropped image is saved to that file.
+    - Fractional cropping values should be between 0 and 1, where 0 represents the beginning and 1 the full length.
+    '''    
     img = plt.imread(filename)
     h, w, _ = img.shape
     hfrac_crop = [0, 1] if hfrac_crop is None else hfrac_crop
@@ -27,19 +57,142 @@ def crop3D(filename, hfrac_crop=None, wfrac_crop=None, output_filename=None):
 
 class scube_plots():
     '''
-    TODO
+    Class for creating various plots from SCUBE data (spectral cubes).
+
+    This class provides methods to generate different types of plots, including images of flux, magnitude, signal-to-noise ratios, sky flux, 
+    and integrated spectra. It also supports 3D flux visualization, LRGB image creation, and contour plotting.
+
+    Parameters
+    ----------
+    filename : str
+        The path to the FITS file containing the SCUBE data.
+    
+    block : bool, optional
+        If True, blocks the execution of plots until they are closed (default is False).
+
+    Attributes
+    ----------
+    scube_filename : str
+        Path to the SCUBE file being processed.
+    
+    scube : read_scube
+        Instance of the read_scube class, containing the data from the FITS file.
+    
+    block : bool
+        Whether plots are blocked or not.
+    
+    filter_colors : np.ndarray
+        Array of colors corresponding to each filter in the SCUBE.
+    
+    aur : float
+        The golden ratio (used for figure aspect ratios).
+    
+    Methods
+    -------
+    readscube(filename)
+        Reads the SCUBE data from the specified FITS file.
+    
+    images_plot(img_lyx, mask_yx=None, suptitle=None, output_filename=None, cmap='Spectral_r', vminmax=None)
+        Plots a set of images for each filter in the data cube.
+    
+    images_mag_plot(output_filename=None, cmap='Spectral')
+        Plots magnitude images for each filter in the data cube.
+    
+    images_emag_plot(output_filename=None, cmap='Spectral')
+        Plots error magnitude images for each filter in the data cube.
+    
+    images_flux_plot(output_filename=None, cmap='Spectral_r')
+        Plots flux images for each filter in the data cube in log scale.
+    
+    images_eflux_plot(output_filename=None, cmap='Spectral_r')
+        Plots flux error images for each filter in the data cube in log scale.
+    
+    images_SN_plot(output_filename=None, cmap='Spectral_r')
+        Plots signal-to-noise (S/N) images for each filter in the data cube.
+    
+    images_skyflux_plot(sky, output_filename=None, cmap='Spectral_r')
+        Plots sky flux images based on the provided sky data.
+    
+    images_3D_plot(output_filename=None, FOV=140)
+        Creates a 3D scatter plot of the flux data cube with respect to wavelength.
+    
+    LRGB_plot(output_filename=None, **kw_rgb)
+        Creates an LRGB image from the data cube.
+    
+    LRGB_spec_plot(output_filename=None, i_x0=None, i_y0=None)
+        Plots a spectrum with an associated LRGB image at a given pixel position.
+    
+    LRGB_centspec_plot(output_filename=None)
+        Plots a spectrum with an associated LRGB image at the central pixel.
+    
+    SN_filters_plot(output_filename=None, SN_range=None, valid_mask__yx=None, bins=50)
+        Plots histograms of the signal-to-noise ratio (S/N) for each filter.
+    
+    sky_spec_plot(sky, output_filename=None)
+        Plots the sky spectrum based on the provided sky data.
+    
+    rings_spec_plot(output_filename=None, pa=0, ba=1, theta=None, rad_scale=1, mode='mean', sky_mask=None, rad_mask=None)
+        Plots the spectrum of concentric rings from the center of the object.
+    
+    contour_plot(output_filename=None, contour_levels=None)
+        Plots contour levels over the r-band magnitude image.
+    
+    int_area_spec_plot(output_filename=None, pa_deg=0, ba=1, R_pix=50)
+        Plots the integrated area spectrum for a specified elliptical region.
     '''
     def __init__(self, filename, block=False):
-        self.readscube(filename)
+        '''
+        Initializes the scube_plots class.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the FITS file containing the data cube.
+
+        block : bool, optional
+            Whether to block the execution of plots (default is False).
+        '''        
+        self.readscube(filename)       
         self.block = block
         self.filter_colors = np.array([FILTER_COLORS[FILTER_NAMES_FITS[k]] for k in self.scube.filters])
         self.aur = 0.5*(1 + 5**0.5)
 
     def readscube(self, filename):
+        '''
+        Reads the SCUBE data from the specified FITS file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the FITS file to read.
+        '''        
         self.scube_filename = filename
         self.scube = read_scube(filename)
 
     def images_plot(self, img__lyx, mask__yx=None, suptitle=None, output_filename=None, cmap='Spectral_r', vminmax=None):
+        '''
+        Plots a set of images for each filter in the data cube.
+
+        Parameters
+        ----------
+        img__lyx : np.ndarray
+            3D array with image data for each filter.
+
+        mask__yx : np.ndarray, optional
+            2D mask to apply to the images (default is None).
+
+        suptitle : str, optional
+            Title to display above the figure (default is None).
+
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        cmap : str, optional
+            Colormap to use for the images (default is 'Spectral_r').
+
+        vminmax : list of float, optional
+            Minimum and maximum values for the colormap (default is None).
+        '''        
         nl = len(self.scube.filters)
         nrows = 3
         ncols = 4
@@ -80,6 +233,17 @@ class scube_plots():
         plt.close(f)
 
     def images_mag_plot(self, output_filename=None, cmap='Spectral'):
+        '''
+        Plots magnitude images for each filter in the data cube.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        cmap : str, optional
+            Colormap to use for the images (default is 'Spectral').
+        '''        
         self.images_plot(
             img__lyx=self.scube.mag__lyx, 
             suptitle=r'AB-mag/arcsec$^2$',
@@ -88,6 +252,17 @@ class scube_plots():
         )
 
     def images_emag_plot(self, output_filename=None, cmap='Spectral'):
+        '''
+        Plots error magnitude images for each filter in the data cube.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        cmap : str, optional
+            Colormap to use for the images (default is 'Spectral').
+        '''        
         self.images_plot(
             img__lyx=self.scube.emag__lyx, 
             suptitle=r'AB-mag/arcsec$^2$',
@@ -96,6 +271,17 @@ class scube_plots():
         )
 
     def images_flux_plot(self, output_filename=None, cmap='Spectral_r'):
+        '''
+        Plots flux images for each filter in the data cube in log scale.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        cmap : str, optional
+            Colormap to use for the images (default is 'Spectral_r').
+        '''        
         self.images_plot(
             img__lyx=np.ma.log10(self.scube.flux__lyx) + 18,
             suptitle=r'$\log_{10}$ 10$^{18}$erg/s/$\AA$/cm$^2$',
@@ -104,6 +290,17 @@ class scube_plots():
         )
 
     def images_eflux_plot(self, output_filename=None, cmap='Spectral_r'):
+        '''
+        Plots flux error images for each filter in the data cube in log scale.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        cmap : str, optional
+            Colormap to use for the images (default is 'Spectral_r').
+        '''
         self.images_plot(
             img__lyx=np.ma.log10(self.scube.eflux__lyx) + 18,
             suptitle=r'$\log_{10}$ 10$^{18}$erg/s/$\AA$/cm$^2$',
@@ -112,6 +309,17 @@ class scube_plots():
         )
 
     def images_SN_plot(self, output_filename=None, cmap='Spectral_r'):
+        '''
+        Plots signal-to-noise (S/N) images for each filter in the data cube.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        cmap : str, optional
+            Colormap to use for the images (default is 'Spectral_r').
+        '''        
         SN__lyx = self.scube.SN__lyx
 
         self.images_plot(
@@ -122,6 +330,20 @@ class scube_plots():
         )
 
     def images_skyflux_plot(self, sky, output_filename=None, cmap='Spectral_r'):
+        '''
+        Plots sky flux images based on the provided sky data.
+
+        Parameters
+        ----------
+        sky : dict
+            Sky data dictionary returned from a sky estimation function.
+
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        cmap : str, optional
+            Colormap to use for the images (default is 'Spectral_r').
+        '''        
         f__byx = np.log10(sky['flux__lyx'])+18
         sky_pixels__yx = sky['mask__yx']
 
@@ -134,6 +356,17 @@ class scube_plots():
         )
 
     def images_3D_plot(self, output_filename=None, FOV=140):
+        '''
+        Creates a 3D scatter plot of the flux data cube with respect to wavelength.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        FOV : float, optional
+            Field of view (FOV) for the 3D projection (default is 140 degrees).
+        '''        
         output_filename = f'{self.scube.galaxy}_imgs_3Dflux.png' if output_filename is None else output_filename
 
         FOV *= u.deg
@@ -164,6 +397,17 @@ class scube_plots():
         plt.close(f)
        
     def LRGB_plot(self, output_filename=None, **kw_rgb):
+        '''
+        Creates an LRGB image from the data cube.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        **kw_rgb : dict, optional
+            Additional keyword arguments for controlling the LRGB image creation.
+        '''        
         title = kw_rgb.pop('title', None)
         output_filename = f'{self.scube.galaxy}_RGBs.png' if output_filename is None else output_filename
 
@@ -191,6 +435,20 @@ class scube_plots():
         plt.close(f)
 
     def LRGB_spec_plot(self, output_filename=None, i_x0=None, i_y0=None):
+        '''
+        Plots a spectrum with an associated LRGB image at a given pixel position.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        i_x0 : int, optional
+            x-coordinate of the pixel (default is None).
+
+        i_y0 : int, optional
+            y-coordinate of the pixel (default is None).
+        '''        
         i_x0 = self.scube.i_x0 if i_x0 is None else i_x0
         i_y0 = self.scube.i_y0 if i_y0 is None else i_y0
         
@@ -253,12 +511,37 @@ class scube_plots():
         plt.close(f)
 
     def LRGB_centspec_plot(self, output_filename=None):
+        '''
+        Plots a spectrum with an associated LRGB image at the central pixel.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+        '''        
         self.LRGB_spec_plot(
             output_filename=f'{self.scube.galaxy}_LRGB_centspec.png' if output_filename is None else output_filename, 
             i_x0=self.scube.i_x0, i_y0=self.scube.i_y0
         )
 
     def SN_filters_plot(self, output_filename=None, SN_range=None, valid_mask__yx=None, bins=50):
+        '''
+        Plots histograms of the signal-to-noise ratio (S/N) for each filter.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        SN_range : list, optional
+            Range of S/N values to display (default is [0, 10]).
+
+        valid_mask__yx : np.ndarray, optional
+            Mask indicating valid pixels (default is None).
+
+        bins : int, optional
+            Number of bins to use for the histogram (default is 50).
+        '''        
         output_filename = f'{self.scube.galaxy}_SN_filters.png' if output_filename is None else output_filename
         SN_range = [0, 10] if SN_range is None else SN_range
     
@@ -314,7 +597,18 @@ class scube_plots():
             plt.show(block=True)
         plt.close(f)        
 
-    def sky_spec_plot(self, sky, output_filename=None):
+    def sky_spec_plot(self, sky, output_filename=None):        
+        '''
+        Plots the sky spectrum based on the provided sky data.
+
+        Parameters
+        ----------
+        sky : dict
+            Sky data dictionary returned from a sky estimation function.
+
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+        '''        
         output_filename = f'{self.scube.galaxy}_sky_spec.png' if output_filename is None else output_filename
 
         sky_mean_flux__l = sky['mean__l']
@@ -357,6 +651,35 @@ class scube_plots():
         plt.close(f)
 
     def rings_spec_plot(self, output_filename=None, pa=0, ba=1, theta=None, rad_scale=1, mode='mean', sky_mask=None, rad_mask=None):
+        '''
+        Plots the spectrum of concentric rings from the center of the object.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        pa : float, optional
+            Position angle in radians (default is 0).
+
+        ba : float, optional
+            Axis ratio (default is 1).
+
+        theta : float, optional
+            Ellipse rotation angle in degrees (default is None).
+
+        rad_scale : float, optional
+            Scaling factor for radial distances (default is 1).
+
+        mode : str, optional
+            Mode for calculating the profile ('mean' or 'median', default is 'mean').
+
+        sky_mask : np.ndarray, optional
+            Mask for the sky pixels (default is None).
+
+        rad_mask : np.ndarray, optional
+            Radial mask (default is None).
+        '''        
         output_filename = f'{self.scube.galaxy}_rings_spec.png' if output_filename is None else output_filename
         from matplotlib.patches import Ellipse
         center = np.array([self.scube.x0, self.scube.y0])
@@ -417,6 +740,17 @@ class scube_plots():
         plt.close(f)
 
     def contour_plot(self, output_filename=None, contour_levels=None):
+        '''
+        Plots contour levels over the r-band magnitude image.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        contour_levels : list, optional
+            List of contour levels to plot (default is [21, 23, 24]).
+        '''        
         output_filename = f'{self.scube.galaxy}_contours.png' if output_filename is None else output_filename
         contour_levels = [21, 23, 24] if contour_levels is None else contour_levels
 
@@ -434,6 +768,23 @@ class scube_plots():
         plt.close(f)
 
     def int_area_spec_plot(self, output_filename=None, pa_deg=0, ba=1, R_pix=50):
+        '''
+        Plots the integrated area spectrum for a specified elliptical region.
+
+        Parameters
+        ----------
+        output_filename : str, optional
+            Path to save the output figure (default is None).
+
+        pa_deg : float, optional
+            Position angle in degrees (default is 0).
+
+        ba : float, optional
+            Axis ratio (default is 1).
+
+        R_pix : int, optional
+            Radius in pixels for the integration area (default is 50).
+        '''        
         output_filename = f'{self.scube.galaxy}_intarea_spec.png' if output_filename is None else output_filename
         
         pa_deg *= u.deg
