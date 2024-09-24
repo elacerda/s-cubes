@@ -240,12 +240,109 @@ def radial_profile(prop, bin_r, x0, y0, pa=0.0, ba=1.0, rad_scale=1.0, mask=None
     return prop_profile
 
 class read_scube:
+    '''
+    Class for reading and processing data from an astronomical data cube (SCUBE).
+
+    Parameters
+    ----------
+    filename : str
+        The path to the FITS file to be read and processed.
+
+    Attributes
+    ----------
+    filename : str
+        The path to the FITS file.
+    
+    _hdulist : astropy.io.fits.HDUList
+        The list of HDU (Header Data Units) from the FITS file.
+    
+    wcs : astropy.wcs.WCS
+        The World Coordinate System (WCS) for the data.
+    
+    cent_coord : astropy.coordinates.SkyCoord
+        The central sky coordinates of the object.
+    
+    x0, y0 : float
+        Pixel coordinates of the central sky position.
+    
+    i_x0, i_y0 : int
+        Integer pixel coordinates of the central sky position.
+    
+    mag_arcsec2__lyx : np.ndarray
+        The magnitude per square arcsecond for each layer in the data cube.
+    
+    emag_arcsec2__lyx : np.ndarray
+        The error in the magnitude per square arcsecond.
+    
+    pa, ba : float
+        Position angle (pa) and axis ratio (ba) for pixel distance calculations.
+    
+    pixel_distance__yx : np.ndarray
+        Pixel distance array from the central coordinate, adjusted by pa and ba.
+    
+    mask_stars_filename : str
+        Filename for the star mask generated in `source_extractor()`.
+    
+    detection_image_filename : str
+        Filename for the detection image used in `source_extractor()`.
+    
+    mask_stars_hdul : astropy.io.fits.HDUList
+        The HDUList containing the star mask data.
+    
+    detection_image_hdul : astropy.io.fits.HDUList
+        The HDUList containing the detection image data.
+    
+    Methods
+    -------
+    _read()
+        Reads the FITS file and loads the data.
+    
+    _init_wcs()
+        Initializes the WCS (World Coordinate System) for the data.
+    
+    _init_centre()
+        Calculates the central coordinates of the object in pixel space.
+    
+    _mag_values()
+        Computes magnitude values and their errors for each layer in the data cube.
+    
+    _init()
+        Initializes WCS, central coordinates, and magnitude values.
+    
+    lRGB_image(rgb, rgb_f, pminmax, im_max, minimum, Q, stretch)
+        Creates an RGB image from the data cube using specified filters.
+    
+    source_extractor(sextractor, username, password, class_star, satur_level, back_size, detect_thresh, estimate_fwhm, force, verbose)
+        Runs source extraction using SExtractor on the data cube.
+    
+    get_iso_sky(isophotal_limit, isophotal_medsize, stars_mask, n_sigma, n_iter, clip_neg)
+        Estimates the sky flux from the data cube using isophotal limits.
+    
+    mask_optimal()
+        Generates a mask for optimal data handling based on flux and error values.
+    '''
     def __init__(self, filename):
+        '''
+        Initialize the read_scube class by reading the FITS file and initializing attributes.
+
+        Parameters
+        ----------
+        filename : str
+            The path to the FITS file to be read.
+        '''        
         self.filename = filename
         self._read()
         self._init()
     
-    def _read(self):       
+    def _read(self): 
+        '''
+        Reads the FITS file and loads the data into the HDUList.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified file does not exist.
+        '''              
         try:
             self._hdulist = fits.open(self.filename)
         except FileNotFoundError:
@@ -253,21 +350,34 @@ class read_scube:
             sys.exit()
 
     def _init_wcs(self):
+        '''
+        Initializes the World Coordinate System (WCS) from the data header.
+        '''        
         self.wcs = WCS(self.data_header, naxis=2)
 
     def _init_centre(self):
+        '''
+        Calculates the central coordinates of the object in pixel space using WCS.
+        '''        
         self.cent_coord = SkyCoord(self.ra, self.dec, unit=('deg', 'deg'), frame='icrs')
         self.x0, self.y0 = self.wcs.world_to_pixel(self.cent_coord)
         self.i_x0 = int(self.x0)
         self.i_y0 = int(self.y0)
 
     def _mag_values(self):
+        '''
+        Computes the magnitude per square arcsecond and corresponding errors from the flux values.
+        '''        
         a = 1/(2.997925e18*3631.0e-23*self.pixscale**2)
         x = a*(self.flux__lyx*self.pivot_wave[:, np.newaxis, np.newaxis]**2)
         self.mag_arcsec2__lyx = -2.5*np.log10(x)
         self.emag_arcsec2__lyx = (2.5*np.log10(np.exp(1)))*self.eflux__lyx/self.flux__lyx
 
     def _init(self):
+        '''
+        Initializes the class by setting WCS, central coordinates, and magnitude values.
+        Also calculates the pixel distance from the central coordinates.
+        '''        
         self._init_wcs()
         self._init_centre()
         self._mag_values()
@@ -280,7 +390,35 @@ class read_scube:
         # astropy.visualization.make_lupton_rgb() input vars
         minimum=(0, 0, 0), Q=0, stretch=10):
         '''
-        make RGB
+        Creates an RGB image from the data cube using specified filters.
+
+        Parameters
+        ----------
+        rgb : tuple of str, optional
+            Tuple specifying the filters to use for the red, green, and blue channels (default is ('rSDSS', 'gSDSS', 'iSDSS')).
+        
+        rgb_f : tuple of float, optional
+            Scaling factors for the red, green, and blue channels (default is (1, 1, 1)).
+        
+        pminmax : tuple of int, optional
+            Percentiles for scaling the RGB intensities (default is (5, 95)).
+        
+        im_max : int, optional
+            Maximum intensity value for the RGB image (default is 255).
+        
+        minimum : tuple of float, optional
+            Minimum values for scaling the RGB channels (default is (0, 0, 0)).
+        
+        Q : float, optional
+            Parameter for controlling the contrast in the Lupton RGB scaling (default is 0).
+        
+        stretch : float, optional
+            Stretch factor for enhancing the RGB intensities (default is 10).
+
+        Returns
+        -------
+        np.ndarray
+            3D array representing the RGB image with shape (height, width, 3).
         '''
         # check filters
         if len(rgb) != 3:
@@ -327,6 +465,41 @@ class read_scube:
                          class_star=0.25, satur_level=1600, back_size=64, 
                          detect_thresh=1.1, estimate_fwhm=False,
                          force=False, verbose=0):
+        '''
+        Runs source extraction on the data cube using SExtractor.
+
+        Parameters
+        ----------
+        sextractor : str
+            Path to the SExtractor executable.
+        
+        username : str
+            Username for accessing cloud services or external databases.
+        
+        password : str
+            Password for accessing cloud services or external databases.
+        
+        class_star : float, optional
+            Threshold for classifying objects as stars (default is 0.25).
+        
+        satur_level : float, optional
+            Saturation level for the image (default is 1600).
+        
+        back_size : int, optional
+            Background size parameter for SExtractor (default is 64).
+        
+        detect_thresh : float, optional
+            Detection threshold for SExtractor (default is 1.1).
+        
+        estimate_fwhm : bool, optional
+            If True, estimate the full width at half maximum (FWHM) of sources (default is False).
+        
+        force : bool, optional
+            If True, force re-running source extraction (default is False).
+        
+        verbose : int, optional
+            Verbosity level of the source extraction process (default is 0).
+        '''        
         from ..headers import get_author
         from ..mask_stars import maskStars
         from .splusdata import connect_splus_cloud, detection_image_hdul
@@ -373,6 +546,34 @@ class read_scube:
         self.detection_image_hdul = _.detection_image_hdul
 
     def get_iso_sky(self, isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5, clip_neg=False):
+        '''
+        Estimates the sky flux using isophotal limits and clipping outliers in the flux data.
+
+        Parameters
+        ----------
+        isophotal_limit : float, optional
+            Threshold value for selecting sky pixels (default is 25).
+        
+        isophotal_medsize : int, optional
+            Size of the median filter for smoothing the mask (default is 10).
+        
+        stars_mask : np.ndarray, optional
+            Mask indicating the positions of stars (default is None).
+        
+        n_sigma : float, optional
+            Sigma clipping threshold (default is 3).
+        
+        n_iter : int, optional
+            Number of iterations for sigma clipping (default is 5).
+        
+        clip_neg : bool, optional
+            If True, clip negative and positive outliers (default is False).
+
+        Returns
+        -------
+        dict
+            Dictionary containing the sky flux information and masks.
+        '''        
         # Sky selection using rSDSS image
         reference_mag_img__yx = self.mag__lyx[self.filters.index('rSDSS')]
         flux__lyx = self.flux__lyx
@@ -383,6 +584,19 @@ class read_scube:
         )
 
     def mask_optimal(self):
+        '''
+        Creates an optimal mask for the data cube based on flux, error, and weight information.
+
+        The mask is generated by checking the following conditions:
+        - The weight image (`weimask__lyx`) is greater than zero.
+        - The flux values are non-negative.
+        - The error values are finite.
+
+        Returns
+        -------
+        np.ndarray
+            A boolean array where `True` indicates valid pixels (not masked) and `False` indicates masked pixels.
+        '''        
         f = self._hdulist['DATA'].data
         ef = self._hdulist['ERRORS'].data
         wei = self.weimask__lyx

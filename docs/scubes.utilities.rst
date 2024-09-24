@@ -33,6 +33,14 @@ scubes.utilities.plots module
    :undoc-members:
    :show-inheritance:
 
+scubes.utilities.readscube module
+-----------------------------
+
+.. automodule:: scubes.utilities.readscube
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 scubes.utilities.sextractor module
 ----------------------------------
 
