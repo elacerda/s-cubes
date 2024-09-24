@@ -2,7 +2,7 @@ Getting started
 ===============
 
 **S-Cubes** is a python package designed to make galaxy cubes (X, Y, Lambda) 
-with S-PLUS data. The `S-Cubes repository <https://github.com/elacerda/s-cubes>`_ 
+with S-PLUS data. The `S-Cubes repository <https://github.com/splus-collab/s-cubes>`_ 
 includes the `scubes` python package which allows the users to create their own
 codes. It also includes the data files to calibrate stamps with iDR4 zero-points 
 correction and SExtractor to identify stars along the stamp (optionally).
@@ -31,7 +31,7 @@ Clone the project:
 
 .. code:: console
 
-   git clone https://github.com/elacerda/s-cubes.git
+   git clone https://github.com/splus-collab/s-cubes.git
    
 *(optional)* Create and activate a virtual enviroment for the package
 instalation and usage:
@@ -45,7 +45,7 @@ Install S-Cubes:
 
 .. code:: console
 
-   pip3 install .
+   pip install .
 
 .. _scripts:
 

@@ -46,7 +46,7 @@ calculates the fluxes and uncertainties for the 12-band images cropped from
 `S-PLUS <https://www.splus.iag.usp.br/>`__ observed tiles. The stamps are 
 downloaded from `S-PLUS Cloud <https://splus.cloud/>`__ and the zero-points 
 for the data-release 4 (DR4) are 
-`included <https://github.com/elacerda/s-cubes/tree/main/src/scubes/data>`__ 
+`included <https://github.com/splus-collab/s-cubes/tree/main/src/scubes/data>`__ 
 to the package.
 
 The usage of this script is detailed in :ref:`How to create a cube`.

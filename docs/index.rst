@@ -6,16 +6,16 @@
 S-Cubes homepage
 ================
 
-.. image:: https://img.shields.io/github/v/tag/elacerda/s-cubes?include_prereleases&label=version
-   :target: https://github.com/elacerda/s-cubes
+.. image:: https://img.shields.io/github/v/tag/splus-collab/s-cubes?include_prereleases&label=version
+   :target: https://github.com/splus-collab/s-cubes
    :alt: GitHub Tag
 
-.. image:: https://img.shields.io/github/actions/workflow/status/elacerda/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?label=gh-pages
-   :target: https://github.com/elacerda/s-cubes/blob/main/.github/workflows/docs_deploy.yml 
+.. image:: https://img.shields.io/github/actions/workflow/status/splus-collab/s-cubes/.github%2Fworkflows%2Fdocs_deploy.yml?label=gh-pages
+   :target: https://github.com/splus-collab/s-cubes/blob/main/.github/workflows/docs_deploy.yml 
    :alt: GitHub Actions Workflow Status
 
-.. image:: https://img.shields.io/github/license/elacerda/s-cubes
-   :target: https://github.com/elacerda/s-cubes/blob/main/LICENSE.txt
+.. image:: https://img.shields.io/github/license/splus-collab/s-cubes
+   :target: https://github.com/splus-collab/s-cubes/blob/main/LICENSE.txt
    :alt: GitHub License
 
 .. figure:: images/scubes3d.png

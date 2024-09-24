@@ -8,7 +8,7 @@ The S-Cubes repository includes the scubes python package which allows the users
 their own codes. It also includes the data files to calibrate stamps with iDR4 zero-points 
 correction and SExtractor to identify stars along the stamp (optionally).
 
-**Online Documentation:** `<https://elacerda.github.io/s-cubes/>`__
+**Online Documentation:** `<https://splus-collab.github.io/s-cubes/>`__
 
 .. _require:
 
@@ -29,7 +29,7 @@ Clone the project:
 
 .. code:: console
 
-   git clone https://github.com/elacerda/s-cubes.git
+   git clone https://github.com/splus-collab/s-cubes.git
    
 *(optional)* Create and activate a virtual enviroment for the package
 instalation and usage:
@@ -43,7 +43,7 @@ Install S-Cubes:
 
 .. code:: console
 
-   pip3 install .
+   pip install .
 
 .. _scripts:
 
@@ -97,18 +97,18 @@ This code is distributed under the `GNU GENERAL PUBLIC LICENSE
 v3.0 <LICENSE>`__. Please refer to the ``LICENSE.txt`` file in the
 repository for more details.
 
-.. |version| image:: https://img.shields.io/github/v/tag/elacerda/s-cubes?include_prereleases&label=version
+.. |version| image:: https://img.shields.io/github/v/tag/splus-collab/s-cubes?include_prereleases&label=version
    :alt: S-Cubes version
-   :target: https://github.com/elacerda/s-cubes
+   :target: https://github.com/splus-collab/s-cubes
 
-.. |workflow| image:: https://github.com/elacerda/s-cubes/actions/workflows/docs_deploy.yml/badge.svg
+.. |workflow| image:: https://github.com/splus-collab/s-cubes/actions/workflows/docs_deploy.yml/badge.svg
    :alt: Docs build deployment
-   :target: https://github.com/elacerda/s-cubes/blob/main/.github/workflows/docs_deploy.yml 
+   :target: https://github.com/splus-collab/s-cubes/blob/main/.github/workflows/docs_deploy.yml 
 
-.. |license| image:: https://img.shields.io/github/license/elacerda/s-cubes
+.. |license| image:: https://img.shields.io/github/license/splus-collab/s-cubes
    :alt: License
-   :target: https://github.com/elacerda/s-cubes/blob/main/LICENSE.txt
+   :target: https://github.com/splus-collab/s-cubes/blob/main/LICENSE.txt
    
-.. |docs| image:: https://img.shields.io/website?url=https%3A%2F%2Felacerda.github.io%2Fs-cubes%2F
+.. |docs| image:: https://img.shields.io/website?url=https%3A%2F%2Fsplus%2Dcollab.github.io%2Fs-cubes%2F
    :alt: S-Cubes website
-   :target: https://elacerda.github.io/s-cubes/index.html
+   :target: https://splus-collab.github.io/s-cubes/index.html
