@@ -1,9 +1,6 @@
 .. figure:: images/s-cubes_logo.png
    :alt: S-Cubes
 
-S-Cubes
-=======
-
 |version| |workflow| |license| |docs|
 
 S-Cubes is a python package designed to make galaxy cubes (X, Y, Lambda) with S-PLUS data. 
