@@ -17,9 +17,8 @@ from scipy.interpolate import RectBivariateSpline
 from . import __filters_table__
 
 from .control import control
-from .mask_stars import maskStars
 from .headers import get_author, get_key
-from .constants import FILTER_NAMES_ZP_TABLE, FILTER_NAMES, CENTRAL_WAVE, METADATA_NAMES
+from .constants import FILTER_NAMES_ZP_TABLE, CENTRAL_WAVE, METADATA_NAMES
 
 from .utilities.io import print_level
 from .utilities.splusdata import connect_splus_cloud, detection_image_hdul, get_lupton_rgb
@@ -719,6 +718,8 @@ class SCubes:
             
         # MASK STARS
         if ctrl.mask_stars:
+            from .mask_stars import maskStars
+            
             self.get_lupton_rgb()
             mask = maskStars(args=self.args, detection_image=self.detection_image, lupton_rgb=self.lupton_rgb, output_dir=ctrl.output_dir)
             # HDUList

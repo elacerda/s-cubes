@@ -12,8 +12,6 @@ SEX_DEFAULT_FILTER = os.path.join(__data_files__, 'default.conv')
 SEX_DEFAULT_STARNNW = os.path.join(__data_files__, 'default.nnw') 
 
 from sewpy import SEW
-from os.path import join
-from astropy.io import fits
 
 from .io import print_level
 

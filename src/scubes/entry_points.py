@@ -83,22 +83,23 @@ def scubes_argparse(args):
     '''
     # closest even
     args.size = round(args.size/2)*2
-
-    _sex = which(args.sextractor)
-    if _sex is None:
-        print_level(f'{args.sextractor}: SExtractor exec not found', 1, args.verbose)
-        _SExtr_names = ['sex', 'source-extractor']
-        for name in _SExtr_names:
-            _sex = which(name)
-            if _sex is None:
-                print_level(f'{name}: SExtractor exec not found', 2, args.verbose)
-            else:
-                print_level(f'{name}: SExtractor found. Forcing --sextractor={_sex}', 1, args.verbose)
-                args.sextractor = _sex
-                pass
+    
+    if args.mask_stars:
+        _sex = which(args.sextractor)
         if _sex is None:
-            print_level(f'SExtractor not found')
-            sys.exit(1)
+            print_level(f'{args.sextractor}: SExtractor exec not found', 1, args.verbose)
+            _SExtr_names = ['sex', 'source-extractor']
+            for name in _SExtr_names:
+                _sex = which(name)
+                if _sex is None:
+                    print_level(f'{name}: SExtractor exec not found', 2, args.verbose)
+                else:
+                    print_level(f'{name}: SExtractor found. Forcing --sextractor={_sex}', 1, args.verbose)
+                    args.sextractor = _sex
+                    pass
+            if _sex is None:
+                print_level(f'SExtractor not found')
+                sys.exit(1)
     return args
 
 def scubes():

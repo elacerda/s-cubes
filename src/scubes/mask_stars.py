@@ -6,6 +6,7 @@ from .control import control
 from os.path import join, isfile
 from copy import deepcopy as copy
 from matplotlib import pyplot as plt
+
 from .headers import get_key, get_author
 from .constants import SPLUS_DEFAULT_SEXTRACTOR_CONFIG, SPLUS_DEFAULT_SEXTRACTOR_PARAMS
 
