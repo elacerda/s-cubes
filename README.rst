@@ -1,4 +1,4 @@
-.. figure:: http://minerva.ufsc.br/~lacerda/s-cubes/s-cubes.logo
+.. figure:: images/s-cubes.png
    :alt: S-Cubes
 
 S-Cubes
