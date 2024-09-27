@@ -1,4 +1,4 @@
-.. figure:: images/s-cubes.png
+.. figure:: images/s-cubes_logo.png
    :alt: S-Cubes
 
 S-Cubes
