@@ -347,7 +347,8 @@ MLTOHEADER_DESC = f'''
 
 '''
 MLTOHEADER_ARGS = {
-    'cube': ['pos', dict(metavar='CUBE', help="Path to a Galaxy's S-CUBES fits.")], 
+    'force': ['f', dict(action='store_true', help='Force the update the value of existent header keys')],
+    'cube': ['pos', dict(metavar='CUBE', help="Path to a Galaxy's S-CUBES fits")], 
     'masterlist': ['pos', dict(metavar='MASTERLIST', help='Path to masterlist file')]
 }
 
@@ -382,7 +383,7 @@ def ml2header_argparse(args):
 
     return args
 
-def ml2header_updheader(cube_filename, ml_table):
+def ml2header_updheader(cube_filename, ml_table, force=False):
     '''
     Updates a S-CUBES raw cube primary header with the masterlist 
     information.
@@ -393,7 +394,11 @@ def ml2header_updheader(cube_filename, ml_table):
         Path to S-CUBES raw cube.
     
     ml_table : :class:`astropy.table.table.Table`
-        Masterlist read using :meth:`astropy.io.ascii.read`.
+        Masterlist read using :meth:`astropy.io.ascii.read`
+        
+    force : bool, optional
+        Force the update the key value is the key is existent at the 
+        S-CUBES header. 
     '''
     with fits.open(cube_filename, 'update') as hdul:
         hdu = hdul['PRIMARY']
@@ -413,11 +418,13 @@ def ml2header_updheader(cube_filename, ml_table):
             desc = None
             if '__' in col:
                 col, desc = col.split('__')
+            if not force and (col in hdu.header):
+                continue 
+            if col == 'FIELD' or col == 'SNAME':
+                continue
             if col == 'SIZE':
                 col = 'SIZE_ML'
                 desc = 'SIZE masterlist'
-            if col == 'FIELD' or col == 'SNAME':
-                continue
             hdu.header.set(col, value=v, comment=desc)
 
 def ml2header():
@@ -440,7 +447,7 @@ def ml2header():
     args = ml2header_argparse(parser.parse_args(args=sys.argv[1:]))
     
     # update masterlist information
-    ml2header_updheader(args.cube, args.ml)
+    ml2header_updheader(args.cube, args.ml, args.force)
 
 #############################################################################
 #############################################################################
