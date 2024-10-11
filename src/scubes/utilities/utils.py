@@ -400,6 +400,8 @@ def ml2header_updheader(cube_filename, ml_table, force=False):
         Force the update the key value is the key is existent at the 
         S-CUBES header. 
     '''
+    import numpy as np
+
     with fits.open(cube_filename, 'update') as hdul:
         hdu = hdul['PRIMARY']
 
@@ -416,6 +418,8 @@ def ml2header_updheader(cube_filename, ml_table, force=False):
         for col in ml_table.colnames:
             v = mlcut[col][0]
             desc = None
+            if v is np.ma.masked:
+                v = None
             if '__' in col:
                 col, desc = col.split('__')
             if not force and (col in hdu.header):
