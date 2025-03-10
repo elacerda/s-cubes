@@ -38,6 +38,17 @@ def _parse_filters_tuple(f_tup, filters):
             i_f.append(f_tup)
     return i_f
 
+def _parse_filters_tuple(f_tup, filters):
+    if isinstance(f_tup, list):
+        f_tup = tuple(f_tup)
+    i_f = []
+    if isinstance(f_tup, tuple):
+        for f in f_tup:
+            i_f.append(f)
+    else:
+        i_f.append(f_tup)
+    return i_f
+
 def get_distance(x, y, x0, y0, pa=0.0, ba=1.0):
     '''
     Return an image (:class:`numpy.ndarray`)
@@ -86,6 +97,35 @@ def get_distance(x, y, x0, y0, pa=0.0, ba=1.0):
     A3 = sin_th ** 2 + a_b ** 2 * cos_th ** 2
 
     return np.sqrt(A1 * x2 + A2 * xy + A3 * y2)
+
+def make_RGB_tom(flux__lyx,
+        rgb=(7, 5, 9), rgb_f=(1, 1, 1), 
+        pminmax=(5, 95), im_max=255, 
+        # astropy.visualization.make_lupton_rgb() input vars
+        minimum=(0, 0, 0), Q=0, stretch=10):
+    # get filters index(es)
+    pmin, pmax = pminmax
+    RGB = []
+    for f_tup in rgb:
+        # get fluxes list
+        if isinstance(f_tup, list):
+            f_tup = tuple(f_tup)
+        i_f = []
+        if isinstance(f_tup, tuple):
+            for f in f_tup:
+                i_f.append(f)
+        else:
+            i_f.append(f_tup)
+        C = copy(flux__lyx[i_f, :, :]).sum(axis=0)
+        # percentiles
+        Cmin, Cmax = np.nanpercentile(C, pmin), np.nanpercentile(C, pmax)
+        # calc color intensities
+        RGB.append(im_max*(C - Cmin)/(Cmax - Cmin))
+    R, G, B = RGB
+    # filters factors
+    fR, fG, fB = rgb_f
+    # make RGB image
+    return make_lupton_rgb(fR*R, fG*G, fB*B, Q=Q, minimum=minimum, stretch=stretch)
 
 def get_image_distance(shape, x0, y0, pa=0.0, ba=1.0):
     '''
@@ -394,7 +434,7 @@ class read_scube:
 
         Parameters
         ----------
-        rgb : tuple of str, optional
+        rgb : tuple of str or tuple of int, optional
             Tuple specifying the filters to use for the red, green, and blue channels (default is ('rSDSS', 'gSDSS', 'iSDSS')).
         
         rgb_f : tuple of float, optional
@@ -437,28 +477,13 @@ class read_scube:
         else:
             rgb_f = (rgb_f, rgb_f, rgb_f)
 
-        #################
-        ### RGB image ###
-        #################
-        # get filters index(es)
-        pmin, pmax = pminmax
-        RGB = []
-        for _c in rgb:
-            # get filters fluxes
-            i_c = _parse_filters_tuple(_c, self.filters)
-            C = copy(self.flux__lyx[i_c, :, :]).sum(axis=0)
-            # percentiles
-            Cmin, Cmax = np.nanpercentile(C, pmin), np.nanpercentile(C, pmax)
-            # calc color intensities
-            RGB.append(im_max*(C - Cmin)/(Cmax - Cmin))
-        R, G, B = RGB
-        # filters factors
-        fR, fG, fB = rgb_f
-        # make RGB image
-        RGB__yxc = make_lupton_rgb(fR*R, fG*G, fB*B, Q=Q, minimum=minimum, stretch=stretch)
-        #################
-        #################        
-        return RGB__yxc
+        i_rgb = [_parse_filters_tuple(x, self.filters) for x in rgb]
+
+        return make_RGB_tom(
+            self.flux__lyx, rgb=i_rgb, rgb_f=rgb_f, 
+            pminmax=pminmax, im_max=im_max, 
+            minimum=minimum, Q=Q, stretch=stretch
+        )
     
     def source_extractor(self, 
                          sextractor, username, password, 
@@ -545,12 +570,16 @@ class read_scube:
         self.mask_stars_hdul = _.hdul
         self.detection_image_hdul = _.detection_image_hdul
 
-    def get_iso_sky(self, isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5, clip_neg=False):
+    def get_iso_sky(self, ref_mag_filt='rSDSS', isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5, clip_neg=False):
         '''
         Estimates the sky flux using isophotal limits and clipping outliers in the flux data.
 
         Parameters
         ----------
+        ref_mag_filt : str or int, optional
+            Filter name or index number for the reference magnitude for the 
+            isophotal limits evaluation.
+
         isophotal_limit : float, optional
             Threshold value for selecting sky pixels (default is 25).
         
@@ -574,9 +603,22 @@ class read_scube:
         dict
             Dictionary containing the sky flux information and masks.
         '''        
-        # Sky selection using rSDSS image
-        reference_mag_img__yx = self.mag__lyx[self.filters.index('rSDSS')]
+        try:
+            i_l = self.get_filter_i(ref_mag_filt)
+        except ValueError:
+            i_l = ref_mag_filt
+        except:
+            print_level(f'ref_mag_filt: {ref_mag_filt}: inexistent', )
+            return {}
+
+        try:
+            reference_mag_img__yx = self.mag_arcsec2__lyx[i_l]
+        except:
+            print_level(f'ref_mag_filt: {ref_mag_filt}: inexistent', )
+            return {}
+        
         flux__lyx = self.flux__lyx
+        reference_mag_img__yx = np.where(flux__lyx[i_l] <= 0, 99, reference_mag_img__yx)
         return get_iso_sky(
             refmag__yx=reference_mag_img__yx, flux__lyx=flux__lyx, 
             isophotal_limit=isophotal_limit, isophotal_medsize=isophotal_medsize, 
@@ -601,7 +643,10 @@ class read_scube:
         ef = self._hdulist['ERRORS'].data
         wei = self.weimask__lyx
         return np.bitwise_or(wei>0, f<=0, ~(np.isfinite(ef)))
-
+    
+    def get_filter_i(self, filt):
+        return self.filters.index(filt)
+    
     @property
     def weimask__lyx(self):
         return np.broadcast_to(self.weimask__yx, (len(self.filters), self.size, self.size))
@@ -629,6 +674,10 @@ class read_scube:
     @property
     def pivot_wave(self):
         return self.metadata[METADATA_NAMES['pivot_wave']]
+    
+    @property
+    def psf_fwhm(self):
+        return self.metadata[METADATA_NAMES['psf_fwhm']]
 
     @property
     def tile(self):

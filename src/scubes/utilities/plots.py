@@ -7,9 +7,9 @@ from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec    
 
 from .io import print_level
-from .readscube import read_scube
+from .readscube import read_scube, make_RGB_tom
 from .readscube import get_image_distance, radial_profile
-from ..constants import FILTER_NAMES_FITS, FILTER_COLORS, FILTER_TRANSMITTANCE
+from ..constants import FILTER_NAMES_FITS, FILTER_COLORS, FILTER_TRANSMITTANCE, BANDS
 
 fmagr = lambda x, w, p: 10**(-0.4*x)/(w**2)*(p**2)*(2.997925e18*3631.0e-23)
 
@@ -152,7 +152,7 @@ class scube_plots():
         block : bool, optional
             Whether to block the execution of plots (default is False).
         '''        
-        self.readscube(filename)       
+        self.readscube(filename)
         self.block = block
         self.filter_colors = np.array([FILTER_COLORS[FILTER_NAMES_FITS[k]] for k in self.scube.filters])
         self.aur = 0.5*(1 + 5**0.5)
@@ -881,7 +881,6 @@ def plot_mask(detection_image, lupton_rgb, masked_ddata, resulting_mask, sewregi
     wcs = WCS(dheader)
     # FIGURE
     plt.rcParams['figure.figsize'] = (12, 10)
-    plt.ion()
     if fig is None:
         fig = plt.figure()
     # AX1
@@ -929,3 +928,146 @@ def plot_mask(detection_image, lupton_rgb, masked_ddata, resulting_mask, sewregi
         plt.close(fig)
         fig = None
     return fig     
+
+def plot_psf(psf__bsxy, filename=None):
+    lab = [{v: k for k, v in FILTER_NAMES_FITS.items()}[x] for x in BANDS]
+    f = plt.figure(figsize=(15, 10))
+    for b in range(12):
+        ax = plt.subplot(3, 4, b + 1)
+        ax.hist(psf__bsxy[b, :, 0][psf__bsxy[b, :, 0] > 0], alpha=0.5, color='b', label='x')
+        ax.axvline(x=np.ma.median(psf__bsxy[b, :, 0]), c='b')
+        ax.hist(psf__bsxy[b, :, 1][psf__bsxy[b, :, 1] > 0], alpha=0.5, color='r', label='y')
+        ax.axvline(x=np.ma.median(psf__bsxy[b, :, 1]), c='r')
+        _title = f'Median PSF(x,y):{np.ma.median(psf__bsxy[b, :, 0]):2.2f}, '
+        _title += f'{np.ma.median(psf__bsxy[b, :, 1]):2.2f} [pix]'
+        ax.set_title(_title, fontsize=12)
+        ax.set_xlabel(f'{lab[b]}', fontsize=12)
+        ax.legend()
+    f.tight_layout()
+    if filename is not None:
+        f.savefig('psf_' + filename, dpi=300)
+
+def plot_masks_psf(RGB__yxc, apertures, mask_Ha, mask_star__yx, fig=None):
+    if fig is None:
+        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(11, 10))
+    else:
+        ax1, ax2, ax3, ax4 = fig.axes
+    # fig with RGB normal
+    ax1.imshow(RGB__yxc, origin='lower')
+    ax1.set_title('RGB=(J0660, i, g)', fontsize=14)
+    # fig com rgb Ha/buracos
+    ax2.imshow(RGB__yxc, origin='lower')
+    ax2.set_title('RGB with Ha mask', fontsize=14)
+    if mask_Ha is not False:
+        ax2.imshow(np.ma.masked_where(mask_Ha == 0, mask_Ha), cmap='gray_r', origin='lower', interpolation='nearest')
+    # fig com masks com circ and normal
+    ax3.imshow(RGB__yxc, origin='lower')
+    ax3.set_title('RGB with stars found', fontsize=14)
+    # [i.plot(ax=ax3, facecolor='none', edgecolor='red', lw=2, label='Circle') for i in apertures]
+    for i, v in enumerate(apertures):
+        v.plot(ax=ax3, facecolor='none', edgecolor='red', lw=2, label='Circle')
+        ax3.annotate(repr(i), (v.center.x, v.center.y), color='#378aff', size=12, weight='bold')
+    # fig com rgb + maks/buracos
+    ax4.imshow(RGB__yxc, origin='lower')
+    ax4.set_title('Galaxy with stars masked', fontsize=14)
+    ax4.imshow(np.ma.masked_where(mask_star__yx == 0, mask_star__yx), cmap='gray_r', origin='lower', interpolation='nearest'), plt.tight_layout()
+    # plt.draw(),plt.show(),plt.pause(0.1)    
+    return fig, (ax1, ax2, ax3, ax4)
+
+def plot_extra_sources(xsource, filename=None):
+    f, ax = plt.subplots()
+    f.set_size_inches(6, 5)
+    im = ax.imshow(xsource, cmap=xsource.cmap, origin='lower', interpolation='nearest')
+    f.colorbar(im)
+    f.tight_layout()
+    f.show()
+    if filename is not None: 
+        f.savefig('xsource_' + filename, dpi=300)
+    return f, ax
+
+def plot_scube_RGB_mask_sky(scube, masks_builder):
+    mb = masks_builder
+    RGB__yxc = scube.lRGB_image(rgb=(8, 7, 5), Q=5, stretch=50, pminmax=(1.5, 100 - 1.5))
+    f = plt.figure(figsize=(7, 7))
+    f.suptitle(f'{scube.galaxy} mag_r mask = 25 arcsec/pix² npix={(mb.mask_sky__yx == 1).sum()}')
+    ax1 = plt.subplot(221)
+    ax1.imshow(RGB__yxc, origin='lower')
+    ax1.set_title(scube.galaxy)
+    ax2 = plt.subplot(222)
+    ax2.imshow(mb.mask_sky__yx, interpolation='nearest', origin='lower')
+    ax2.set_title('sky mask')
+    ax3 = plt.subplot(212)
+    ax3.plot(scube.pivot_wave, mb.sky['mean__l'], 'o-k', label='mean_sky')
+    ax3.legend()
+    ax3.set_ylabel(r'$F_\lambda \,\,\, [erg\,s^{-1}\,cm^{-2}\,\AA^{-1}]$', fontsize=15)
+    ax3.set_xlabel(fr'$\lambda \ [\AA]$', fontsize=15)
+    ax3.grid(ls='--', lw=0.5)
+    f.tight_layout()
+    f.savefig(f'{scube.galaxy}_sky.png')
+
+def plot_violin_reescaled_error_spectrum(scube, masks_builder):
+    mb = masks_builder
+    # Error plot
+    quant = [[0.025, 0.16, 0.84, 0.975]] * 12
+    f, ax = plt.subplots(figsize=(9, 5))
+    _ = ax.violinplot(
+        mb.errR__byx[:, (mb.final_mask__yx == 0)].T, 
+        showmeans=True, showextrema=False, quantiles=quant
+    )  # , showmedians=True
+    ax.set_title(f'galaxy {scube.galaxy} - Original')
+    ax.set_xticks(
+        np.arange(1, 13, 1), 
+        [
+            'u', 'J0378', 'J0395', 'J0410', 'J0430', 
+            'g', 'J0515', 'r', 'J0660', 'i', 'J0861', 'z'
+        ], 
+        fontsize=15
+    )
+    ax.plot(np.arange(1, 13, 1), mb.errRel_meanSpec__b, 'ko--')
+    ax.set_ylim(0, mb.errRel_meanSpec__b.max()+4)  # , plt.xlim(3485, 9900)
+    ax.set_ylabel(fr'$\epsilon_\lambda/\epsilon_r$', fontsize=17)
+    ax.grid(linestyle=':')
+    f.tight_layout()
+    f.savefig(f'{scube.galaxy}_violin_error_mean_original.png')
+
+def plot_masks_final_plot(scube, masks_builder):
+    mb = masks_builder
+    # A final plot
+    plt.figure(figsize=(15, 5.5))
+    
+    RGB__yxc = scube.lRGB_image(
+        rgb=(8, 9, 5), 
+        pminmax=(1.5, 100 - 1.5), 
+        minimum=(15, 15, 15),
+        Q=3, stretch=130, im_max=180, 
+    )
+    #  Normal RGB plot
+    plt.subplot(1, 3, 1)
+    plt.imshow(RGB__yxc, origin='lower')
+    plt.title(f'{scube.galaxy} Original data (J0660, i, g)', fontsize=14)
+
+    #   RGB with the mask
+    plt.subplot(1, 3, 2)
+    plt.imshow(mb.final_mask__yx, origin='lower', interpolation='nearest', vmax=4)
+    plt.title(f'Final mask', fontsize=14)
+
+    # Cut RGB
+    RGB__yxc = make_RGB_tom(
+        flux__lyx=mb.hdul[1].data,
+        rgb=(8, 9, 5),
+        Q=3, stretch=130, im_max=180, 
+        minimum=(15, 15, 15),
+        pminmax=(1.5, 100 - 1.5), 
+    )
+
+    plt.subplot(1, 3, 3)
+    plt.imshow(RGB__yxc, origin='lower')
+    plt.title(f'cut masked (stars+contour)', fontsize=14)
+    plt.imshow(
+        np.where(mb.hdul[3].data == 0, np.nan, 0), 
+        cmap='gray_r', origin='lower', interpolation='nearest'
+    )
+    plt.tight_layout()
+    plt.savefig(f'{scube.galaxy}_contour_stars_maskv1.png')
+    print('done')
+    plt.pause(1)

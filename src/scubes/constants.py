@@ -64,6 +64,7 @@ METADATA_NAMES = {
     'mean_1_width': 'MEAN1WIDTH',
     'pivot_wave': 'PIVOTWAVE',
     'alambda_av': 'ALAMBDAAV',
+    'psf_fwhm': 'PSFFWHM',
 }
 
 EXPTIMES = {

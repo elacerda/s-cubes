@@ -507,7 +507,8 @@ def splots():
     #######################################
     ################# SKY #################
     #######################################
-    sky = splots.scube.get_iso_sky(
+    sky, _ = splots.scube.get_iso_sky(
+        ref_mag_filt='rSDSS',
         isophotal_limit=25, 
         isophotal_medsize=10, 
         stars_mask=None, 
@@ -593,3 +594,66 @@ def splots():
     ofile = f'{splots.scube.galaxy}_intarea_rad50pix_spec.png'
     splots.int_area_spec_plot(output_filename=ofile, pa_deg=0, ba=1, R_pix=50)    
     '''
+
+SCUBE_MASK_DESC = f'''
+{SPLUS_MOTD_TOP} | scube_mask entry-point script: Masks stars, 
+{SPLUS_MOTD_MID} | evaluate sky mean flux and creates the galaxy SCUBE 
+{SPLUS_MOTD_BOT} | fits file with the estimated galaxy size and metainfo.
+{SPLUS_MOTD_SEP} + 
+
+   {__author__}
+
+'''
+
+def sky_or_int(arg):
+    import argparse as ap
+    try:
+        return float(arg)  # try convert to float
+    except ValueError:
+        pass
+    if arg == 'sky':
+        return arg
+    raise ap.ArgumentTypeError("x must be a number or 'sky'")
+
+help_star_calc = '''
+    Configures how the star size is calculated. 
+    'sky' -> the size is defined when flux == sky
+    Number -> favtor the multiply the FWHM to get the size of each star.
+'''
+help_isomedsize = 'Size of the window used for the median filter when smoothing the mask'
+help_isolimit = 'The threshold value for the reference magnitude used to mask'
+
+SCUBE_MASK_ARGS = {
+    'cube': ['pos', dict(metavar='SCUBE', help="Path to a Galaxy's S-CUBES fits.")],
+    'extra_pix': ['P', dict(default=5, type=int, help='Extra pixels to be added to the final masked SCUBE.')],
+    'mask_stars_threshold': ['m', dict(default=20, type=int, help='Minimum magnitude threshold. The script searches local density maxima that have a peak amplitude greater than threshold')],
+    'mask_stars_bands': ['b', dict(default=7, nargs='+', type=int, help='List of S-PLUS bands (space separated) to create the detection image.')],
+    'xsource_std_f': ['X', dict(default=2, type=int, help='Factor to be multiplied by the threshold for the extra sources detection.')],
+    'star_size_calc': ['S', dict(default=2, type=sky_or_int, help=help_star_calc)],
+    'mask_isophotal_medsize': ['', dict(default=30, type=int, help=help_isomedsize + '.')],
+    'mask_isophotal_limit': ['', dict(default=24, type=int, help=help_isolimit)],
+    'sky_isophotal_medsize': ['', dict(default=30, type=int, help=help_isomedsize + ' of the sky.')],
+    'sky_isophotal_limit': ['', dict(default=25, type=int, help=help_isolimit + ' the sky.')],
+    'sky_n_sigma': ['', dict(default=3, type=int, help='The threshold number of standard deviations to use for clipping outliers in sky flux values.')],
+    'sky_n_iter': ['', dict(default=5, type=int, help='The number of iterations to perform for sigma clipping to remove outliers.')],
+    'sky_clip_neg': ['', dict(default=False, action='store_true', help='If True, clip both negative and positive outliers. If False, only clip positive outliers.')],
+}
+
+def scube_mask():
+    import matplotlib.pyplot as plt
+    
+    from .masks import masks_builder
+    from .readscube import read_scube
+
+    parser = create_parser(args_dict=SCUBE_MASK_ARGS, program_description=SCUBE_MASK_DESC)
+    args = parser.parse_args(args=sys.argv[1:])
+
+    scube = read_scube(args.cube)
+    mb = masks_builder(scube, args)
+    
+    mb.mask_procedure()
+
+    input('...press any key to close the plots...')
+    plt.close('all')    
+        
+

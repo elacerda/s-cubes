@@ -47,6 +47,7 @@ sex_mask_stars_cube = "scubes.utilities.utils:sex_mask_stars_cube"
 ml2header = "scubes.utilities.utils:ml2header"
 scubes_filters = "scubes.entry_points:scubes_filters"
 splots = "scubes.utilities.utils:splots"
+scube_mask = "scubes.utilities.utils:scube_mask"
 
 [project.urls]
 Documentation = "http://elacerda.github.io/s-cubes"
