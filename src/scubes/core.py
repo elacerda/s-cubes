@@ -328,12 +328,16 @@ class SCubes:
             fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swp.fits.fz')
             self.stamps.append(fname)
             if not isfile(fname) or ctrl.force:
-                _ = self.conn.stamp(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=False, option=ctrl.tile, filename=fname)
+                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=False, option=ctrl.tile, filename=fname)
+                kw_stamp['_data_release'] = 'dr4'
+                _ = self.conn.stamp(**kw_stamp)
             # Download_weight:
             fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swpweight.fits.fz')
             self.stamps.append(fname)
             if not isfile(fname) or ctrl.force:
-                _ = self.conn.stamp(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=True, option=ctrl.tile, filename=fname)
+                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=True, option=ctrl.tile, filename=fname)
+                kw_stamp['_data_release'] = 'dr4'
+                _ = self.conn.stamp(**kw_stamp)
         # SHORTCUTS
         self.images = [img for img in self.stamps if 'swp.' in img]
         self.wimages = [img for img in self.stamps if 'swpweight.' in img]
