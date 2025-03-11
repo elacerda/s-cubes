@@ -132,10 +132,10 @@ class masks_builder:
         )
 
     def build_star_mask(self, 
-                        bands=7, star_threshold=50, worst_psf=3, f_std_exs=3, 
+                        bands=7, star_threshold=50, worst_psf=3, xsource_std_f=3, 
                         mask_Ha=True, extra_mask__yx=False, 
                         detection='StarFinder', 
-                        calcFWHM1by1=True, f_star_size='sky', 
+                        star_fwhm_individual_calc=True, star_size_calc='sky', 
                         save_fig=None, 
                         Q=3, stretch=130, im_max=180, minimum=15, plim=0.3, 
                         check_sources=True):
@@ -159,10 +159,10 @@ class masks_builder:
         worst_psf: is the FWHM used to calculate the size of the stars (in pixels)
         # The full-width half-maximum (FWHM) of the major axis of the Gaussian kernel in units of pixels.
         :threshold: threshold is the value that will be multiplied by the std(sky) to be used as threshold to find stars
-        :f_std_exs: factor multiplied by the standard deviation to be used as threshold to extra source
+        :xsource_std_f: factor multiplied by the standard deviation to be used as threshold to extra source
         :check_sources: whether True will plot the detected sources and ask for changes; False will not, just return
-        :calcFWHM1by1: calculate the FWHM of each star
-        :f_star_size: choose how is calculated the "size" of the star
+        :star_fwhm_individual_calc: calculate the FWHM of each star
+        :star_size_calc: choose how is calculated the "size" of the star
             -> 'sky' : the size is defined when the flux == sky
             -> Number: factor that multiply the FWHM to get the size of each star
         :save_fig: path+name to save the plot with the detected stars, if None is not saved
@@ -172,7 +172,7 @@ class masks_builder:
         Update Júlia Granada 27/02/24 - default parameters changed from (Q= 3.5, stretch=100, im_max=120, minimum=15, plim=0.3)
                     to (Q= 3, stretch=130, im_max=180, minimum=15, plim=1.5) and RGB changed from j0660,r,g to j0660,i,g
                     RGB = 8, 9, 7 also gets a good map
-        Update Júlia Granada 07/06/24 - add parameter calcFWHM1by1        
+        Update Júlia Granada 07/06/24 - add parameter star_fwhm_individual_calc        
         Update Eduardo@RV 17/02/2025 - convert to :class:`scubes.readscube.read_scube` usage.
         """     
         import matplotlib.pyplot as plt
@@ -242,15 +242,14 @@ class masks_builder:
         positions__xy = np.transpose((sources['xcentroid'], sources['ycentroid']))
 
         # Calc the ratios
-        if calcFWHM1by1:
+        if star_fwhm_individual_calc:
             psf__bsxy = calc_PSF_scube(scube.flux__lyx, centers_xy=positions__xy, med_sqrt=False, save_plot=save_fig)
             psf_s = np.ma.median(np.ma.sqrt(psf__bsxy[:, :, 1] ** 2 + psf__bsxy[:, :, 0] ** 2), axis=0)
-            sig_s = np.where(psf_s.mask, worst_psf / (2 * np.sqrt(2 * np.log(2))),
-                            psf_s / (2 * np.sqrt(2 * np.log(2))))
-            if f_star_size == 'sky':
+            sig_s = np.where(psf_s.mask, worst_psf / (2 * np.sqrt(2 * np.log(2))), psf_s / (2 * np.sqrt(2 * np.log(2))))
+            if star_size_calc == 'sky':
                 ratios = np.sqrt(-2 * sig_s ** 2 * np.log(mean / (f_max)))
             else:
-                ratios = f_star_size * np.where(psf_s.mask, worst_psf, psf_s)
+                ratios = star_size_calc * np.where(psf_s.mask, worst_psf, psf_s)
         else:
             sig = worst_psf / (2 * np.sqrt(2 * np.log(2)))
             ratios = np.sqrt(-2 * sig ** 2 * np.log(std / (star_threshold * f_max)))
@@ -284,7 +283,7 @@ class masks_builder:
                         # z1, z2 = int(min(data__yx.shape) * 0.2), int(min(data__yx.shape) * 0.8)
                         # mean, median, std = sigma_clipped_stats(data__yx[z1:z2, z1:z2])
                         # segm = detect_sources(data__yx[z1:z2, z1:z2] - mean, std, npixels=30)
-                        segm = detect_sources(data__yx - mean, f_std_exs*std, npixels=30)
+                        segm = detect_sources(data__yx - mean, xsource_std_f*std, npixels=30)
                         extra_source2 = deblend_sources(data__yx - mean, segm, npixels=10, mode='exponential')
                         fig_xsource2, ax_xsource2 = plot_extra_sources(extra_source2, filename=save_fig)
                         if extra_source2 == extra_source:
@@ -396,20 +395,7 @@ class masks_builder:
             v = getattr(self.args, k)
             if isinstance(v, list):
                 v = str(v)
-            hdu_final_mask__yx.header.append((f'HIERARCH {k}', v, 'parameter used in PP01'))
-
-        #hdu_final_mask__yx.header.append(('HIERARCH extra_pix', args.extra_pix, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH threshold4mask', args.mask_stars_threshold, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH bands4mask', args.mask_stars_bands, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH f_std_exs4mask', args.xsource_std_f, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH f_star_size4mask', args.star_size_calc, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH mf_size4mask', args.mask_isophotal_medsize, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH mag_max4isocontour', args.mask_isophotal_limit, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH mag_max_sky_4ss', args.sky_isophotal_limit, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH mf_size_4ss', args.sky_isophotal_medsize, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH sig_clip_4ss', 'cid', 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH sig_4ss', args.sky_n_sigma, 'parameter used in PP01'))
-        #hdu_final_mask__yx.header.append(('HIERARCH niter_4ss', args.sky_n_iter, 'parameter used in PP01'))
+            hdu_final_mask__yx.header.append((f'HIERARCH {k}', v, 'parameter of scube_mask script'))
 
         hdul = fits.HDUList(
             [
@@ -433,9 +419,10 @@ class masks_builder:
             star_threshold=args.mask_stars_threshold, 
             bands=args.mask_stars_bands, 
             worst_psf=(scube.psf_fwhm/scube.pixscale).max(), 
-            f_std_exs=args.xsource_std_f, 
-            f_star_size=args.star_size_calc,
+            xsource_std_f=args.xsource_std_f, 
+            star_size_calc=args.star_size_calc,
             save_fig=f'{scube.galaxy}_build_stars_mask.png',
+            star_fwhm_individual_calc=args.star_fwhm_individual_calc,
         )
         self.isophot_mask(
             band='rSDSS', 

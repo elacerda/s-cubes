@@ -616,12 +616,15 @@ def sky_or_int(arg):
     raise ap.ArgumentTypeError("x must be a number or 'sky'")
 
 help_star_calc = '''
-    Configures how the star size is calculated. 
+    Configures how the star size is calculated when using --star_fwhm_individual_calc option.
     'sky' -> the size is defined when flux == sky
     Number -> favtor the multiply the FWHM to get the size of each star.
 '''
 help_isomedsize = 'Size of the window used for the median filter when smoothing the mask'
 help_isolimit = 'The threshold value for the reference magnitude used to mask'
+help_star_fwhm = '''
+    If True calculates the FWHM used to estimate the star radius individually.
+'''
 
 SCUBE_MASK_ARGS = {
     'cube': ['pos', dict(metavar='SCUBE', help="Path to a Galaxy's S-CUBES fits.")],
@@ -630,6 +633,7 @@ SCUBE_MASK_ARGS = {
     'mask_stars_bands': ['b', dict(default=7, nargs='+', type=int, help='List of S-PLUS bands (space separated) to create the detection image.')],
     'xsource_std_f': ['X', dict(default=2, type=int, help='Factor to be multiplied by the threshold for the extra sources detection.')],
     'star_size_calc': ['S', dict(default=2, type=sky_or_int, help=help_star_calc)],
+    'star_fwhm_individual_calc': ['F', dict(default=False, action='store_true', help=help_star_fwhm)],
     'mask_isophotal_medsize': ['', dict(default=30, type=int, help=help_isomedsize + '.')],
     'mask_isophotal_limit': ['', dict(default=24, type=int, help=help_isolimit)],
     'sky_isophotal_medsize': ['', dict(default=30, type=int, help=help_isomedsize + ' of the sky.')],
@@ -654,6 +658,6 @@ def scube_mask():
     mb.mask_procedure()
 
     input('...press any key to close the plots...')
-    plt.close('all')    
+    plt.close('all')
         
 
