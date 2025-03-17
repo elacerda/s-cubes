@@ -113,126 +113,27 @@ def get_lupton_RGB():
 #############################################################################
 #############################################################################
 
-SEX_MASK_STARS_ARGS = {
+SCUBE_SEX_MASK_STARS_ARGS = {
     # optional arguments
-    'size': ['l', dict(default=500, type=int, help='Size of the cube in pixels.')],
-    'sextractor': ['x', dict(default='sex', help='Path to SExtractor executable.')],
     'verbose': ['v', dict(action='count', default=0, help='Verbosity level.')],
-    'class_star': ['p', dict(default=0.25, type=float, help='SExtractor CLASS_STAR parameter for star/galaxy separation.')],
+    'username': ['U', dict(default=None, help='S-PLUS Cloud username.')],
+    'password': ['P', dict(default=None, help='S-PLUS Cloud password.')],
     'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files.')],
     'no_interact': ['N', dict(action='store_true', default=False, help='Run only the automatic mask (a.k.a. do not check final mask)')],
+    
+    'sextractor': ['x', dict(default='sex', help='Path to SExtractor executable.')],
+    'class_star': ['p', dict(default=0.25, type=float, help='SExtractor CLASS_STAR parameter for star/galaxy separation.')],
     'satur_level': ['S', dict(default=1600.0, type=float, help='Saturation level for the png images.')],
     'back_size': ['B', dict(default=64, type=int, help='Background mesh size for SExtractor.')],
     'detect_thresh': ['T', dict(default=1.1, type=float, help='Detection threshold for SExtractor.')],
-    'username': ['U', dict(default=None, help='S-PLUS Cloud username.')],
-    'password': ['P', dict(default=None, help='S-PLUS Cloud password.')],
-    'estimate_fwhm': ['F', dict(action='store_true', default=False, help='Runs SExtractor two times estimating the SEEING_FWHM of the detection image.')],
-    'bands': ['b', dict(default='G,R,I,Z', help='List of S-PLUS bands.')],
-    'galaxy': ['g', dict(default=None, metavar='GALAXY_NAME', help="Galaxy's name")],
-
-    # positional arguments
-    'tile': ['pos', dict(metavar='SPLUS_TILE', help='Name of the S-PLUS tile')],
-    'ra': ['pos', dict(metavar='RA', help="Galaxy's right ascension")],
-    'dec': ['pos', dict(metavar='DEC', help="Galaxy's declination")],
-}
-
-SEX_MASK_STARS_DESC = f'''
-{SPLUS_MOTD_TOP} | sex_mask_stars entry-point script:
-{SPLUS_MOTD_MID} | Uses S-PLUS detection image and SExtractor 
-{SPLUS_MOTD_BOT} | to identify stars on the FOV. 
-{SPLUS_MOTD_SEP} + 
-
-   {__author__}
-
-'''
-
-def sex_mask_stars_argsparse(args):
-    '''
-    A specific parser for command-line arguments used in the `sex_mask_stars` function.
-
-    Parameters
-    ----------
-    args : :class:`argparse.Namespace`
-        Command-line arguments parsed by :meth:`argparse.ArgumentParser.parse_args`
-
-    Returns
-    -------
-    :class:`argparse.Namespace`
-        Parsed command-line arguments.
-    '''
-    from ..entry_points import scubes_argparse
-
-    return get_lupton_RGB_argsparse(scubes_argparse(args))
-    
-def sex_mask_stars():
-    '''
-    Uses S-PLUS detection image and SExtractor to identify stars on the FOV.
-
-    Raises
-    ------
-    SystemExit
-        If the detection file exists.
-
-    Returns
-    -------
-    None
-    '''
-    from ..mask_stars import maskStars
-    from ..headers import get_author
-    
-    from .splusdata import connect_splus_cloud, detection_image_hdul
-
-    parser = create_parser(args_dict=SEX_MASK_STARS_ARGS, program_description=SEX_MASK_STARS_DESC)
-    args = sex_mask_stars_argsparse(parser.parse_args(args=sys.argv[1:]))
-    conn = connect_splus_cloud(args.username, args.password)
-    if args.galaxy is None:
-        args.galaxy = 'OBJECT'
-    detection_image = f'{args.galaxy}_detection.fits'
-
-    if not isfile(detection_image) or args.force:
-        print_level(f'{args.galaxy} @ {args.tile} - downloading detection image')
-        kw = dict(ra=args.ra, dec=args.dec, size=args.size, bands=args.bands, option=args.tile)
-        hdul = detection_image_hdul(conn, **kw)
-
-        author = get_author(hdul[1].header)
-
-        # ADD AUTHOR TO HEADER IF AUTHOR IS UNKNOWN
-        if author == 'unknown':
-            author = 'scubes'
-            hdul[1].header.set('AUTHOR', value=author, comment='Who ran the software')
-
-        # SAVE DETECTION FITS
-        hdul.writeto(detection_image, overwrite=args.force)
-    else:
-        print_level('Detection file exists.')
-        #sys.exit(1)
-
-    maskStars(args=args, detection_image=detection_image, lupton_rgb=_get_lupton_RGB(conn, args, save_img=False), output_dir='.')
-
-#############################################################################
-#############################################################################
-#############################################################################
-
-SEX_MASK_STARS_CUBE_ARGS = {
-    # optional arguments
-    'sextractor': ['x', dict(default='sex', help='Path to SExtractor executable.')],
-    'verbose': ['v', dict(action='count', default=0, help='Verbosity level.')],
-    'class_star': ['p', dict(default=0.25, type=float, help='SExtractor CLASS_STAR parameter for star/galaxy separation.')],
-    'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files.')],
-    'no_interact': ['N', dict(action='store_true', default=False, help='Run only the automatic mask (a.k.a. do not check final mask)')],
-    'satur_level': ['S', dict(default=1600.0, type=float, help='Saturation level for the png images.')],
-    'back_size': ['B', dict(default=64, type=int, help='Background mesh size for SExtractor.')],
-    'detect_thresh': ['T', dict(default=1.1, type=float, help='Detection threshold for SExtractor.')],
-    'username': ['U', dict(default=None, help='S-PLUS Cloud username.')],
-    'password': ['P', dict(default=None, help='S-PLUS Cloud password.')],
     'estimate_fwhm': ['F', dict(action='store_true', default=False, help='Runs SExtractor two times estimating the SEEING_FWHM of the detection image.')],
 
     # positional arguments
     'cube_path': ['pos', dict(metavar='CUBEFITSFILE', help="Galaxy's S-Cube FITS file")],
 }
 
-SEX_MASK_STARS_CUBE_DESC = f'''
-{SPLUS_MOTD_TOP} | sex_mask_stars entry-point script:
+SCUBE_SEX_MASK_STARS_DESC = f'''
+{SPLUS_MOTD_TOP} | scube_sex_mask_stars entry-point script:
 {SPLUS_MOTD_MID} | Uses S-PLUS detection image and SExtractor 
 {SPLUS_MOTD_BOT} | to identify stars on the FOV using the S-Cube
 {SPLUS_MOTD_SEP} + FITSFILE of a galaxy as input.
@@ -241,9 +142,9 @@ SEX_MASK_STARS_CUBE_DESC = f'''
 
 '''
 
-def sex_mask_stars_cube_argsparse(args):
+def scube_sex_mask_stars_argsparse(args):
     '''
-    A particular parser of the command-line arguments for `sex_mask_stars_cube` 
+    A particular parser of the command-line arguments for `scube_sex_mask_stars_cube` 
     entry-point script.
 
     Parameters
@@ -288,7 +189,7 @@ def sex_mask_stars_cube_argsparse(args):
 
     return args
 
-def sex_mask_stars_cube():
+def scube_sex_mask_stars():
     '''
     Uses S-PLUS detection image and SExtractor to identify stars on the FOV.
     This entry-point script uses a S-Cube as input to gather the needed 
@@ -308,8 +209,8 @@ def sex_mask_stars_cube():
     
     from .splusdata import connect_splus_cloud, detection_image_hdul
 
-    parser = create_parser(args_dict=SEX_MASK_STARS_CUBE_ARGS, program_description=SEX_MASK_STARS_CUBE_DESC)
-    args = sex_mask_stars_cube_argsparse(parser.parse_args(args=sys.argv[1:]))
+    parser = create_parser(args_dict=SCUBE_SEX_MASK_STARS_ARGS, program_description=SCUBE_SEX_MASK_STARS_DESC)
+    args = scube_sex_mask_stars_argsparse(parser.parse_args(args=sys.argv[1:]))
     conn = connect_splus_cloud(args.username, args.password)
     detection_image = f'{args.galaxy}_detection.fits'
 

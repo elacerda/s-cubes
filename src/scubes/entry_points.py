@@ -2,7 +2,7 @@ import sys
 from os import getcwd
 from shutil import which
 
-from . import __author__, __zp_cat__, __zpcorr_path__, __version__, __filters_table__
+from . import __author__, __version__, __filters_table__  #, __zp_cat__, __zpcorr_path__
 
 from .constants import BANDS
 
@@ -44,21 +44,23 @@ SCUBES_ARGS = {
     'no_interact': ['N', dict(action='store_true', default=False, help='Run only the automatic stars mask (a.k.a. do not check final mask)')],
     'work_dir': ['w', dict(default=getcwd(), help='Working directory.')],
     'output_dir': ['o', dict(default=getcwd(), help='Output directory.')],
-    'sextractor': ['x', dict(default='sex', help='Path to SExtractor executable.')],
-    'class_star': ['p', dict(default=0.25, type=float, help='SExtractor CLASS_STAR parameter for star/galaxy separation.')],
     'verbose': ['v', dict(action='count', default=0, help='Verbosity level.')],
     'debug': ['D', dict(action='store_true', default=False, help='Enable debug mode.')],
-    'satur_level': ['S', dict(default=1600.0, type=float, help='Saturation level for the png images.')],
-    'zpcorr_dir': ['Z', dict(default=__zpcorr_path__, help='Zero-point correction directory.')],
-    'zp_table': ['z', dict(default=__zp_cat__, help='Zero-point table.')],
-    'back_size': ['B', dict(default=64, type=int, help='Background mesh size for SExtractor.')],
-    'detect_thresh': ['T', dict(default=1.1, type=float, help='Detection threshold for SExtractor.')],
+    #'zpcorr_dir': ['Z', dict(default=__zpcorr_path__, help='Zero-point correction directory.')],
+    #'zp_table': ['z', dict(default=__zp_cat__, help='Zero-point table.')],
     'username': ['U', dict(default=None, help='S-PLUS Cloud username.')],
     'password': ['P', dict(default=None, help='S-PLUS Cloud password.')],
-    'mask_stars': ['M', dict(action='store_true', default=False, help='Run SExtractor to auto-identify stars on stamp.')],
     'det_img': ['I', dict(action='store_true', default=False, help='Downloads detection image for the stamp. Needed if --mask_stars is active.')],
-    'estimate_fwhm': ['F', dict(action='store_true', default=False, help='Runs SExtractor two times estimating the SEEING_FWHM of the detection image.')],
     'remove_downloaded_data': ['R', dict(action='store_true', default=False, help='Remove the downloaded data from splusdata at the end of the run.')],
+    'data_release': ['d', dict(default='dr4', type=str, help='Select S-PLUS Data Release')],
+
+    #'mask_stars': ['M', dict(action='store_true', default=False, help='Run SExtractor to auto-identify stars on stamp.')],
+    #'sextractor': ['x', dict(default='sex', help='Path to SExtractor executable.')],
+    #'class_star': ['p', dict(default=0.25, type=float, help='SExtractor CLASS_STAR parameter for star/galaxy separation.')],
+    #'satur_level': ['S', dict(default=1600.0, type=float, help='Saturation level for the png images.')],
+    #'back_size': ['B', dict(default=64, type=int, help='Background mesh size for SExtractor.')],
+    #'detect_thresh': ['T', dict(default=1.1, type=float, help='Detection threshold for SExtractor.')],
+    #'estimate_fwhm': ['F', dict(action='store_true', default=False, help='Runs SExtractor two times estimating the SEEING_FWHM of the detection image.')],
 
     # positional arguments
     'tile': ['pos', dict(metavar='SPLUS_TILE', help='Name of the S-PLUS tile')],
@@ -84,6 +86,7 @@ def scubes_argparse(args):
     # closest even
     args.size = round(args.size/2)*2
     
+    '''
     if args.mask_stars:
         _sex = which(args.sextractor)
         if _sex is None:
@@ -100,6 +103,7 @@ def scubes_argparse(args):
             if _sex is None:
                 print_level(f'SExtractor not found')
                 sys.exit(1)
+    '''
     return args
 
 def scubes():
@@ -140,12 +144,13 @@ SCUBESML_ARGS = {
     'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files.')],
     'bands': ['b', dict(default=BANDS, nargs='+', help='List of S-PLUS bands (space separated).')],
     'size_multiplicator': ['S', dict(default=10, type=float, help='Factor to multiply the SIZE__pix value of the masterlist to create the galaxy size. If size is a odd number, the program will choose the closest even integer.')],
+    'data_release': ['d', dict(default='dr4', type=str, help='Select S-PLUS Data Release')],
     'work_dir': ['w', dict(default=getcwd(), help='Working directory.')],
     'output_dir': ['o', dict(default=getcwd(), help='Output directory.')],
     'verbose': ['v', dict(action='count', default=0, help='Verbosity level.')],
     'debug': ['D', dict(action='store_true', default=False, help='Enable debug mode.')],
-    'zpcorr_dir': ['Z', dict(default=__zpcorr_path__, help='Zero-point correction directory.')],
-    'zp_table': ['z', dict(default=__zp_cat__, help='Zero-point table.')],
+    #'zpcorr_dir': ['Z', dict(default=__zpcorr_path__, help='Zero-point correction directory.')],
+    #'zp_table': ['z', dict(default=__zp_cat__, help='Zero-point table.')],
     'username': ['U', dict(default=None, help='S-PLUS Cloud username.')],
     'password': ['P', dict(default=None, help='S-PLUS Cloud password.')],
     'remove_downloaded_data': ['R', dict(action='store_true', default=False, help='Remove the downloaded data from splusdata at the end of the run.')],
