@@ -293,12 +293,6 @@ class SCubes:
         '''
         return self._header_key_spectra('GAIN')
     
-    def _effexptime(self):
-        '''
-        Get the effective exposure time.
-        '''
-        return self._header_key_spectra('EFFTIME')
-    
     def _galaxy(self):
         '''
         Create a _galaxy object.
@@ -422,8 +416,6 @@ class SCubes:
             on correcting stamps. 
         '''
         ctrl = self.control
-        x0, x1, nbins = 0, 9200, 32
-        xgrid = np.linspace(x0, x1, nbins + 1)
         zpcorr = {}
         print_level('Getting ZP corrections for the S-PLUS bands...')
         for h in self.headers__b:
@@ -474,7 +466,6 @@ class SCubes:
         Add magnitude zero-point values to the image headers.
         '''
         ctrl = self.control
-        gal = self.galaxy
         self.get_zero_points()
         print_level('Calibrating stamps...')
         headers = []
@@ -507,59 +498,6 @@ class SCubes:
         if not self.check_zero_points():
             self.add_magzp_headers()
 
-    '''
-    def get_main_circle(self):
-        ctrl = self.control
-        dhdu = fits.open(self.detection_image)
-        ddata = dhdu[1].data
-        wcs = WCS(dhdu[1].header)
-        cen_coords = sky2pix(self.galaxy.coords, wcs)
-        ix, iy = np.meshgrid(np.arange(ddata.shape[0]), np.arange(ddata.shape[1]))
-        distance = np.sqrt((ix - cen_coords[0])**2 + (iy - cen_coords[1])**2)
-        expand = True
-        iteration = 1
-        size = ctrl.size
-        angsize = ctrl.angsize/0.55
-        while expand:
-            print_level(f'Iteration {iteration} - angsize: {angsize}', 1, ctrl.verbose)
-            inner_mask = distance <= angsize
-            disk_mask = (distance > angsize) & (distance <= angsize + 5)
-            outer_mask = distance > angsize + 5
-            p_inner = np.percentile(ddata[inner_mask], [16, 50, 84])
-            p_disk = np.percentile(ddata[disk_mask], [16, 50, 84])
-            p_outer = np.percentile(ddata[outer_mask], [16, 50, 84])
-            print_level(f'Inner [16, 50, 84]: {p_inner}', 2, ctrl.verbose)
-            print_level(f'Disk [16, 50, 84]: {p_inner}', 2, ctrl.verbose)
-            print_level(f'Outer [16, 50, 84]: {p_inner}', 2, ctrl.verbose)
-            plt.ioff()
-            ax1 = plt.subplot(111, projection=wcs)
-            ax1.imshow(ddata, cmap='Greys_r', origin='lower', vmin=-0.1, vmax=3.5)
-            r_circ = CirclePixelRegion(center=PixCoord(cen_coords[0], cen_coords[1]), radius=angsize)
-            r_circ.plot(color='y', lw=1.5, ax=ax1, label=f'{angsize:.1f} pix')
-            o_r_circ = CirclePixelRegion(center=PixCoord(cen_coords[0], cen_coords[1]), radius=angsize + 5)
-            o_r_circ.plot(color='g', lw=1.5, ax=ax1, label=f'{angsize + 5:.1f} pix')
-            ax1.set_title('RGB')
-            ax1.set_xlabel('RA')
-            ax1.set_xlabel('DEC')
-            ax1.legend(loc='upper left')
-            if p_disk[1] <= (p_outer[1] + (p_outer[1] - p_outer[0])):
-                fig_filename = f'{ctrl.prefix_filename}_defCircle.png'
-                print_level(f'Saving fig after finishing iteration {iteration}: {fig_filename}', 1, ctrl.verbose)
-                plt.savefig(join(ctrl.output_dir, fig_filename), format='png', dpi=180)
-                plt.close()
-                expand = False
-            else:
-                angsize += 5
-                print_level(f'Current angsize: {angsize} - size/2: {size/2}', 1, ctrl.verbose)
-                if angsize >= (size/2):
-                    plt.show()
-                    raise ValueError(f'Iteration stopped. Angsize {angsize} bigger than size {size/2}')
-                iteration += 1
-        dmask = np.zeros(ddata.shape)
-        dmask[distance > angsize] = 1
-        return r_circ, dmask
-    '''
-     
     def stamp_WCS_to_cube_header(self, header):
         '''
         Convert WCS information from stamp to cube header.
@@ -607,29 +545,23 @@ class SCubes:
         names = []
         items = ['filter', 'central_wave', 'pivot_wave']        
         for k in items:
-            names.append(METADATA_NAMES[k])
-            tab.append(__filters_table__[k])
-        names.append('EXPTIME')
-        tab.append(self.effexptime__b)
+            if k in __filters_table__.colnames:
+                names.append(METADATA_NAMES[k])
+                v = __filters_table__[k]
+                tab.append(v)
 
-        # create metadata arrays from headers keys
-        keys = ['GAIN', 'PSFFWHM', 'DATE-OBS'] if keys is None else keys
-        for key in keys:
-            fcount = 0
-            list_values = []
-            for h in self.headers__b:
-                k = get_key(key, get_author(h))
-                val = h.get(k, None)
-                if val is None:
-                    raise ValueError(f'Missing value: {key}: {val}')
-                else:
-                    fcount += 1
-                    list_values.append(val)
-            if fcount != len(self.headers__b):
-                raise ValueError(f'Missing header key {key}')
-            tab.append(list_values)
-            names.append(key)
-        # Bin Table HDU
+        # PSFFWHM
+        list_values = []
+        for h in self.headers__b:
+            k = get_key('PSFFWHM', get_author(h))
+            val = h.get(k, None)
+            if val is None:
+                raise ValueError(f'Missing value: PSFFWHM: {val}')
+            else:
+                list_values.append(val)
+        tab.append(list_values)
+        names.append('PSFFWHM')
+
         meta_tab = Table(tab, names=names)
         meta_hdu = fits.BinTableHDU(meta_tab)
         return meta_hdu
@@ -656,7 +588,6 @@ class SCubes:
         '''
         self.m0__b = self._m0()
         self.gain__b = self._gain()
-        self.effexptime__b = self._effexptime()
         self.data__byx = self._get_data_spectra(self.images, 1)   
         self.f0__b = np.power(10, -0.4*(48.6 + self.m0__b))
         self.fnu__byx = self.data__byx*self.f0__b[:, None, None]*self.fnu_unit
@@ -749,7 +680,7 @@ class SCubes:
 
         # DELETE BOGUS INFO
         cube_h = self.headers__b[0].copy()
-        for _k in ['FILTER', 'MAGZP', 'NCOMBINE', 'EFFTIME', 'GAIN', 'PSFFWHM']:
+        for _k in ['FILTER', 'MAGZP', 'NCOMBINE', 'GAIN', 'PSFFWHM']:
             k = get_key(_k, get_author(cube_h))
             if cube_h.get(k, None) is not None:
                 print_level(f'create_cube: deleting header key {k}', 2, ctrl.verbose)
