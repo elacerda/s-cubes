@@ -2,6 +2,7 @@ import numpy as np
 import astropy.units as u
 from astropy.wcs import WCS
 from astropy.io import fits
+from os.path import splitext
 import matplotlib.ticker as ticker
 from matplotlib import pyplot as plt
 from matplotlib.gridspec import GridSpec    
@@ -945,7 +946,8 @@ def plot_psf(psf__bsxy, filename=None):
         ax.legend()
     f.tight_layout()
     if filename is not None:
-        f.savefig('psf_' + filename, dpi=300)
+        fname, fext = splitext(filename)
+        f.savefig(fname + '_psf' + fext, dpi=300)
 
 def plot_masks_psf(RGB__yxc, apertures, mask_Ha, mask_star__yx, fig=None):
     if fig is None:
@@ -982,7 +984,8 @@ def plot_extra_sources(xsource, filename=None):
     f.tight_layout()
     f.show()
     if filename is not None: 
-        f.savefig('xsource_' + filename, dpi=300)
+        fname, fext = splitext(filename)
+        f.savefig(fname + '_xsource' + fext, dpi=300)
     return f, ax
 
 def plot_scube_RGB_mask_sky(scube, masks_builder):

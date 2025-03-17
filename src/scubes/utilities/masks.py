@@ -172,7 +172,7 @@ class masks_builder:
         Update Júlia Granada 27/02/24 - default parameters changed from (Q= 3.5, stretch=100, im_max=120, minimum=15, plim=0.3)
                     to (Q= 3, stretch=130, im_max=180, minimum=15, plim=1.5) and RGB changed from j0660,r,g to j0660,i,g
                     RGB = 8, 9, 7 also gets a good map
-        Update Júlia Granada 07/06/24 - add parameter star_fwhm_individual_calc        
+        Update Júlia Granada 07/06/24 - add parameter star_fwhm_individual_calc
         Update Eduardo@RV 17/02/2025 - convert to :class:`scubes.readscube.read_scube` usage.
         """     
         import matplotlib.pyplot as plt
