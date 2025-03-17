@@ -21,7 +21,7 @@ def get_iso_sky(refmag__yx, flux__lyx, isophotal_limit=25, isophotal_medsize=10,
         Size of the window used for the median filter when smoothing the mask (default is 10).
     
     stars_mask : np.ndarray, optional
-        2D boolean array where 1 indicates a star, and 0 indicates a sky pixel (default is None).
+        2D boolean array where 1 indicates a star, and 0 means no star (default is None).
     
     n_sigma : float, optional
         The threshold number of standard deviations to use for clipping outliers in sky flux values (default is 3).
@@ -68,6 +68,7 @@ def get_iso_sky(refmag__yx, flux__lyx, isophotal_limit=25, isophotal_medsize=10,
     # size gives the shape that is taken from the input array, 
     # at every element position, to define the input to the filter 
     # function
+    stars_mask = np.zeros_like(refmag__yx) if stars_mask is None else stars_mask
 
     sky_pixels__yx = refmag__yx > isophotal_limit 
     sky_pixels__yx = median_filter(sky_pixels__yx, size=isophotal_medsize)
