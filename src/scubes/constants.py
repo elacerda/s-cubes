@@ -21,7 +21,7 @@ for v in FILTER_NAMES.values():
     FILTER_TRANSMITTANCE[v]['wavelength'] *= 10
     FILTER_TRANSMITTANCE[v]['transmittance'] *= 100
 
-FILTER_NAMES_ZP_TABLE = {
+FILTER_NAMES_DR4_ZP_TABLE = {
     'F378': 'J0378', 
     'F395': 'J0395', 
     'F410': 'J0410', 

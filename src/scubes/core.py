@@ -14,11 +14,12 @@ from astropy.coordinates import SkyCoord
 from os.path import join, exists, isfile
 from scipy.interpolate import RectBivariateSpline
 
-from . import __filters_table__
+from . import __filters_table__, __dr4_zp_cat__, __dr4_zpcorr_path__, \
+    __dr5_zp_cat__, __dr5_zpcorr__
 
 from .control import control
 from .headers import get_author, get_key
-from .constants import FILTER_NAMES_ZP_TABLE, CENTRAL_WAVE, METADATA_NAMES
+from .constants import FILTER_NAMES_DR4_ZP_TABLE, CENTRAL_WAVE, METADATA_NAMES
 
 from .utilities.io import print_level
 from .utilities.splusdata import connect_splus_cloud, detection_image_hdul, get_lupton_rgb
@@ -329,14 +330,14 @@ class SCubes:
             self.stamps.append(fname)
             if not isfile(fname) or ctrl.force:
                 kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=False, option=ctrl.tile, filename=fname)
-                kw_stamp['_data_release'] = 'dr4'
+                kw_stamp['_data_release'] = ctrl.data_release
                 _ = self.conn.stamp(**kw_stamp)
             # Download_weight:
             fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swpweight.fits.fz')
             self.stamps.append(fname)
             if not isfile(fname) or ctrl.force:
                 kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=True, option=ctrl.tile, filename=fname)
-                kw_stamp['_data_release'] = 'dr4'
+                kw_stamp['_data_release'] = ctrl.data_release
                 _ = self.conn.stamp(**kw_stamp)
         # SHORTCUTS
         self.images = [img for img in self.stamps if 'swp.' in img]
@@ -361,6 +362,7 @@ class SCubes:
         if not isfile(self.detection_image) or ctrl.force:
             print_level(f' {gal.name} @ {ctrl.tile} - downloading detection image')
             kw = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, bands=band, option=ctrl.tile)
+            kw['_data_relase'] = ctrl.data_release
             hdul = detection_image_hdul(self.conn, wcs=True, **kw)
             author = get_author(hdul[1].header)
 
@@ -384,6 +386,7 @@ class SCubes:
         if not isfile(fname) or ctrl.force:
             print_level(f'{gal.name} @ {ctrl.tile} - downloading RGB image')
             kw = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, option=ctrl.tile)
+            kw['_data_relase'] = ctrl.data_release
             img = get_lupton_rgb(self.conn, transpose=True, **kw)
         else:
             img = Image.open(fname)
@@ -392,14 +395,36 @@ class SCubes:
     def get_zero_points_correction(self):
         '''
         Get corrections for zero points.
+        
+        XXX: 2025-03-14 - EADL@RV
+            zp correction image is based on a 9200 x 9200 image,
+            the valid CCD area. When creating stamps, the stamp
+            FITS header maps the x0, y0 position on the original
+            11000 x 11000 field image. This creates a huge problem
+            on correcting stamps. 
         '''
         ctrl = self.control
         x0, x1, nbins = 0, 9200, 32
         xgrid = np.linspace(x0, x1, nbins + 1)
         zpcorr = {}
         print_level('Getting ZP corrections for the S-PLUS bands...')
-        for band in ctrl.bands:
-            corrfile = join(ctrl.zpcorr_dir, 'SPLUS_' + band + '_offsets_grid.npy')
+        for h in self.headers__b:
+            author = get_author(h)
+            band = h.get(get_key('FILTER', author))
+            if '4' in ctrl.data_release:
+                self.zpcorr_dir = __dr4_zpcorr_path__
+                nbins = 32
+            elif '5' in ctrl.data_release:
+                self.zpcorr_dir = __dr5_zpcorr__[author]
+                nbins = 64
+            else:
+                print_level(f'{ctrl.data_release}: wrong data release')
+                self.remove_downloaded_data()
+                sys.exit(1)
+            x0, x1 = 0, 9200
+            xgrid = np.linspace(x0, x1, nbins + 1)
+            corrfile = join(self.zpcorr_dir, 'SPLUS_' + band + '_offsets_grid.npy')
+            print_level(f'Reading ZPs corr image: {corrfile}')
             corr = np.load(corrfile)
             zpcorr[band] = RectBivariateSpline(xgrid, xgrid, corr)
         self.zpcorr = zpcorr
@@ -409,9 +434,13 @@ class SCubes:
         Get zero points from the specified table.
         '''
         ctrl = self.control
-        zp_table = ctrl.zp_table
-        print_level(f'Reading ZPs table: {zp_table}')
-        zpt = pd.read_csv(zp_table)
+        self.zp_table = None
+        if '4' in ctrl.data_release:
+            self.zp_table = __dr4_zp_cat__
+        elif '5' in ctrl.data_release:           
+            self.zp_table = __dr5_zp_cat__
+        print_level(f'Reading ZPs table: {self.zp_table}')
+        zpt = pd.read_csv(self.zp_table)
         cols = [col.replace('ZP_', '') if 'ZP_' in col else col for col in zpt.columns]
         zpt.columns = cols
         # New class properties
@@ -435,7 +464,15 @@ class SCubes:
             #h = fits.getheader(img, ext=1)
             h['TILE'] = ctrl.tile
             filtername = h['FILTER']
-            zp = float(self.zptab[FILTER_NAMES_ZP_TABLE[filtername]].item())
+            if ('4' in ctrl.data_release) and (filtername in FILTER_NAMES_DR4_ZP_TABLE.keys()):
+                k = FILTER_NAMES_DR4_ZP_TABLE[filtername]
+            elif filtername in self.zptab.keys():
+                k = filtername
+            else:
+                print_level(f'{ctrl.tile}: {filtername}: missing zp correction data')
+                self.remove_downloaded_data()
+                sys.exit(1)
+            zp = float(self.zptab[k].item())
             x0 = h['X0TILE']
             y0 = h['Y0TILE']
             zp += round(self.zpcorr[filtername](x0, y0)[0][0], 5)
@@ -592,6 +629,13 @@ class SCubes:
         _c = const.c
         scale = (1/flam_scale)
     
+        '''
+        XXX: 2025-03-14 - EADL
+            The zp magnitude used now is the value of the central 
+            pixel of the galaxy. Since we have a zp correction for
+            each pixel, we can create a m0 map, resulting in a f0 
+            map.
+        '''
         self.m0__b = self._m0()
         self.gain__b = self._gain()
         self.effexptime__b = self._effexptime()
@@ -611,9 +655,9 @@ class SCubes:
     def download_data(self):
         ctrl = self.control
         self.get_stamps()
-        if ctrl.mask_stars and not ctrl.det_img:
-            print_level('For mask detection image is required. Overwriting --det_img')
-            ctrl.det_img = True
+        #if ctrl.mask_stars and not ctrl.det_img:
+        #    print_level('For mask detection image is required. Overwriting --det_img')
+        #    ctrl.det_img = True
         if ctrl.det_img:
             self.get_detection_image()
 

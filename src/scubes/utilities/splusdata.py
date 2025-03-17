@@ -52,7 +52,6 @@ def detection_image_hdul(conn, wcs=False, **kwargs):
         detection image. If `wcs` is True, the header of the ImageHDU is
         updated with WCS information.
     '''
-    kwargs['_data_release'] = 'dr4'
     t = conn.stamp_detection(**kwargs) 
     phdu = fits.PrimaryHDU()
     # UPDATE HEADER WCS

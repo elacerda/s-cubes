@@ -35,15 +35,13 @@ dynamic = ["version", "readme"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-"scubes.data" = ["*", "zpcorr_iDR4/*"]
+"scubes.data" = ["*", "zpcorr_iDR4/*", "zpcorr_iDR5/mar/*", "zpcorr_iDR5/jype/*"]
 "scubes.utilities.data" = ["*", "sex/*"]
 
 [project.scripts]
 scubes = "scubes.entry_points:scubes"
 scubesml = "scubes.entry_points:scubesml"
 get_lupton_RGB = "scubes.utilities.utils:get_lupton_RGB"
-sex_mask_stars = "scubes.utilities.utils:sex_mask_stars"
-sex_mask_stars_cube = "scubes.utilities.utils:sex_mask_stars_cube"
 ml2header = "scubes.utilities.utils:ml2header"
 scubes_filters = "scubes.entry_points:scubes_filters"
 splots = "scubes.utilities.utils:splots"
