@@ -38,17 +38,6 @@ def _parse_filters_tuple(f_tup, filters):
             i_f.append(f_tup)
     return i_f
 
-def _parse_filters_tuple(f_tup, filters):
-    if isinstance(f_tup, list):
-        f_tup = tuple(f_tup)
-    i_f = []
-    if isinstance(f_tup, tuple):
-        for f in f_tup:
-            i_f.append(f)
-    else:
-        i_f.append(f_tup)
-    return i_f
-
 def get_distance(x, y, x0, y0, pa=0.0, ba=1.0):
     '''
     Return an image (:class:`numpy.ndarray`)
