@@ -318,6 +318,35 @@ class SCubes:
                 break
         return has_magzp
 
+    def _check_write_mar_author(self, header):
+        '''
+            Fix MAR authorship at the header.
+
+            Parameters
+            ----------
+            header : str
+
+            Note: Gustavo said that this problem will fix for the iDR6!
+        '''
+        ctrl = self.control
+        author = get_author(header)
+        # ADD AUTHOR TO HEADER IF AUTHOR IS UNKNOWN
+        if (author is None) or (author == 'unknown'):
+            print_level('Writting header key AUTHOR', 1, ctrl.verbose)
+            header.set('AUTHOR', value='MAR', comment='Who ran the software')
+
+    def _add_info_stamps_header(self):
+        gal = self.galaxy
+        ctrl = self.control
+        # UPDATE IMAGES HEADER - WILL ADD TILE INFO AND WCS TO THE HEADERS
+        for img in self.images:
+            with fits.open(img, 'update') as f:
+                print_level(f'{gal.name}: {ctrl.tile}: {img}: add OBJECT and TILE to header', 2, ctrl.verbose)
+                w = WCS(f[1].header)
+                f[1].header['OBJECT'] = gal.name
+                f[1].header['TILE'] = ctrl.tile
+                f[1].header.update(w.to_header())
+
     def get_stamps(self):
         '''
         Download stamps for each band.
@@ -342,15 +371,11 @@ class SCubes:
         # SHORTCUTS
         self.images = [img for img in self.stamps if 'swp.' in img]
         self.wimages = [img for img in self.stamps if 'swpweight.' in img]
-        # UPDATE IMAGES HEADER - WILL ADD TILE INFO AND WCS TO THE HEADERS
-        for img in self.images:
-            with fits.open(img, 'update') as f:
-                w = WCS(f[1].header)
-                f[1].header['OBJECT'] = gal.name
-                f[1].header['TILE'] = ctrl.tile
-                f[1].header.update(w.to_header())
+        self._add_info_stamps_header()
         self.headers__b = self._get_headers_list(self.images, ext=1)
-    
+        for header in self.headers__b:
+            self._check_write_mar_author(header)
+       
     def get_detection_image(self):
         '''
         Download the detection image.        
@@ -364,14 +389,7 @@ class SCubes:
             kw = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, bands=band, option=ctrl.tile)
             kw['_data_relase'] = ctrl.data_release
             hdul = detection_image_hdul(self.conn, wcs=True, **kw)
-            author = get_author(hdul[1].header)
-
-            # ADD AUTHOR TO HEADER IF AUTHOR IS UNKNOWN
-            if author == 'unknown':
-                print_level('Writting header key AUTHOR to detection image', 1, ctrl.verbose)
-                author = get_author(self.headers__b[0])
-                hdul[1].header.set('AUTHOR', value=author, comment='Who ran the software')
-
+            self._check_write_mar_author(hdul[1].header)
             hdul.writeto(self.detection_image, overwrite=ctrl.force)
                         
     def get_lupton_rgb(self):
@@ -765,6 +783,7 @@ class SCubes:
         hdu_list.append(self.create_weights_mask_hdu())
             
         # MASK STARS
+        '''
         if ctrl.mask_stars:
             from .mask_stars import maskStars
             
@@ -776,6 +795,7 @@ class SCubes:
 
             mask_hdu.header['EXTNAME'] = ('STARMASK', 'Boolean mask of stars along the FOV')
             hdu_list.append(mask_hdu)
+        '''
         
         # METADATA
         meta_hdu = self.create_metadata_hdu()  # BinTableHDU

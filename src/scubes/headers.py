@@ -1,16 +1,17 @@
 JYPE_KEYS = {
     'PSFFWHM': 'HIERARCH OAJ PRO FWHMMEAN',
-    'EFFTIME': 'EFECTIME',
+    'FILTER': 'FILTER',
 }
 
 MAR_KEYS = {
     'PSFFWHM': 'HIERARCH MAR PRO FWHMMEAN',
-    'EFFTIME': 'EFECTIME',
+    'FILTER': 'FILTER',    
 }
 
 KEYS = {
     'jype': JYPE_KEYS,
     'mar': MAR_KEYS,
+    'unknown': MAR_KEYS,
 }
 
 AUTHORS = list(KEYS.keys())
@@ -77,8 +78,8 @@ def get_author(header):
     str
         Author identifier.
     '''   
-    author = header.get('AUTHOR', None)
+    author = header.get('AUTHOR', None).strip().lower()
     if author is None:
-        Warning(f'{author}: missing author, using jype dictionary')
+        Warning(f'{author}: missing author, using mar dictionary')
         author = 'mar'
     return author
