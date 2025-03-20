@@ -8,6 +8,7 @@ then
     echo "Username and password are mandatory!"
     exit 1
 fi
+read -p "Data Release: " data_release
 read -p "Size Multiplicator (20): " size_multiplicator
 if [ -z $size_multiplicator ]
 then
@@ -35,7 +36,7 @@ do
         if [[ ! -e $of ]]
         then
             echo "Creating cube for $gal"
-            scubesml -U $username -P $password -w $workdir -S $size_multiplicator -R $gal $mlfile
+	        scubesml -d $data_release -U $username -P $password -w $workdir -S $size_multiplicator -R $gal $mlfile
             mv ${tag}/${gal}_cube.fits ${workdir}/.
             rm -rf $tag
             splots ${of}
