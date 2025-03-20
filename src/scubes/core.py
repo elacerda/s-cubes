@@ -24,6 +24,8 @@ from .constants import FILTER_NAMES_DR4_ZP_TABLE, CENTRAL_WAVE, METADATA_NAMES
 from .utilities.io import print_level
 from .utilities.splusdata import connect_splus_cloud, detection_image_hdul, get_lupton_rgb
 
+_disable_zpcorr = True  # waiting S-PLUS iDR6...
+
 @dataclass
 class _galaxy:
     '''
@@ -459,7 +461,8 @@ class SCubes:
             print_level(f'{ctrl.tile}: not found in zero-points table')
             self.remove_downloaded_data()
             sys.exit(1)
-        self.get_zero_points_correction()
+        if not _disable_zpcorr:
+            self.get_zero_points_correction()
 
     def add_magzp_headers(self):
         '''
@@ -484,7 +487,8 @@ class SCubes:
             zp = float(self.zptab[k].item())
             x0 = h['X0TILE']
             y0 = h['Y0TILE']
-            zp += round(self.zpcorr[filtername](x0, y0)[0][0], 5)
+            if not _disable_zpcorr:
+                zp += round(self.zpcorr[filtername](x0, y0)[0][0], 5)
             fits.setval(img, 'MAGZP', value=zp, comment='Magnitude zero point', ext=1)
             headers.append(fits.getheader(img, ext=1))
             print_level(f'add_magzp_headers: {img}: MAGZP={zp}', level=2, verbose=ctrl.verbose)

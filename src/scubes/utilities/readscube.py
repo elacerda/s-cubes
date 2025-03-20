@@ -75,17 +75,17 @@ def get_distance(x, y, x0, y0, pa=0.0, ba=1.0):
     x = np.asarray(x) - x0
     x2 = x**2
     y2 = y**2
-    xy = x * y
+    xy = x*y
 
-    a_b = 1.0/ba
+    a_b = 1/ba
     cos_th = np.cos(pa)
     sin_th = np.sin(pa)
 
-    A1 = cos_th ** 2 + a_b ** 2 * sin_th ** 2
-    A2 = -2.0 * cos_th * sin_th * (a_b ** 2 - 1.0)
-    A3 = sin_th ** 2 + a_b ** 2 * cos_th ** 2
+    A1 = cos_th**2 + a_b**2*sin_th**2
+    A2 = -2*cos_th*sin_th*(a_b**2 - 1)
+    A3 = sin_th**2 + a_b**2*cos_th* 2
 
-    return np.sqrt(A1 * x2 + A2 * xy + A3 * y2)
+    return np.sqrt(A1*x2 + A2*xy + A3*y2)
 
 def make_RGB_tom(flux__lyx,
         rgb=(7, 5, 9), rgb_f=(1, 1, 1), 

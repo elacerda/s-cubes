@@ -560,5 +560,3 @@ def scube_mask():
 
     input('...press any key to close the plots...')
     plt.close('all')
-        
-
