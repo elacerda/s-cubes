@@ -2,7 +2,6 @@ import sys
 import numpy as np
 from astropy.io import fits
 from astropy.wcs import WCS
-from os.path import basename
 from scipy.ndimage import median_filter
 from astropy.nddata.utils import Cutout2D
 from astropy.stats import sigma_clipped_stats
@@ -362,26 +361,25 @@ class masks_builder:
         from .utils import SCUBE_MASK_ARGS
 
         scube = self.scube
-        hdu_info = scube._hdulist[4].copy()
+        orig_table = scube._hdulist[4].data
+        orig_cols = orig_table.columns
+        new_cols = fits.ColDefs([
+            fits.Column(name='mean_sky', array=self.sky['mean__l'], format='D', unit='flux'),
+            fits.Column(name='errRel_meanSpec__b', array=self.errRel_meanSpec__b, format='D', unit='norm by r band'),
+        ])
+        hdu_info = fits.BinTableHDU.from_columns(orig_cols + new_cols)
         hdu_info.name = 'FilterInfo'
+        '''
+        print(scube._hdulist[4].data)
+        hdu_info = fits.BinTableHDU(data=scube._hdulist[4].data)
+        print(hdu_info.data)
         hdu_info.columns.add_col(
-            fits.Column(
-                name='mean_sky', 
-                array=self.sky['mean__l'], 
-                format='D', 
-                unit='flux'
-            )
         )
 
         hdu_info.columns.add_col(
-            fits.Column(
-                name='errRel_meanSpec__b', 
-                array=self.errRel_meanSpec__b, 
-                format='D', 
-                unit='norm by r band'
-            )
         )
-
+        print(hdu_info.data)
+        '''
         _ = self.cut_cube_wcs(self.final_mask__yx, extra_pix=self.args.extra_pix)
         hdu_final_mask__yx, hdu_flux__byx, hdu_err__byx = _
 
@@ -406,9 +404,10 @@ class masks_builder:
                 hdu_info
             ]
         )
+
         self.hdul = hdul.copy()
-        print_level('Saving cut cube')
         hdul.writeto(f'{scube.galaxy}.fits', overwrite=True)
+        print_level('Saving cut cube')
         hdul.close()
 
     def mask_procedure(self):
