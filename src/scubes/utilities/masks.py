@@ -361,6 +361,7 @@ class masks_builder:
         from .utils import SCUBE_MASK_ARGS
 
         scube = self.scube
+
         orig_table = scube._hdulist[4].data
         orig_cols = orig_table.columns
         new_cols = fits.ColDefs([
@@ -369,17 +370,7 @@ class masks_builder:
         ])
         hdu_info = fits.BinTableHDU.from_columns(orig_cols + new_cols)
         hdu_info.name = 'FilterInfo'
-        '''
-        print(scube._hdulist[4].data)
-        hdu_info = fits.BinTableHDU(data=scube._hdulist[4].data)
-        print(hdu_info.data)
-        hdu_info.columns.add_col(
-        )
 
-        hdu_info.columns.add_col(
-        )
-        print(hdu_info.data)
-        '''
         _ = self.cut_cube_wcs(self.final_mask__yx, extra_pix=self.args.extra_pix)
         hdu_final_mask__yx, hdu_flux__byx, hdu_err__byx = _
 

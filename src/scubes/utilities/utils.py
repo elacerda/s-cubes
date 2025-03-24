@@ -411,11 +411,11 @@ def splots():
     sky, _ = splots.scube.get_iso_sky(
         ref_mag_filt='rSDSS',
         isophotal_limit=25, 
-        isophotal_medsize=10, 
+        isophotal_medsize=30, 
         stars_mask=None, 
         n_sigma=3, 
         n_iter=5,
-        clip_neg=False,
+        clip_neg=True,
     )
     il = sky['isophotal_limit']
     im = sky['isophotal_medsize']
