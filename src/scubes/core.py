@@ -192,7 +192,7 @@ class SCubes:
         Initialize the spectra arrays.
         '''        
         self.wl__b = np.array(sorted([CENTRAL_WAVE[b] for b in self.control.bands]))*u.Angstrom
-        self.flam_unit = u.erg / u.cm / u.cm / u.s / u.AA
+        self.flam_unit = u.erg / u.s / u.cm / u.cm / u.AA
         self.fnu_unit = u.erg / u.s / u.cm / u.cm / u.Hz
         self.flam__b = None
         self.fnu__b = None
@@ -590,17 +590,23 @@ class SCubes:
             each pixel, we can create a m0 map, resulting in a f0 
             map.
         '''
-        self.m0__b = self._m0()
-        self.gain__b = self._gain()
-        self.data__byx = self._get_data_spectra(self.images, 1)   
-        self.f0__b = np.power(10, -0.4*(48.6 + self.m0__b))
+        #Jy to to erg/s/cm/cm/Hz
+        Jy2fnu = - 2.5*(np.log10(3631) - 23)  # 48.5999343777177...
+        
+        # MAGZP
+        self.m0__b = self._m0()  # mAB
+        self.f0__b = np.power(10, -0.4*(Jy2fnu + self.m0__b))
+        
+        # from e- counts to erg/s/cm/cm/A
+        self.data__byx = self._get_data_spectra(self.images, 1)
         self.fnu__byx = self.data__byx*self.f0__b[:, None, None]*self.fnu_unit
         self.flam__byx = scale*(self.fnu__byx*_c/self.wl__b[:, None, None]**2).to(self.flam_unit).value
 
         if self._check_errors():
-            weidata__byx = np.abs(self._get_data_spectra(self.wimages, 1))
-            dataclip__byx = np.abs(self.data__byx)
+            self.gain__b = self._gain()
             gain__byx = self.gain__b[:, None, None]
+            dataclip__byx = np.abs(self.data__byx)
+            weidata__byx = np.abs(self._get_data_spectra(self.wimages, 1))
             dataerr__byx = np.sqrt(1/weidata__byx + dataclip__byx/gain__byx)
             self.efnu__byx = dataerr__byx*self.f0__b[:, None, None]*self.fnu_unit
             self.eflam__byx = scale*(self.efnu__byx*_c/self.wl__b[:, None, None]**2).to(self.flam_unit).value
