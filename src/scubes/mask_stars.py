@@ -161,35 +161,34 @@ class maskStars:
         '''        
         ctrl = self.control
 
-        resulting_mask = self.calc_masks(input_config=input_config, output_parameters=output_parameters, unmask_stars=None, run_DAOfinder=False, save_fig=ctrl.no_interact)
+        resulting_mask = self.calc_masks(input_config=input_config, output_parameters=output_parameters, unmask_stars=None, run_DAOfinder=False, save_fig=True)
 
-        if not ctrl.no_interact:
-            unmask_sexstars = True
-            unmask_stars = []
-            while unmask_sexstars:
-                in_opt = input('(UN)mask SExtractor stars? [(Y)es|(r)edo|(n)o|(q)uit]:').lower()
-                if in_opt == 'y':
-                    newindx = input('type (space separated) the detections numbers to be unmasked: ')
-                    unmask_stars += [int(i) for i in newindx.split()]
-                    print_level(f'Current stars numbers are: {unmask_stars}')
-                    unmask_sexstars = True
-                elif in_opt == 'r':
-                    unmask_stars = []
-                elif in_opt == 'n' or in_opt == '':
-                    unmask_stars = []
-                    unmask_sexstars = False
-                    # save figure
-                    fig_filename = join(self.output_dir, f'{ctrl.prefix_filename}_maskMosaic.png')
-                    print_level(f'Saving fig to {fig_filename}', 1, ctrl.verbose)
-                    self.fig.savefig(fig_filename, format='png', dpi=180)
-                    plt.close(self.fig)
-                elif in_opt == 'q':
-                    Warning('Exiting!')
-                    sys.exit(1)
-                else:
-                    raise IOError('Option %s not recognized' % in_opt)
-                if len(unmask_stars) or in_opt == 'r':
-                    resulting_mask = self.calc_masks(input_config, output_parameters, unmask_stars=unmask_stars, run_DAOfinder=False)
+        unmask_sexstars = True
+        unmask_stars = []
+        while unmask_sexstars:
+            in_opt = input('(UN)mask SExtractor stars? [(Y)es|(r)edo|(n)o|(q)uit]:').lower()
+            if in_opt == 'y':
+                newindx = input('type (space separated) the detections numbers to be unmasked: ')
+                unmask_stars += [int(i) for i in newindx.split()]
+                print_level(f'Current stars numbers are: {unmask_stars}')
+                unmask_sexstars = True
+            elif in_opt == 'r':
+                unmask_stars = []
+            elif in_opt == 'n' or in_opt == '':
+                unmask_stars = []
+                unmask_sexstars = False
+                # save figure
+                fig_filename = join(self.output_dir, f'{ctrl.prefix_filename}_maskMosaic.png')
+                print_level(f'Saving fig to {fig_filename}', 1, ctrl.verbose)
+                self.fig.savefig(fig_filename, format='png', dpi=180)
+                plt.close(self.fig)
+            elif in_opt == 'q':
+                Warning('Exiting!')
+                sys.exit(1)
+            else:
+                raise IOError('Option %s not recognized' % in_opt)
+            if len(unmask_stars) or in_opt == 'r':
+                resulting_mask = self.calc_masks(input_config, output_parameters, unmask_stars=unmask_stars, run_DAOfinder=False)
         return resulting_mask
 
     def mask(self):

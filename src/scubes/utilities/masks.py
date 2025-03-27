@@ -137,7 +137,7 @@ class masks_builder:
                         star_fwhm_individual_calc=True, star_size_calc='sky', 
                         save_fig=None, 
                         Q=3, stretch=130, im_max=180, minimum=15, plim=0.3, 
-                        check_sources=True):
+                        check_sources=True, no_interact=False):
         """
         Build masks of stars in front of the galaxy
         * if noise image, change the pLim
@@ -263,38 +263,40 @@ class masks_builder:
 
         if check_sources:
             fig_masks, ax_masks = plot_masks_psf(RGB__yxc, apertures, mask_Ha, mask_stars__yx)
-            no_mask = input('UNmask any source? \nNo: just enter! \nYes: write the numbers (ex.: 2, 54): ')
-            extra_source = input('Extra source? ([no] or yes) ').lower().strip()
-            if (extra_source == 'y') or (extra_source == 'yes'):
-                # detect the sources and do the segmentation
-                segm = detect_sources(data__yx - mean, std, npixels=30)
-                extra_source = deblend_sources(data__yx - mean, segm, npixels=10, mode='linear')
-                fig_xsource, ax_xsource = plot_extra_sources(extra_source, filename=save_fig)
-                str_sources = input('Which sources? (ex.: 31, 42)\n')
-                if str_sources:
-                #xsources = str_sources.split(',')
-                #n_xsources = len(xsources)
-                #if n_xsources:
-                    for n in str_sources.split(','):
-                        mask_stars__yx = np.where(extra_source.data == int(n), 1, mask_stars__yx)
-                    extra_source2 = input('Separate extra source? ([no] or yes) ').lower()
-                    if (extra_source2 == 'y') or (extra_source2 == 'yes'):
-                        # z1, z2 = int(min(data__yx.shape) * 0.2), int(min(data__yx.shape) * 0.8)
-                        # mean, median, std = sigma_clipped_stats(data__yx[z1:z2, z1:z2])
-                        # segm = detect_sources(data__yx[z1:z2, z1:z2] - mean, std, npixels=30)
-                        segm = detect_sources(data__yx - mean, xsource_std_f*std, npixels=30)
-                        extra_source2 = deblend_sources(data__yx - mean, segm, npixels=10, mode='exponential')
-                        fig_xsource2, ax_xsource2 = plot_extra_sources(extra_source2, filename=save_fig)
-                        if extra_source2 == extra_source:
-                            print_level("Not possible separate any source.")
-                        else:
-                            str_sources = input('Which sources? (ex.: 31, 42)\n')
-                            if str_sources:
-                            #xsources = str_sources.split()
-                            #n_xsources = len(xsources)
-                            #if n_xsources:
-                                for n in str_sources.split():
-                                    mask_stars__yx = np.where(extra_source2.data == int(n), 1, mask_stars__yx)
+            no_mask = ''
+            if not no_interact:
+                no_mask = input('UNmask any source? \nNo: just enter! \nYes: write the numbers (ex.: 2, 54): ')
+                extra_source = input('Extra source? ([no] or yes) ').lower().strip()
+                if (extra_source == 'y') or (extra_source == 'yes'):
+                    # detect the sources and do the segmentation
+                    segm = detect_sources(data__yx - mean, std, npixels=30)
+                    extra_source = deblend_sources(data__yx - mean, segm, npixels=10, mode='linear')
+                    fig_xsource, ax_xsource = plot_extra_sources(extra_source, filename=save_fig)
+                    str_sources = input('Which sources? (ex.: 31, 42)\n')
+                    if str_sources:
+                    #xsources = str_sources.split(',')
+                    #n_xsources = len(xsources)
+                    #if n_xsources:
+                        for n in str_sources.split(','):
+                            mask_stars__yx = np.where(extra_source.data == int(n), 1, mask_stars__yx)
+                        extra_source2 = input('Separate extra source? ([no] or yes) ').lower()
+                        if (extra_source2 == 'y') or (extra_source2 == 'yes'):
+                            # z1, z2 = int(min(data__yx.shape) * 0.2), int(min(data__yx.shape) * 0.8)
+                            # mean, median, std = sigma_clipped_stats(data__yx[z1:z2, z1:z2])
+                            # segm = detect_sources(data__yx[z1:z2, z1:z2] - mean, std, npixels=30)
+                            segm = detect_sources(data__yx - mean, xsource_std_f*std, npixels=30)
+                            extra_source2 = deblend_sources(data__yx - mean, segm, npixels=10, mode='exponential')
+                            fig_xsource2, ax_xsource2 = plot_extra_sources(extra_source2, filename=save_fig)
+                            if extra_source2 == extra_source:
+                                print_level("Not possible separate any source.")
+                            else:
+                                str_sources = input('Which sources? (ex.: 31, 42)\n')
+                                if str_sources:
+                                #xsources = str_sources.split()
+                                #n_xsources = len(xsources)
+                                #if n_xsources:
+                                    for n in str_sources.split():
+                                        mask_stars__yx = np.where(extra_source2.data == int(n), 1, mask_stars__yx)
             if len(no_mask):
                 for i in no_mask.split(','):
                     mask_stars__yx -= apertures[int(i)].to_mask().to_image(shape=data__yx.shape)
@@ -402,6 +404,8 @@ class masks_builder:
         hdul.close()
 
     def mask_procedure(self):
+        from matplotlib import pyplot as plt
+        
         scube = self.scube
         args = self.args
 
@@ -413,6 +417,7 @@ class masks_builder:
             star_size_calc=args.star_size_calc,
             save_fig=f'{scube.galaxy}_build_stars_mask.png',
             star_fwhm_individual_calc=args.star_fwhm_individual_calc,
+            no_interact=args.no_interact,
         )
         self.isophot_mask(
             band='rSDSS', 
@@ -440,3 +445,7 @@ class masks_builder:
             plot_violin_reescaled_error_spectrum(scube, self)
             self.build_final_hdul()
             plot_masks_final_plot(scube, self)
+
+        if not args.no_interact:
+            input('...press any key to close the plots...')
+        plt.close('all')

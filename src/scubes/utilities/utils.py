@@ -542,6 +542,7 @@ SCUBE_MASK_ARGS = {
     'sky_n_sigma': ['', dict(default=3, type=int, help='The threshold number of standard deviations to use for clipping outliers in sky flux values.')],
     'sky_n_iter': ['', dict(default=5, type=int, help='The number of iterations to perform for sigma clipping to remove outliers.')],
     'sky_clip_neg': ['', dict(default=False, action='store_true', help='If True, clip both negative and positive outliers. If False, only clip positive outliers.')],
+    'no_interact': ['N', dict(action='store_true', default=False, help='Run automatic stars mask.')],
 }
 
 def scube_mask():
@@ -554,9 +555,4 @@ def scube_mask():
     args = parser.parse_args(args=sys.argv[1:])
 
     scube = read_scube(args.cube)
-    mb = masks_builder(scube, args)
-    
-    mb.mask_procedure()
-
-    input('...press any key to close the plots...')
-    plt.close('all')
+    masks_builder(scube, args).mask_procedure()
