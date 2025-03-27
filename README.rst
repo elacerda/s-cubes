@@ -77,16 +77,11 @@ Note that *10h37m2.5s* (*159.26 deg*) is a totally different angle from
 
 The resultant files will be created at directory *workdir*.
 
-The program also uses SExtractor in order to create a spatial mask of
-stars, attempting to remove the areas enclosed by the brightest ones
-along the FOV (*-M* optional argument). Do not forget to include the
-SExtractor executable path using the option *-x*.
-
 The call to the entry-point script ``scubes`` to this example would be:
 
 .. code:: console
 
-   scubes -I -M -F --w workdir -l 500 -x /usr/bin/source-extractor -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312
+   scubes -w workdir -l 500 -- HYDRA-0045 10h37m02.5s -27d33\'56\" NGC3312
 
 .. _license:
 
