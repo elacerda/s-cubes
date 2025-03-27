@@ -633,6 +633,37 @@ class read_scube:
         wei = self.weimask__lyx
         return np.bitwise_or(wei>0, f<=0, ~(np.isfinite(ef)))
     
+    def generate_masked_cube(self, 
+        mask_stars_bands=7, mask_stars_threshold=20, xsource_std_f=2, 
+        mask_isophotal_medsize=30, mask_isophotal_limit=24, 
+        sky_isophotal_medsize=30, sky_isophotal_limit=25, 
+        star_size_calc='sky', star_fwhm_individual_calc=False, 
+        extra_pix=5, sky_n_sigma=3, sky_n_iter=5, sky_clip_neg=False, 
+        no_interact=False):
+        
+        from .masks import masks_builder
+        from .utils import sky_or_int
+
+        args = tupperware_none()
+        args.mask_stars_bands = mask_stars_bands
+        args.mask_stars_threshold = mask_stars_threshold
+        args.xsource_std_f = xsource_std_f
+        args.mask_isophotal_medsize = mask_isophotal_medsize
+        args.mask_isophotal_limit  = mask_isophotal_limit 
+        args.sky_isophotal_medsize = sky_isophotal_medsize
+        args.sky_isophotal_limit  = sky_isophotal_limit 
+        args.star_size_calc  = sky_or_int(star_size_calc)
+        args.star_fwhm_individual_calc = star_fwhm_individual_calc
+        args.extra_pix = extra_pix
+        args.sky_n_sigma = sky_n_sigma
+        args.sky_n_iter = sky_n_iter
+        args.sky_clip_neg = sky_clip_neg
+        args.no_interact = no_interact
+        
+        mb = masks_builder(self, args)
+        mb.mask_procedure()
+        self.mask_builder = mb
+
     def get_filter_i(self, filt):
         return self.filters.index(filt)
     
