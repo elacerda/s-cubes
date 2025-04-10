@@ -194,8 +194,8 @@ class masks_builder:
 
         # define the center and exclude the center
         ny, nx = data__yx.shape
-        center = (nx / 2, ny / 2)
-        ap_center = CircularAperture(center, r=nx/100)  # change with size of the galaxy
+        center = ((nx - 1)/2, (ny - 1)/2)
+        ap_center = CircularAperture(center, r=max(min(nx/100, 10), 2.5)) # change with size of the galaxy
         mask_center = ap_center.to_mask().to_image(shape=data__yx.shape)
         mask_center = np.ma.masked_where(mask_center == 1, mask_center)
     
