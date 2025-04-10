@@ -84,6 +84,7 @@ def scubes_argparse(args):
         Command-line arguments parsed.
     '''
     # closest even
+    min_size = args
     args.size = round(args.size/2)*2
     
     '''
@@ -144,6 +145,7 @@ SCUBESML_ARGS = {
     'force': ['f', dict(action='store_true', default=False, help='Force overwrite of existing files.')],
     'bands': ['b', dict(default=BANDS, nargs='+', help='List of S-PLUS bands (space separated).')],
     'size_multiplicator': ['S', dict(default=10, type=float, help='Factor to multiply the SIZE__pix value of the masterlist to create the galaxy size. If size is a odd number, the program will choose the closest even integer.')],
+    'min_size': ['m', dict(default=200, type=int, help='Minimal size of the cube in pixels. If size negative, uses the original value of size calculation.')],
     'data_release': ['d', dict(default='dr4', type=str, help='Select S-PLUS Data Release')],
     'work_dir': ['w', dict(default=getcwd(), help='Working directory.')],
     'output_dir': ['o', dict(default=getcwd(), help='Output directory.')],
@@ -195,7 +197,8 @@ def scubesml_argparse(args):
     args.tile = mlcut['FIELD'][0]
     args.ra = mlcut['RA__deg'][0]
     args.dec = mlcut['DEC__deg'][0]
-    args.size = round(args.size_multiplicator*float(mlcut['SIZE__pix'])/2)*2
+    min_size = args.min_size
+    args.size = max(round(args.size_multiplicator*float(mlcut['SIZE__pix'])/2)*2, min_size)
 
     return args
 
