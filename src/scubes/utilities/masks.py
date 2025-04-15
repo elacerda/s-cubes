@@ -317,7 +317,7 @@ class masks_builder:
         scube = self.scube
         # Def region to cut
         ny, nx = mask_gal__yx.shape
-        cx, cy = (nx - 1) / 2, (ny - 1) / 2  # Center for cropping
+        cx, cy = (nx - 1)/2, (ny - 1)/2  # Center for cropping
         size_gal = np.abs(np.argwhere(mask_gal__yx == 0) - np.array([cy, cx])).max()
         cutx = (cx - (size_gal + extra_pix)).astype(int)  # Pixels to cut from each side -> center - size radial of the mask
         cuty = (cy - (size_gal + extra_pix)).astype(int)
