@@ -1,6 +1,5 @@
 from astropy.io import fits
 from splusdata import Core
-from splusdata.core import AuthenticationError
 
 def connect_splus_cloud(username=None, password=None):
     '''
@@ -25,7 +24,7 @@ def connect_splus_cloud(username=None, password=None):
     while (n_tries < 3) and (conn is None):
         try:
             conn = Core(username=username, password=password)
-        except AuthenticationError:
+        except:
             n_tries += 1
     return conn
 

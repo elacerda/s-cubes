@@ -354,14 +354,14 @@ class SCubes:
             fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swp.fits.fz')
             self.stamps.append(fname)
             if not isfile(fname) or ctrl.force:
-                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=False, option=ctrl.tile, filename=fname)
+                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=False, outfile=fname)  #, field_name=ctrl.tile)
                 kw_stamp['_data_release'] = ctrl.data_release
                 _ = self.conn.stamp(**kw_stamp)
             # Download_weight:
             fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swpweight.fits.fz')
             self.stamps.append(fname)
             if not isfile(fname) or ctrl.force:
-                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=True, option=ctrl.tile, filename=fname)
+                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=True, outfile=fname)  #, field_name=ctrl.tile)
                 kw_stamp['_data_release'] = ctrl.data_release
                 _ = self.conn.stamp(**kw_stamp)
         # SHORTCUTS
