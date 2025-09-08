@@ -1,4 +1,3 @@
-import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
 class readFileArgumentParser(ArgumentParser):

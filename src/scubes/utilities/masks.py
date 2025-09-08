@@ -77,7 +77,7 @@ class masks_builder:
         if (fm is None) or (scube.eflux__lyx is None):
             return None, None
         # Compute "Re-scaled" error spectrum & add to hdu "info" for later output
-        errR__byx = scube.eflux__lyx/scube.eflux__lyx[scube.get_filter_i('rSDSS')]
+        errR__byx = scube.eflux__lyx/scube.eflux__lyx[7]
         errR__byx = np.ma.masked_where(~np.isfinite(errR__byx), errR__byx)
         errRel_meanSpec__b = np.ma.mean(errR__byx[:, (fm == 0)], axis=1)
         self.errR__byx = errR__byx
@@ -116,7 +116,7 @@ class masks_builder:
         self.iso_mask__yx = iso_mask
         return iso_mask
     
-    def mask_sky(self, ref_mag_filt='rSDSS', isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5, clip_neg=False):
+    def mask_sky(self, ref_mag_filt=7, isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5, clip_neg=False):
         '''
         A Wrapper to :meth:`read_scube.get_iso_sky`. 
         '''
@@ -420,7 +420,7 @@ class masks_builder:
             no_interact=args.no_interact,
         )
         self.isophot_mask(
-            band='rSDSS', 
+            band=7, 
             isophotal_limit=args.mask_isophotal_limit, 
             isophotal_medsize=args.mask_isophotal_medsize, 
             stars_mask=self.mask_stars__yx, 
@@ -431,7 +431,7 @@ class masks_builder:
             fmask__yx = self.final_mask()
         if fmask__yx is not None:
             self.mask_sky(
-                ref_mag_filt='rSDSS',
+                ref_mag_filt=7,
                 isophotal_limit=args.sky_isophotal_limit, 
                 isophotal_medsize=args.sky_isophotal_medsize, 
                 stars_mask=(self.final_mask__yx != 2), 

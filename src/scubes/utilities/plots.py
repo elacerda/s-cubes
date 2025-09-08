@@ -155,7 +155,10 @@ class scube_plots():
         '''        
         self.readscube(filename)
         self.block = block
-        self.filter_colors = np.array([FILTER_COLORS[FILTER_NAMES_FITS[k]] for k in self.scube.filters])
+        fcolors = []
+        self.filter_colors = ['indigo','darkviolet','navy','b','dodgerblue','turquoise','lime','limegreen','y','darkorange','orangered','darkred']
+
+        np.array(fcolors)
         self.aur = 0.5*(1 + 5**0.5)
 
     def readscube(self, filename):
@@ -415,7 +418,7 @@ class scube_plots():
         output_filename = f'{self.scube.galaxy}_RGBs.png' if output_filename is None else output_filename
 
         _kw_rgb = dict(
-            rgb=['iSDSS', 'rSDSS', 'gSDSS'], 
+            rgb=[9, 7, 5], 
             rgb_f=[1, 1, 1], 
             pminmax=[5, 95], 
             Q=10, 
@@ -457,8 +460,8 @@ class scube_plots():
         
         output_filename = f'{self.scube.galaxy}_LRGB_{i_x0}_{i_y0}_spec.png' if output_filename is None else output_filename
 
-        rgb = ['iSDSS', 'rSDSS', 'gSDSS']
-        
+        rgb = [9, 7, 5]
+
         # data
         flux__l = self.scube.flux__lyx[:, i_y0, i_x0]
         eflux__l = self.scube.eflux__lyx[:, i_y0, i_x0]
@@ -487,6 +490,10 @@ class scube_plots():
         axf.sharex(ax)
         for i, k in enumerate(self.scube.filters):
             lt = '-' if 'JAVA' in k or 'SDSS' in k else '--'
+            if 'u' in k:
+                k = 'uJAVA'
+            elif k in ['g', 'r', 'i', 'z']:
+                k = f'{k}SDSS'
             x = FILTER_TRANSMITTANCE[k]['wavelength']
             y = FILTER_TRANSMITTANCE[k]['transmittance']
             axf.plot(x, y, c=self.filter_colors[i], lw=1, ls=lt, label=k)
@@ -629,7 +636,7 @@ class scube_plots():
         ax = f.add_subplot(gs[:, 1])
         axmask = f.add_subplot(gs[:, 0])
 
-        i_r = self.scube.filters.index('rSDSS')
+        i_r = 7
         img__yx = np.ma.masked_array(np.log10(self.scube.flux__lyx[i_r]) + 18, mask=~mask__yx, copy=True)
         img__yx = img__yx.filled(0).astype('bool')
         axmask.imshow(img__yx.astype('int'), origin='lower', cmap='Greys', interpolation='nearest')
@@ -692,7 +699,7 @@ class scube_plots():
         center = np.array([self.scube.x0, self.scube.y0])
         theta = pa*180/np.pi if theta is None else theta
 
-        i_r = self.scube.filters.index('rSDSS')
+        i_r = 7
         w = self.scube.pivot_wave[i_r]
         p = self.scube.pixscale
         
@@ -761,7 +768,7 @@ class scube_plots():
         output_filename = f'{self.scube.galaxy}_contours.png' if output_filename is None else output_filename
         contour_levels = [21, 23, 24] if contour_levels is None else contour_levels
 
-        i_lambda = self.scube.filters.index('rSDSS')
+        i_lambda = 7
         image__yx = self.scube.mag__lyx[i_lambda]
         
         f, ax = plt.subplots()
@@ -821,7 +828,7 @@ class scube_plots():
         gs = GridSpec(nrows=1, ncols=3, wspace=0.2, figure=f)
         ax = f.add_subplot(gs[1:])
         axmask = f.add_subplot(gs[0])
-        i_r = self.scube.filters.index('rSDSS')
+        i_r = 7
         img__yx = np.ma.masked_array(self.scube.mag__lyx[i_r], mask=mask__yx, copy=True)
         axmask.imshow(img__yx, origin='lower', cmap='Spectral_r', vmin=16, vmax=25, interpolation='nearest')
         axmask.imshow(self.scube.mag__lyx[i_r], origin='lower', cmap='Spectral_r', alpha=0.2, vmin=16, vmax=25, interpolation='nearest')

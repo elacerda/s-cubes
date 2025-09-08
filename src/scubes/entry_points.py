@@ -84,7 +84,6 @@ def scubes_argparse(args):
         Command-line arguments parsed.
     '''
     # closest even
-    min_size = args
     args.size = round(args.size/2)*2
     
     '''

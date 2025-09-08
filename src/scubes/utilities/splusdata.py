@@ -28,6 +28,7 @@ def connect_splus_cloud(username=None, password=None):
             n_tries += 1
     return conn
 
+#### DEAD on splusdata v5.0+
 def detection_image_hdul(conn, wcs=False, **kwargs):
     '''
     Retrieve the detection image from the S-PLUS Cloud service.

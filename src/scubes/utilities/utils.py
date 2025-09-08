@@ -409,7 +409,7 @@ def splots():
     ################# SKY #################
     #######################################
     sky, _ = splots.scube.get_iso_sky(
-        ref_mag_filt='rSDSS',
+        ref_mag_filt=7,
         isophotal_limit=25, 
         isophotal_medsize=30, 
         stars_mask=None, 

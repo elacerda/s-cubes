@@ -414,7 +414,7 @@ class read_scube:
         self.pixel_distance__yx = get_image_distance(self.weimask__yx.shape, x0=self.x0, y0=self.y0, pa=self.pa, ba=self.ba)
 
     def lRGB_image(
-        self, rgb=('rSDSS', 'gSDSS', 'iSDSS'), rgb_f=(1, 1, 1), 
+        self, rgb=(7, 5, 9), rgb_f=(1, 1, 1), 
         pminmax=(5, 95), im_max=255, 
         # astropy.visualization.make_lupton_rgb() input vars
         minimum=(0, 0, 0), Q=0, stretch=10):
@@ -424,8 +424,9 @@ class read_scube:
         Parameters
         ----------
         rgb : tuple of str or tuple of int, optional
-            Tuple specifying the filters to use for the red, green, and blue channels (default is ('rSDSS', 'gSDSS', 'iSDSS')).
-        
+            Tuple specifying the filters to use for the red, green, and blue
+            channels (default is (7, 5, 9) corresponding to rSDSS, gSDSS, iSDSS).
+
         rgb_f : tuple of float, optional
             Scaling factors for the red, green, and blue channels (default is (1, 1, 1)).
         
@@ -559,7 +560,7 @@ class read_scube:
         self.mask_stars_hdul = _.hdul
         self.detection_image_hdul = _.detection_image_hdul
 
-    def get_iso_sky(self, ref_mag_filt='rSDSS', isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5, clip_neg=False):
+    def get_iso_sky(self, ref_mag_filt=7, isophotal_limit=25, isophotal_medsize=10, stars_mask=None, n_sigma=3, n_iter=5, clip_neg=False):
         '''
         Estimates the sky flux using isophotal limits and clipping outliers in the flux data.
 
@@ -705,8 +706,8 @@ class read_scube:
     
     @property
     def galaxy(self):
-        return self.primary_header.get('GALAXY', None)
-    
+        return self.primary_header.get('GALAXY', self.primary_header.get('OBJECT', None))
+
     @property
     def size(self):
         return self.primary_header.get('SIZE', None)

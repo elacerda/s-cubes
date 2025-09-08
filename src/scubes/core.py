@@ -354,15 +354,15 @@ class SCubes:
             fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swp.fits.fz')
             self.stamps.append(fname)
             if not isfile(fname) or ctrl.force:
-                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=False, outfile=fname)  #, field_name=ctrl.tile)
-                kw_stamp['_data_release'] = ctrl.data_release
+                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=False, outfile=fname, field_name=ctrl.tile)
+                kw_stamp['data_release'] = ctrl.data_release
                 _ = self.conn.stamp(**kw_stamp)
             # Download_weight:
             fname = join(ctrl.output_dir, f'{gal.name}_{ctrl.tile}_{filt}_{ctrl.size}x{ctrl.size}_swpweight.fits.fz')
             self.stamps.append(fname)
             if not isfile(fname) or ctrl.force:
-                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=True, outfile=fname)  #, field_name=ctrl.tile)
-                kw_stamp['_data_release'] = ctrl.data_release
+                kw_stamp = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, band=filt, weight=True, outfile=fname, field_name=ctrl.tile)
+                kw_stamp['data_release'] = ctrl.data_release
                 _ = self.conn.stamp(**kw_stamp)
         # SHORTCUTS
         self.images = [img for img in self.stamps if 'swp.' in img]
@@ -399,7 +399,7 @@ class SCubes:
         self.lupton_rgb_filename = fname
         if not isfile(fname) or ctrl.force:
             print_level(f'{gal.name} @ {ctrl.tile} - downloading RGB image')
-            kw = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, option=ctrl.tile)
+            kw = dict(ra=gal.ra, dec=gal.dec, size=ctrl.size, field_name=ctrl.tile)
             kw['_data_relase'] = ctrl.data_release
             img = get_lupton_rgb(self.conn, transpose=True, **kw)
         else:
@@ -595,7 +595,7 @@ class SCubes:
         
         # MAGZP
         self.m0__b = self._m0()  # mAB
-        self.f0__b = np.power(10, -0.4*(Jy2fnu + self.m0__b))
+        self.f0__b = np.power(10, -1/2.5*(Jy2fnu + self.m0__b))
         
         # from e- counts to erg/s/cm/cm/A
         self.data__byx = self._get_data_spectra(self.images, 1)
