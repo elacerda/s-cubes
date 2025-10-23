@@ -88,7 +88,7 @@ def _get_lupton_RGB(conn, args, save_img=True):
         args.galaxy = 'OBJECT'
     print_level(f'{args.galaxy} @ {args.tile} - downloading RGB image', 1, args.verbose)
 
-    kw = dict(ra=args.ra, dec=args.dec, size=args.size, option=args.tile)
+    kw = dict(ra=args.ra, dec=args.dec, size=args.size, field_name=args.tile)
     fname = f'{args.galaxy}_{args.tile}_{args.size}x{args.size}.png'
     img = get_lupton_rgb(conn, transpose=True, save_img=save_img, filename=fname, **kw)
 
