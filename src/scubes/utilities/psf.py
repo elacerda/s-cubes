@@ -3,6 +3,8 @@ from scipy.optimize import curve_fit
 
 from .plots import plot_psf
 
+_delta_x2 = lambda x, x0: (x - x0)**2
+
 class PSFFitter:
     def __init__(self, image, known_background, known_x0, known_y0):
         self.image = image
@@ -11,44 +13,45 @@ class PSFFitter:
         self.known_y0 = known_y0
         self.y, self.x = np.indices(image.shape)
         self.data = image.ravel()
+        self._psf_model = {
+            'moffat': [
+                lambda xy, a, b: self.moffat(xy[0], xy[1], a, b), 
+                (self.image.max() - self.known_background, 2.5)
+            ],
+            'gaussian': [
+                lambda xy, a, b, c: self.gaussian(xy[0], xy[1], a, b, c), 
+                (self.image.max() - self.known_background, 2, 2)
+            ]
+        }
 
     def moffat(self, x, y, alpha, beta):
         """Moffat's distribution function."""
-        rr = (x - self.known_x0) ** 2 + (y - self.known_y0) ** 2
-        return self.known_background + (alpha / ((1 + rr / beta ** 2)) ** 2)
+        delta_x2 = _delta_x2(x, self.known_x0)
+        delta_y2 = _delta_x2(y, self.known_y0)
+        rr = delta_x2 + delta_y2
+        moff = alpha/((1 + rr/beta**2))**2
+        return self.known_background + moff
 
     def gaussian(self, x, y, amplitude, sigma_x, sigma_y):
         """Gaussian distribution function."""
-        return self.known_background + amplitude * np.exp(
-            -(((x - self.known_x0) ** 2 / (2 * sigma_x ** 2)) + ((y - self.known_y0) ** 2 / (2 * sigma_y ** 2))))
+        delta_x2 = _delta_x2(x, self.known_x0)
+        delta_y2 = _delta_x2(y, self.known_y0)
+        norm_x2 = delta_x2/(sigma_x**2)
+        norm_y2 = delta_y2/(sigma_y**2)
+        return self.known_background + amplitude * np.exp(-0.5*(norm_x2 + norm_y2))
 
     def fit_psf(self, psf_type='moffat'):
         """Fits a PSF (Moffat or Gaussian) profile to a star in an image."""
         xdata = np.vstack((self.x.ravel(), self.y.ravel()))
-
-        if psf_type == 'moffat':
-            params = np.array([0, 0])
-            initial_guess = (self.image.max() - self.known_background, 2.5)
-            # print('FITTING A MOFFAT DISTRIBUTION')
-            # print('INITIAL GUESS :')
-            # print(initial_guess)
-            psf_func = lambda xy, a, b: self.moffat(xy[0], xy[1], a, b)
-        elif psf_type == 'gaussian':
-            params = np.array([0, 0, 0])
-            initial_guess = (self.image.max() - self.known_background, 2, 2)
-            # print('FITTING A GAUSSIAN DISTRIBUTION')
-            # print('INITIAL GUESS :')
-            # print(initial_guess)
-
-            psf_func = lambda xy, a, b, c: self.gaussian(xy[0], xy[1], a, b, c)
-        else:
+        try:
+            psf_func, initial_guess = self._psf_model[psf_type]
+        except KeyError:
             raise ValueError("Invalid PSF type. Choose 'moffat' or 'gaussian'.")
-
+        params = np.zeros(len(initial_guess))
         try:
             params, _ = curve_fit(psf_func, xdata, self.data, p0=initial_guess)
         except:
             pass
-
         return params
 
 def calc_PSF_scube(flux__lyx, centers_xy, sqr_cut=25, psf_function='gaussian', med_sqrt=True, save_plot=None):

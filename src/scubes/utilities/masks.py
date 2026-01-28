@@ -16,6 +16,22 @@ from .psf import calc_PSF_scube
 from .plots import plot_masks_psf, plot_extra_sources, plot_scube_RGB_mask_sky, \
         plot_violin_reescaled_error_spectrum, plot_masks_final_plot
 
+def _star_fwhm_calc_apertures(data, centers, star_peak, individual=False, star_threshold=50, worst_psf=3, star_size_calc='sky', med_sqrt=False, save_plot=None):
+    mean, _, std = sigma_clipped_stats(data)
+    if individual:
+        psf__bsxy = calc_PSF_scube(data, centers_xy=centers, med_sqrt=med_sqrt, save_plot=save_plot)
+        psf = np.ma.median(np.ma.sqrt(psf__bsxy[:, :, 1]**2 + psf__bsxy[:, :, 0]**2), axis=0)
+        norm = 2*np.sqrt(2*np.log(2))
+        sig = np.where(psf.mask, worst_psf/norm, psf/norm)
+        if star_size_calc == 'sky':
+            ratios = np.sqrt(-2*sig**2*np.log(mean/(star_peak)))
+        else:
+            ratios = star_size_calc*np.where(psf.mask, worst_psf, psf)
+    else:
+        sig = worst_psf/norm
+        ratios = np.sqrt(-2*sig**2*np.log(std/(star_threshold*star_peak)))
+    return [CirclePixelRegion(center=PixCoord(x, y), radius=z) for (x, y), z in zip(centers, ratios)]
+
 def clean_mask_polygons(mask, largest=True, nmin=2, masked_value=False):
     """
     Removes polygons (islands) from a mask (image)
@@ -198,13 +214,12 @@ class masks_builder:
         ap_center = CircularAperture(center, r=max(min(nx/100, 10), 2.5)) # change with size of the galaxy
         mask_center = ap_center.to_mask().to_image(shape=data__yx.shape)
         mask_center = np.ma.masked_where(mask_center == 1, mask_center)
-    
+
+        # Ha mask with R, G and B limits
         pminmax = plim, 100 - plim
         _m = (minimum, minimum, minimum)
         RGB__yxc = scube.lRGB_image(rgb=(8, 9, 5), Q=Q, stretch=stretch, im_max=im_max, minimum=_m, pminmax=pminmax)
-
         if mask_Ha:
-            # Ha mask with R, G and B limits
             mask_Ha = (RGB__yxc[:, :, 0] > 80)
             mask_Ha *= (RGB__yxc[:, :, 0] > (RGB__yxc[:, :, 1] + 30))
             mask_Ha *= (RGB__yxc[:, :, 0] > (RGB__yxc[:, :, 2] + 30))
@@ -215,22 +230,24 @@ class masks_builder:
 
         # joint masks
         mask_tot__yx = mask_center.mask + mask_Ha + extra_mask__yx + median_filter(mask_Ha, 5)
-
+        
+        # detect stars using a catalog
+        sources = None
         if detection == 'DAOStarFinder':
             # threshold : The absolute image value above which to select sources.
             daofind = DAOStarFinder(fwhm=3.0, threshold=star_threshold*std)
             # subtract the background data__yx -= mean
             sources = daofind(data__yx - mean, mask=mask_tot__yx != 0)  # get the sources
-            if sources is not None:
-                f_max = sources['peak']
+            k_max = 'peak'
         elif detection == 'StarFinder':
             kernel = make_2dgaussian_kernel(worst_psf, size=5)
             finder = StarFinder(threshold=star_threshold*std, kernel=kernel.array)
             sources = finder.find_stars(data__yx - mean, mask=mask_tot__yx != 0)  # get the sources
-            if sources is not None:
-                f_max = sources['max_value']
-
-        if sources is None:
+            k_max = 'max_value'
+        if sources is not None:
+            f_max = sources[k_max]
+        else:
+            # GAME OVER!
             mask_stars__yx = np.zeros_like(data__yx)  # ADD EXTRA SOURCE HERE ??
             positions__xy = []
             self.mask_stars__yx = mask_stars__yx
@@ -239,22 +256,19 @@ class masks_builder:
     
         # get the positions of the sources x,y!!!!
         positions__xy = np.transpose((sources['xcentroid'], sources['ycentroid']))
-
-        # Calc the ratios
-        if star_fwhm_individual_calc:
-            psf__bsxy = calc_PSF_scube(scube.flux__lyx, centers_xy=positions__xy, med_sqrt=False, save_plot=save_fig)
-            psf_s = np.ma.median(np.ma.sqrt(psf__bsxy[:, :, 1] ** 2 + psf__bsxy[:, :, 0] ** 2), axis=0)
-            sig_s = np.where(psf_s.mask, worst_psf / (2 * np.sqrt(2 * np.log(2))), psf_s / (2 * np.sqrt(2 * np.log(2))))
-            if star_size_calc == 'sky':
-                ratios = np.sqrt(-2 * sig_s ** 2 * np.log(mean / (f_max)))
-            else:
-                ratios = star_size_calc * np.where(psf_s.mask, worst_psf, psf_s)
-        else:
-            sig = worst_psf / (2 * np.sqrt(2 * np.log(2)))
-            ratios = np.sqrt(-2 * sig ** 2 * np.log(std / (star_threshold * f_max)))
-
-        apertures = [CirclePixelRegion(center=PixCoord(x, y), radius=z) for (x, y), z in zip(positions__xy, ratios)]
+        apertures = _star_fwhm_calc_apertures(
+            data=scube.flux__lyx, 
+            centers=positions__xy,
+            star_peak=f_max, 
+            individual=star_fwhm_individual_calc, 
+            star_threshold=star_threshold, 
+            worst_psf=worst_psf, 
+            star_size_calc=star_size_calc, 
+            med_sqrt=False, 
+            save_plot=save_fig
+        )
         
+        # from positions to mask
         mask_stars__yx = np.zeros(shape=data__yx.shape)
         for ap in apertures:
             m_ap = ap.to_mask().to_image(shape=data__yx.shape)
@@ -286,6 +300,7 @@ class masks_builder:
                             # segm = detect_sources(data__yx[z1:z2, z1:z2] - mean, std, npixels=30)
                             segm = detect_sources(data__yx - mean, xsource_std_f*std, npixels=30)
                             extra_source2 = deblend_sources(data__yx - mean, segm, npixels=10, mode='exponential')
+                            print(extra_source2.data)
                             fig_xsource2, ax_xsource2 = plot_extra_sources(extra_source2, filename=save_fig)
                             if extra_source2 == extra_source:
                                 print_level("Not possible separate any source.")
@@ -294,8 +309,9 @@ class masks_builder:
                                 if str_sources:
                                 #xsources = str_sources.split()
                                 #n_xsources = len(xsources)
-                                #if n_xsources:
-                                    for n in str_sources.split():
+                                #if n_xsources:                                    
+                                    for n in str_sources.split(','):
+                                        print(n)
                                         mask_stars__yx = np.where(extra_source2.data == int(n), 1, mask_stars__yx)
             if len(no_mask):
                 for i in no_mask.split(','):

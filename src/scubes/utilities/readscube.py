@@ -1,12 +1,14 @@
 import sys
 import numpy as np
+import astropy.units as u
 from os.path import isfile
 from astropy.io import fits
+from astropy.wcs import WCS
 from argparse import Namespace
 from copy import deepcopy as copy
-from astropy.visualization import make_lupton_rgb
+import astropy.constants as const
 from astropy.coordinates import SkyCoord
-from astropy.wcs import WCS
+from astropy.visualization import make_lupton_rgb
 
 from .io import print_level
 from .sky import get_iso_sky
@@ -360,6 +362,8 @@ class read_scube:
             The path to the FITS file to be read.
         '''        
         self.filename = filename
+        self.flam_unit = u.erg / u.s / u.cm / u.cm / u.AA
+        self.fnu_unit = u.erg / u.s / u.cm / u.cm / u.Hz
         self._read()
         self._init()
     
@@ -396,9 +400,12 @@ class read_scube:
     def _mag_values(self):
         '''
         Computes the magnitude per square arcsecond and corresponding errors from the flux values.
-        '''        
-        a = 1/(2.997925e18*3631.0e-23*self.pixscale**2)
-        x = a*(self.flux__lyx*self.pivot_wave[:, np.newaxis, np.newaxis]**2)
+        '''
+        _c = const.c.to(u.AA/u.s)  # speed of light in AA/s
+        ABmag_ZP = 3631*u.Jy
+        a = 1/(_c*ABmag_ZP.to(self.fnu_unit)*self.pixscale**2)
+        #a = 1/(2.997925e18*3631.0e-23*self.pixscale**2)
+        x = a.value*(self.flux__lyx*self.pivot_wave[:, np.newaxis, np.newaxis]**2)
         self.mag_arcsec2__lyx = -2.5*np.log10(x)
         self.emag_arcsec2__lyx = (2.5*np.log10(np.exp(1)))*self.eflux__lyx/self.flux__lyx
 
