@@ -300,7 +300,6 @@ class masks_builder:
                             # segm = detect_sources(data__yx[z1:z2, z1:z2] - mean, std, npixels=30)
                             segm = detect_sources(data__yx - mean, xsource_std_f*std, npixels=30)
                             extra_source2 = deblend_sources(data__yx - mean, segm, npixels=10, mode='exponential')
-                            print(extra_source2.data)
                             fig_xsource2, ax_xsource2 = plot_extra_sources(extra_source2, filename=save_fig)
                             if extra_source2 == extra_source:
                                 print_level("Not possible separate any source.")
@@ -309,9 +308,8 @@ class masks_builder:
                                 if str_sources:
                                 #xsources = str_sources.split()
                                 #n_xsources = len(xsources)
-                                #if n_xsources:                                    
+                                #if n_xsources:
                                     for n in str_sources.split(','):
-                                        print(n)
                                         mask_stars__yx = np.where(extra_source2.data == int(n), 1, mask_stars__yx)
             if len(no_mask):
                 for i in no_mask.split(','):
