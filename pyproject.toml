@@ -6,8 +6,15 @@ build-backend = "setuptools.build_meta"
 name = "s-cubes"
 authors = [
     {name = "Eduardo Alberto Duarte Lacerda", email = "dhubax@gmail.com"},
-    {name = "Fabio Herpich", email = "fabiorafaelh@gmail.com"},
+    {name = "Fábio Rafael Herpich" , email = "fabiorafaelh@gmail.com"},
+    {name = "Júlia Thainá" , email = "jullia.thainna@gmail.com"},
+    {name = "Gustavo Schwarz" , email = "gustavo.b.schwarz@gmail.com"},
+    {name = "Roberto Cid Fernandes" , email = "robertocidfernandes@gmail.com"},
+    {name = "Maiara Sampaio Carvalho" , email = "mscarvalho.astro@gmail.com"},
+    {name = "Victor Hugo Sasse" , email = "victorsasse62@gmail.com"},
+    {name = "Amanda Lopes" , email = "amandalopes1920@gmail.com"},
 ]
+
 keywords = ["galaxies"]
 license = {file = "LICENSE.txt"}
 description = "Make galaxy cubes (X, Y, Lambda) with S-PLUS data."

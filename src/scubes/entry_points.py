@@ -20,7 +20,7 @@ SCUBES_PROG_DESC = f'''
 {SPLUS_MOTD_BOT} | mask and metadata about some galaxy present on any 
 {SPLUS_MOTD_SEP} + S-PLUS observed tile. Any problem contact:
 
-   {__author__}
+ {__author__}
 
 The input values of RA and DEC will be converted to degrees using the 
 scubes.utilities.io.convert_coord_to_degrees(). All scripts with RA 
@@ -134,7 +134,7 @@ SCUBESML_PROG_DESC = f'''
 {SPLUS_MOTD_BOT} | using the masterlist information as input.
 {SPLUS_MOTD_SEP} + 
 
-   {__author__}
+ {__author__}
 '''
 
 SCUBESML_ARGS = {
@@ -235,7 +235,7 @@ SCUBES_FILTERS_PROG_DESC = f'''
 {SPLUS_MOTD_BOT} | Print the S-PLUS filters information.
 {SPLUS_MOTD_SEP} + 
 
-   {__author__}
+ {__author__}
 '''
 
 SCUBES_FILTERS_ARGS = {

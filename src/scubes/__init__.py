@@ -6,7 +6,7 @@ from importlib.metadata import version, metadata
 from . import data
 
 scubes_meta = metadata('s-cubes')
-__author__ = scubes_meta['Author-email']
+__author__ = scubes_meta['Author-email'].replace(',', '\n')
 __version__ = version('s-cubes')
 
 __dr4_zp_cat__ = os.path.join(data.__path__[0], 'iDR4_zero-points.csv')

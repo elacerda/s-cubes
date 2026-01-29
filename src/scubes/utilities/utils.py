@@ -20,7 +20,7 @@ GET_LUPTON_RGB_DESC = f'''
 {SPLUS_MOTD_BOT} | using splusdata API.
 {SPLUS_MOTD_SEP} + 
 
-   {__author__}
+ {__author__}
 
 '''
 
@@ -138,7 +138,7 @@ SCUBE_SEX_MASK_STARS_DESC = f'''
 {SPLUS_MOTD_BOT} | to identify stars on the FOV using the S-Cube
 {SPLUS_MOTD_SEP} + FITSFILE of a galaxy as input.
 
-   {__author__}
+ {__author__}
 
 '''
 
@@ -244,7 +244,7 @@ MLTOHEADER_DESC = f'''
 {SPLUS_MOTD_BOT} | to the primary header of a raw cube.
 {SPLUS_MOTD_SEP} + 
 
-   {__author__}
+ {__author__}
 
 '''
 MLTOHEADER_ARGS = {
@@ -364,7 +364,7 @@ SPLOTS_DESC = f'''
 {SPLUS_MOTD_BOT} | SCUBE fits file.
 {SPLUS_MOTD_SEP} + 
 
-   {__author__}
+ {__author__}
 
 '''
 SPLOTS_ARGS = {
@@ -502,7 +502,7 @@ SCUBE_MASK_DESC = f'''
 {SPLUS_MOTD_BOT} | fits file with the estimated galaxy size and metainfo.
 {SPLUS_MOTD_SEP} + 
 
-   {__author__}
+ {__author__}
 
 '''
 
