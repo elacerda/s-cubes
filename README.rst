@@ -108,6 +108,6 @@ repository for more details.
    :alt: S-Cubes website
    :target: https://splus-collab.github.io/s-cubes/index.html
 
-.. |doi|image:: https://zenodo.org/badge/DOI/10.5281/zenodo.18417114.svg
+.. |doi| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.18417114.svg
    :alt: DOI
    :target: https://doi.org/10.5281/zenodo.18417114
