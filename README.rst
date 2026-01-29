@@ -1,7 +1,7 @@
 .. figure:: images/s-cubes_logo.png
    :alt: S-Cubes
 
-|version| |workflow| |license| |docs|
+|version| |workflow| |license| |docs| |doi|
 
 S-Cubes is a python package designed to make galaxy cubes (X, Y, Lambda) with S-PLUS data. 
 The S-Cubes repository includes the scubes python package which allows the users to create 
@@ -107,3 +107,7 @@ repository for more details.
 .. |docs| image:: https://img.shields.io/website?url=https%3A%2F%2Fsplus%2Dcollab.github.io%2Fs-cubes%2F
    :alt: S-Cubes website
    :target: https://splus-collab.github.io/s-cubes/index.html
+
+.. |doi| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.18417114.svg
+   :alt: DOI
+   :target: https://doi.org/10.5281/zenodo.184171

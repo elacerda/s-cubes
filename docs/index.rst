@@ -18,6 +18,10 @@ S-Cubes homepage
    :target: https://github.com/splus-collab/s-cubes/blob/main/LICENSE.txt
    :alt: GitHub License
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.18417114.svg
+   :target: https://doi.org/10.5281/zenodo.184171
+   :alt: DOI
+
 .. figure:: images/scubes3d.png
    :align: left
 
