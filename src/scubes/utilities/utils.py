@@ -249,6 +249,8 @@ MLTOHEADER_DESC = f'''
 '''
 MLTOHEADER_ARGS = {
     'force': ['f', dict(action='store_true', help='Force the update the value of existent header keys')],
+    'columns': ['c', dict(nargs='+', type=int, default=None, help='List of column numbers (0-indexed) to copy. If not provided, copies all.')],
+    'sname_col': ['s', dict(type=int, default=None, help='Column number (0-indexed) representing the SNAME of the object. If not provided, uses the "SNAME" column.')],
     'cube': ['pos', dict(metavar='CUBE', help="Path to a Galaxy's S-CUBES fits")], 
     'masterlist': ['pos', dict(metavar='MASTERLIST', help='Path to masterlist file')]
 }
@@ -284,7 +286,7 @@ def ml2header_argparse(args):
 
     return args
 
-def ml2header_updheader(cube_filename, ml_table, force=False):
+def ml2header_updheader(cube_filename, ml_table, force=False, columns=None, sname_col=None):
     '''
     Updates a S-CUBES raw cube primary header with the masterlist 
     information.
@@ -300,6 +302,12 @@ def ml2header_updheader(cube_filename, ml_table, force=False):
     force : bool, optional
         Force the update the key value is the key is existent at the 
         S-CUBES header. 
+        
+    columns : list of int, optional
+        List of column indices to selectively copy. If None, all are copied.
+        
+    sname_col : int, optional
+        Column index representing the SNAME of the object. If None, uses "SNAME".
     '''
     import numpy as np
 
@@ -307,16 +315,26 @@ def ml2header_updheader(cube_filename, ml_table, force=False):
         hdu = hdul['PRIMARY']
 
         # SNAME CONTROL
-        sname = hdu.header.get('GALAXY', None)
+        sname = hdu.header.get('GALAXY', hdu.header.get('OBJECT', None))
         if sname is None:
             print_level('header: missing SNAME information')
             sys.exit(1)
-        if sname not in ml_table['SNAME']:
-            print_level(f'masterlist: {sname}: missing SNAME information')
+            
+        sname_col_name = 'SNAME'
+        if sname_col is not None and sname_col < len(ml_table.colnames):
+            sname_col_name = ml_table.colnames[sname_col]
+            
+        if sname not in ml_table[sname_col_name]:
+            print_level(f'masterlist: {sname}: missing SNAME information in column {sname_col_name}')
             sys.exit(1)
 
-        mlcut = ml_table[ml_table['SNAME'] == sname]
-        for col in ml_table.colnames:
+        mlcut = ml_table[ml_table[sname_col_name] == sname]
+        
+        colnames = ml_table.colnames
+        if columns is not None:
+            colnames = [ml_table.colnames[i] for i in columns if i < len(ml_table.colnames)]
+
+        for col in colnames:
             v = mlcut[col][0]
             desc = None
             if v is np.ma.masked:
@@ -352,7 +370,7 @@ def ml2header():
     args = ml2header_argparse(parser.parse_args(args=sys.argv[1:]))
     
     # update masterlist information
-    ml2header_updheader(args.cube, args.ml, args.force)
+    ml2header_updheader(args.cube, args.ml, args.force, args.columns, args.sname_col)
 
 #############################################################################
 #############################################################################
