@@ -227,7 +227,8 @@ def scubesml():
     scubes.create_cube(flam_scale=None)
 
     # update masterlist information
-    ml2header_updheader(scubes.cube_path, args.ml)
+    print_level(f'Please, run ml2header script to update {scubes.cube_path} header with masterlist information, if needed.')
+    #ml2header_updheader(scubes.cube_path, args.ml)
 
 SCUBES_FILTERS_PROG_DESC = f'''
 {SPLUS_MOTD_TOP} | scubes_filters entry-point script:
