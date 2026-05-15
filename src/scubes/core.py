@@ -210,7 +210,7 @@ class SCubes:
         '''        
         if self._conn is None:
             ctrl = self.control
-            self._conn = connect_splus_cloud(ctrl.username, ctrl.password)
+            self._conn = connect_splus_cloud(ctrl.username, ctrl.password, server=ctrl.server)
         return self._conn
 
     def _check_errors(self):

@@ -1,7 +1,7 @@
 from astropy.io import fits
 from splusdata import Core
 
-def connect_splus_cloud(username=None, password=None):
+def connect_splus_cloud(username=None, password=None, server=None):
     '''
     Connect to the S-PLUS Cloud service.
 
@@ -13,6 +13,10 @@ def connect_splus_cloud(username=None, password=None):
     password : str, optional
         The password for S-PLUS Cloud authentication.
 
+    server : str, optional
+        The URL of the S-PLUS Cloud server. If None, the default server
+        'https://splus.cloud' is used.
+
     Returns
     -------
     splusdata.Core or None
@@ -23,7 +27,10 @@ def connect_splus_cloud(username=None, password=None):
     conn = None
     while (n_tries < 3) and (conn is None):
         try:
-            conn = Core(username=username, password=password)
+            conn = Core(
+                username=username, password=password, 
+                SERVER_IP='https://splus.cloud' if server is None else server,
+            )
         except:
             n_tries += 1
     return conn

@@ -50,6 +50,7 @@ SCUBES_ARGS = {
     'det_img': ['I', dict(action='store_true', default=False, help='Downloads detection image for the stamp. Needed if --mask_stars is active.')],
     'remove_downloaded_data': ['R', dict(action='store_true', default=False, help='Remove the downloaded data from splusdata at the end of the run.')],
     'data_release': ['d', dict(default='dr4', type=str, help='Select S-PLUS Data Release')],
+    'server': ['s', dict(default=None, help='Server URL to retrieve S-PLUS data. If None, the default server will be used.')],
 
     #'zpcorr_dir': ['Z', dict(default=__zpcorr_path__, help='Zero-point correction directory.')],
     #'zp_table': ['z', dict(default=__zp_cat__, help='Zero-point table.')],
@@ -153,7 +154,8 @@ SCUBESML_ARGS = {
     'username': ['U', dict(default=None, help='S-PLUS Cloud username.')],
     'password': ['P', dict(default=None, help='S-PLUS Cloud password.')],
     'remove_downloaded_data': ['R', dict(action='store_true', default=False, help='Remove the downloaded data from splusdata at the end of the run.')],
-
+    'server': ['s', dict(default=None, help='Server URL to retrieve S-PLUS data. If None, the default server will be used.')],
+    
     #'zpcorr_dir': ['Z', dict(default=__zpcorr_path__, help='Zero-point correction directory.')],
     #'zp_table': ['z', dict(default=__zp_cat__, help='Zero-point table.')],
 
