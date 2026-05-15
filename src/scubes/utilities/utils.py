@@ -335,7 +335,7 @@ def ml2header_updheader(cube_filename, ml_table, force=False, columns=None, snam
             colnames = [ml_table.colnames[i] for i in columns if i < len(ml_table.colnames)]
 
         for col in colnames:
-            v = mlcut[col][0]
+            v = mlcut[col].item()
             desc = None
             if v is np.ma.masked:
                 v = None

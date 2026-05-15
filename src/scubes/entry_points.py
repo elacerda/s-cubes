@@ -193,11 +193,11 @@ def scubesml_argparse(args):
     
     # Retrieve scubes positional arguments
     mlcut = args.ml[args.ml['SNAME'] == args.galaxy]
-    args.tile = mlcut['FIELD'][0]
-    args.ra = mlcut['RA__deg'][0]
-    args.dec = mlcut['DEC__deg'][0]
+    args.tile = mlcut['FIELD'].item()
+    args.ra = mlcut['RA__deg'].item()
+    args.dec = mlcut['DEC__deg'].item()
     min_size = args.min_size
-    args.size = max(round(args.size_multiplicator*float(mlcut['SIZE__pix'])/2)*2, min_size)
+    args.size = max(round(args.size_multiplicator*float(mlcut['SIZE__pix'].item())/2)*2, min_size)
 
     return args
 
