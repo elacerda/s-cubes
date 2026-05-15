@@ -18,10 +18,10 @@ from .plots import plot_masks_psf, plot_extra_sources, plot_scube_RGB_mask_sky, 
 
 def _star_fwhm_calc_apertures(data, centers, star_peak, individual=False, star_threshold=50, worst_psf=3, star_size_calc='sky', med_sqrt=False, save_plot=None):
     mean, _, std = sigma_clipped_stats(data)
+    norm = 2*np.sqrt(2*np.log(2))
     if individual:
         psf__bsxy = calc_PSF_scube(data, centers_xy=centers, med_sqrt=med_sqrt, save_plot=save_plot)
         psf = np.ma.median(np.ma.sqrt(psf__bsxy[:, :, 1]**2 + psf__bsxy[:, :, 0]**2), axis=0)
-        norm = 2*np.sqrt(2*np.log(2))
         sig = np.where(psf.mask, worst_psf/norm, psf/norm)
         if star_size_calc == 'sky':
             ratios = np.sqrt(-2*sig**2*np.log(mean/(star_peak)))
